@@ -43,11 +43,12 @@ class $HospitalsTable extends Hospitals
   late final GeneratedColumn<String> level = GeneratedColumn<String>(
       'level', aliasedName, true,
       type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _departmentIdsMeta =
+      const VerificationMeta('departmentIds');
   @override
-  late final GeneratedColumnWithTypeConverter<List<int>, String> departmentIds =
-      GeneratedColumn<String>('department_ids', aliasedName, false,
-              type: DriftSqlType.string, requiredDuringInsert: true)
-          .withConverter<List<int>>($HospitalsTable.$converterdepartmentIds);
+  late final GeneratedColumn<String> departmentIds = GeneratedColumn<String>(
+      'department_ids', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
   static const VerificationMeta _createdAtMeta =
       const VerificationMeta('createdAt');
   @override
@@ -98,6 +99,14 @@ class $HospitalsTable extends Hospitals
       context.handle(
           _levelMeta, level.isAcceptableOrUnknown(data['level']!, _levelMeta));
     }
+    if (data.containsKey('department_ids')) {
+      context.handle(
+          _departmentIdsMeta,
+          departmentIds.isAcceptableOrUnknown(
+              data['department_ids']!, _departmentIdsMeta));
+    } else if (isInserting) {
+      context.missing(_departmentIdsMeta);
+    }
     if (data.containsKey('created_at')) {
       context.handle(_createdAtMeta,
           createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
@@ -125,9 +134,8 @@ class $HospitalsTable extends Hospitals
           .read(DriftSqlType.string, data['${effectivePrefix}type']),
       level: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}level']),
-      departmentIds: $HospitalsTable.$converterdepartmentIds.fromSql(
-          attachedDatabase.typeMapping.read(
-              DriftSqlType.string, data['${effectivePrefix}department_ids'])!),
+      departmentIds: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}department_ids'])!,
       createdAt: attachedDatabase.typeMapping
           .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
       updatedAt: attachedDatabase.typeMapping
@@ -139,9 +147,6 @@ class $HospitalsTable extends Hospitals
   $HospitalsTable createAlias(String alias) {
     return $HospitalsTable(attachedDatabase, alias);
   }
-
-  static TypeConverter<List<int>, String> $converterdepartmentIds =
-      const IntListConverter();
 }
 
 class Hospital extends DataClass implements Insertable<Hospital> {
@@ -150,7 +155,7 @@ class Hospital extends DataClass implements Insertable<Hospital> {
   final String? address;
   final String? type;
   final String? level;
-  final List<int> departmentIds;
+  final String departmentIds;
   final DateTime createdAt;
   final DateTime updatedAt;
   const Hospital(
@@ -176,10 +181,7 @@ class Hospital extends DataClass implements Insertable<Hospital> {
     if (!nullToAbsent || level != null) {
       map['level'] = Variable<String>(level);
     }
-    {
-      map['department_ids'] = Variable<String>(
-          $HospitalsTable.$converterdepartmentIds.toSql(departmentIds));
-    }
+    map['department_ids'] = Variable<String>(departmentIds);
     map['created_at'] = Variable<DateTime>(createdAt);
     map['updated_at'] = Variable<DateTime>(updatedAt);
     return map;
@@ -210,7 +212,7 @@ class Hospital extends DataClass implements Insertable<Hospital> {
       address: serializer.fromJson<String?>(json['address']),
       type: serializer.fromJson<String?>(json['type']),
       level: serializer.fromJson<String?>(json['level']),
-      departmentIds: serializer.fromJson<List<int>>(json['departmentIds']),
+      departmentIds: serializer.fromJson<String>(json['departmentIds']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
     );
@@ -224,7 +226,7 @@ class Hospital extends DataClass implements Insertable<Hospital> {
       'address': serializer.toJson<String?>(address),
       'type': serializer.toJson<String?>(type),
       'level': serializer.toJson<String?>(level),
-      'departmentIds': serializer.toJson<List<int>>(departmentIds),
+      'departmentIds': serializer.toJson<String>(departmentIds),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
     };
@@ -236,7 +238,7 @@ class Hospital extends DataClass implements Insertable<Hospital> {
           Value<String?> address = const Value.absent(),
           Value<String?> type = const Value.absent(),
           Value<String?> level = const Value.absent(),
-          List<int>? departmentIds,
+          String? departmentIds,
           DateTime? createdAt,
           DateTime? updatedAt}) =>
       Hospital(
@@ -302,7 +304,7 @@ class HospitalsCompanion extends UpdateCompanion<Hospital> {
   final Value<String?> address;
   final Value<String?> type;
   final Value<String?> level;
-  final Value<List<int>> departmentIds;
+  final Value<String> departmentIds;
   final Value<DateTime> createdAt;
   final Value<DateTime> updatedAt;
   const HospitalsCompanion({
@@ -321,7 +323,7 @@ class HospitalsCompanion extends UpdateCompanion<Hospital> {
     this.address = const Value.absent(),
     this.type = const Value.absent(),
     this.level = const Value.absent(),
-    required List<int> departmentIds,
+    required String departmentIds,
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
   })  : name = Value(name),
@@ -354,7 +356,7 @@ class HospitalsCompanion extends UpdateCompanion<Hospital> {
       Value<String?>? address,
       Value<String?>? type,
       Value<String?>? level,
-      Value<List<int>>? departmentIds,
+      Value<String>? departmentIds,
       Value<DateTime>? createdAt,
       Value<DateTime>? updatedAt}) {
     return HospitalsCompanion(
@@ -388,8 +390,7 @@ class HospitalsCompanion extends UpdateCompanion<Hospital> {
       map['level'] = Variable<String>(level.value);
     }
     if (departmentIds.present) {
-      map['department_ids'] = Variable<String>(
-          $HospitalsTable.$converterdepartmentIds.toSql(departmentIds.value));
+      map['department_ids'] = Variable<String>(departmentIds.value);
     }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
@@ -2338,7 +2339,7 @@ typedef $$HospitalsTableCreateCompanionBuilder = HospitalsCompanion Function({
   Value<String?> address,
   Value<String?> type,
   Value<String?> level,
-  required List<int> departmentIds,
+  required String departmentIds,
   Value<DateTime> createdAt,
   Value<DateTime> updatedAt,
 });
@@ -2348,7 +2349,7 @@ typedef $$HospitalsTableUpdateCompanionBuilder = HospitalsCompanion Function({
   Value<String?> address,
   Value<String?> type,
   Value<String?> level,
-  Value<List<int>> departmentIds,
+  Value<String> departmentIds,
   Value<DateTime> createdAt,
   Value<DateTime> updatedAt,
 });
@@ -2377,10 +2378,8 @@ class $$HospitalsTableFilterComposer
   ColumnFilters<String> get level => $composableBuilder(
       column: $table.level, builder: (column) => ColumnFilters(column));
 
-  ColumnWithTypeConverterFilters<List<int>, List<int>, String>
-      get departmentIds => $composableBuilder(
-          column: $table.departmentIds,
-          builder: (column) => ColumnWithTypeConverterFilters(column));
+  ColumnFilters<String> get departmentIds => $composableBuilder(
+      column: $table.departmentIds, builder: (column) => ColumnFilters(column));
 
   ColumnFilters<DateTime> get createdAt => $composableBuilder(
       column: $table.createdAt, builder: (column) => ColumnFilters(column));
@@ -2448,9 +2447,8 @@ class $$HospitalsTableAnnotationComposer
   GeneratedColumn<String> get level =>
       $composableBuilder(column: $table.level, builder: (column) => column);
 
-  GeneratedColumnWithTypeConverter<List<int>, String> get departmentIds =>
-      $composableBuilder(
-          column: $table.departmentIds, builder: (column) => column);
+  GeneratedColumn<String> get departmentIds => $composableBuilder(
+      column: $table.departmentIds, builder: (column) => column);
 
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
@@ -2487,7 +2485,7 @@ class $$HospitalsTableTableManager extends RootTableManager<
             Value<String?> address = const Value.absent(),
             Value<String?> type = const Value.absent(),
             Value<String?> level = const Value.absent(),
-            Value<List<int>> departmentIds = const Value.absent(),
+            Value<String> departmentIds = const Value.absent(),
             Value<DateTime> createdAt = const Value.absent(),
             Value<DateTime> updatedAt = const Value.absent(),
           }) =>
@@ -2507,7 +2505,7 @@ class $$HospitalsTableTableManager extends RootTableManager<
             Value<String?> address = const Value.absent(),
             Value<String?> type = const Value.absent(),
             Value<String?> level = const Value.absent(),
-            required List<int> departmentIds,
+            required String departmentIds,
             Value<DateTime> createdAt = const Value.absent(),
             Value<DateTime> updatedAt = const Value.absent(),
           }) =>

@@ -22,9 +22,9 @@ void main() {
         // Arrange
         final hospital = HospitalsCompanion.insert(
           name: 'General Hospital',
-          address: '123 Main St',
-          type: 'General Hospital',
-          level: 'Class A Grade 3',
+          address: Value('123 Main St'),
+          type: Value('General Hospital'),
+          level: Value('Class A Grade 3'),
           departmentIds: [1, 2, 3],
         );
 
@@ -43,15 +43,19 @@ void main() {
         // Arrange
         final hospital = HospitalsCompanion.insert(
           name: 'Test Hospital',
-          address: '123 Test St',
+          address: Value('123 Test St'),
+          departmentIds: [],
         );
         final id = await database.createHospital(hospital);
-        final retrievedHospital = await database.getHospitalById(id)!;
+        final retrievedHospital = await database.getHospitalById(id);
 
         // Act
+        if (retrievedHospital == null) {
+          fail('Hospital should not be null');
+        }
         final updatedHospital = retrievedHospital.copyWith(
           name: 'Updated Hospital',
-          address: '456 Updated St',
+          address: Value('456 Updated St'),
         );
         final success = await database.updateHospital(updatedHospital);
         final retrievedUpdatedHospital = await database.getHospitalById(id);
@@ -80,9 +84,9 @@ void main() {
 
       test('should get all hospitals', () async {
         // Arrange
-        await database.createHospital(HospitalsCompanion.insert(name: 'Hospital 1'));
-        await database.createHospital(HospitalsCompanion.insert(name: 'Hospital 2'));
-        await database.createHospital(HospitalsCompanion.insert(name: 'Hospital 3'));
+        await database.createHospital(HospitalsCompanion.insert(name: 'Hospital 1', departmentIds: []));
+        await database.createHospital(HospitalsCompanion.insert(name: 'Hospital 2', departmentIds: []));
+        await database.createHospital(HospitalsCompanion.insert(name: 'Hospital 3', departmentIds: []));
 
         // Act
         final hospitals = await database.getAllHospitals();
@@ -156,10 +160,10 @@ void main() {
 
       test('should get doctors by hospital', () async {
         // Arrange
-        final hospital1 = HospitalsCompanion.insert(name: 'Hospital 1');
+        final hospital1 = HospitalsCompanion.insert(name: 'Hospital 1', departmentIds: []);
         final hospital1Id = await database.createHospital(hospital1);
 
-        final hospital2 = HospitalsCompanion.insert(name: 'Hospital 2');
+        final hospital2 = HospitalsCompanion.insert(name: 'Hospital 2', departmentIds: []);
         final hospital2Id = await database.createHospital(hospital2);
 
         final department = DepartmentsCompanion.insert(name: 'Cardiology');
