@@ -2,7 +2,7 @@
 
 ## Overview
 
-This documentation covers the comprehensive error handling and logging system implemented in the Flutter monorepo. The system provides centralized logging, error tracking, crash reporting, and user-friendly error display across all platforms.
+This documentation covers the comprehensive error handling and logging system implemented in the Medical Records Flutter application. The system provides centralized logging, error tracking, crash reporting, and user-friendly error display across all platforms.
 
 ## Architecture
 

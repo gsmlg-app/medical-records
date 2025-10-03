@@ -1,4 +1,4 @@
-# Error Handling System Usage Guide
+# Medical Records Error Handling System Usage Guide
 
 ## Setup
 
@@ -28,7 +28,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return CrashReportingWidget(
       child: MaterialApp(
-        title: 'My App',
+        title: 'Medical Records',
         home: const HomeScreen(),
       ),
     );

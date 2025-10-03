@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is a Flutter monorepo managed by Melos, providing a comprehensive template for building Flutter applications with modular architecture. The project follows clean architecture principles with separation of concerns across multiple packages.
+This is a Flutter monorepo managed by Melos, providing a comprehensive medical records application with modular architecture. The project follows clean architecture principles with separation of concerns across multiple packages, specifically designed for healthcare data management.
 
 ## Architecture Structure
 

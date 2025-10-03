@@ -1,6 +1,6 @@
-# Flutter App Template
+# Medical Records
 
-A comprehensive Flutter application template with monorepo architecture, providing a robust foundation for building scalable Flutter applications with clean architecture principles.
+A comprehensive Flutter application for managing medical records with monorepo architecture, providing a robust foundation for building scalable healthcare applications with clean architecture principles.
 
 ## Features
 
@@ -50,8 +50,8 @@ This project follows clean architecture principles with a monorepo structure man
 1.  **Clone the repository:**
 
     ```bash
-    git clone https://github.com/your-username/flutter-app-template.git
-    cd flutter-app-template
+    git clone https://github.com/your-username/medical-records.git
+    cd medical-records
     ```
 
 2.  **Install global dependencies:**

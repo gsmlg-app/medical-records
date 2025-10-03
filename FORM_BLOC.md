@@ -1,6 +1,6 @@
-# Form BLoC Guide
+# Medical Records Form BLoC Guide
 
-This guide provides comprehensive documentation for using the `form_bloc` and `flutter_form_bloc` packages in this Flutter project. These packages provide a powerful, BLoC-based approach to form management with validation, submission handling, and state management.
+This guide provides comprehensive documentation for using the `form_bloc` and `flutter_form_bloc` packages in the Medical Records Flutter application. These packages provide a powerful, BLoC-based approach to form management with validation, submission handling, and state management, perfect for medical record forms and patient data entry.
 
 ## Table of Contents
 

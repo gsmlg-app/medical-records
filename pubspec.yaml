@@ -1,5 +1,5 @@
-name: flutter_app_template
-description: "A new Flutter project."
+name: medical_records
+description: "Medical records application."
 publish_to: "none"
 
 version: 1.0.0+1
@@ -84,7 +84,7 @@ flutter_launcher_icons:
     generate: true
 
 melos:
-  name: flutter_app_template
+  name: medical_records
   command:
     version:
       # Only allow versioning to happen on main branch.

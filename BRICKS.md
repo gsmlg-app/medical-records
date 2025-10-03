@@ -1,6 +1,6 @@
-# Mason Bricks Guide
+# Medical Records Mason Bricks Guide
 
-This project uses [Mason](https://pub.dev/packages/mason_cli) for code generation to maintain consistency and speed up development. This guide explains how to use the available bricks.
+This Medical Records project uses [Mason](https://pub.dev/packages/mason_cli) for code generation to maintain consistency and speed up development. This guide explains how to use the available bricks for building medical record management features.
 
 ## Available Bricks
 

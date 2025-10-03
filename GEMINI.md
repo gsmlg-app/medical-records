@@ -1,10 +1,10 @@
-# Gemini Project Configuration
+# Gemini Medical Records Project Configuration
 
-This file helps Gemini understand the project structure and conventions.
+This file helps Gemini understand the Medical Records project structure and conventions.
 
 ## Project Overview
 
-A Flutter application template.
+A comprehensive Flutter application for managing medical records with monorepo architecture and clean design principles.
 
 ## Key Technologies
 
