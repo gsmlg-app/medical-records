@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_app_template/screens/app/error_screen.dart';
-import 'package:flutter_app_template/screens/app/splash_screen.dart';
-import 'package:flutter_app_template/screens/home/home_screen.dart';
-import 'package:flutter_app_template/screens/settings/app_settings_screen.dart';
-import 'package:flutter_app_template/screens/settings/settings_screen.dart';
+import 'package:medical_records/screens/app/error_screen.dart';
+import 'package:medical_records/screens/app/splash_screen.dart';
+import 'package:medical_records/screens/home/home_screen.dart';
+import 'package:medical_records/screens/settings/app_settings_screen.dart';
+import 'package:medical_records/screens/settings/settings_screen.dart';
 import 'package:go_router/go_router.dart';
 
 class AppRouter {
