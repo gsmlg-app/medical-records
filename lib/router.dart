@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:medical_records/screens/app/error_screen.dart';
 import 'package:medical_records/screens/app/splash_screen.dart';
 import 'package:medical_records/screens/home/home_screen.dart';
+import 'package:medical_records/screens/hospitals/hospitals_screen.dart';
+import 'package:medical_records/screens/treatments/treatments_screen.dart';
 import 'package:medical_records/screens/settings/app_settings_screen.dart';
 import 'package:medical_records/screens/settings/settings_screen.dart';
 import 'package:go_router/go_router.dart';
@@ -40,6 +42,28 @@ class AppRouter {
           key: state.pageKey,
           restorationId: state.pageKey.value,
           child: const HomeScreen(),
+        );
+      },
+    ),
+    GoRoute(
+      name: TreatmentsScreen.name,
+      path: TreatmentsScreen.path,
+      pageBuilder: (context, state) {
+        return NoTransitionPage<void>(
+          key: state.pageKey,
+          restorationId: state.pageKey.value,
+          child: const TreatmentsScreen(),
+        );
+      },
+    ),
+    GoRoute(
+      name: HospitalsScreen.name,
+      path: HospitalsScreen.path,
+      pageBuilder: (context, state) {
+        return NoTransitionPage<void>(
+          key: state.pageKey,
+          restorationId: state.pageKey.value,
+          child: const HospitalsScreen(),
         );
       },
     ),

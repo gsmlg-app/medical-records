@@ -2,6 +2,7 @@ import 'package:app_adaptive_widgets/app_adaptive_widgets.dart';
 import 'package:app_artwork/app_artwork.dart';
 import 'package:app_locale/app_locale.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:medical_records/destination.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -33,53 +34,122 @@ class HomeScreen extends StatelessWidget {
         backgroundColor: Theme.of(context).colorScheme.primary,
       ),
       body: (context) => SafeArea(
-        child: Center(
-          child: SizedBox(
-            width: w * 0.618,
-            height: w * 0.618,
-            child: Container(
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Theme.of(context).colorScheme.secondary,
-              ),
-              child: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // App Header
+              Center(
                 child: Column(
                   children: [
                     LaddingPageLottie(
-                      width: w * 0.382,
-                      height: w * 0.382,
+                      width: w * 0.2,
+                      height: w * 0.2,
                     ),
+                    const SizedBox(height: 16),
                     Text(
-                      context.l10n.welcomeHome,
-                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                            color: Theme.of(context)
-                                .colorScheme
-                                .secondaryContainer,
-                          ),
+                      context.l10n.appName,
+                      style: Theme.of(context).textTheme.headlineMedium,
                     ),
-                    Text(
-                      '$screenWidth x $screenHeight',
-                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                            color: Theme.of(context)
-                                .colorScheme
-                                .secondaryContainer,
-                          ),
-                    ),
-                    TextButton(
-                      onPressed: () {
-                        throw Exception('This is a crash!');
-                      },
+                    const SizedBox(height: 8),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 32.0),
                       child: Text(
-                        'Throw Error',
-                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                              color: Theme.of(context).colorScheme.error,
+                        context.l10n.appDescription,
+                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                              color: Theme.of(context).colorScheme.onSurfaceVariant,
                             ),
+                        textAlign: TextAlign.center,
                       ),
+                    ),
+                    const SizedBox(height: 32),
+                  ],
+                ),
+              ),
+
+              // Quick Actions
+              Expanded(
+                child: Column(
+                  children: [
+                    Text(
+                      'Quick Access',
+                      style: Theme.of(context).textTheme.titleLarge,
+                    ),
+                    const SizedBox(height: 16),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Card(
+                            child: InkWell(
+                              onTap: () => context.goNamed('TreatmentsScreen'),
+                              borderRadius: BorderRadius.circular(12),
+                              child: Padding(
+                                padding: const EdgeInsets.all(20.0),
+                                child: Column(
+                                  children: [
+                                    Icon(
+                                      Icons.medical_services_outlined,
+                                      size: 48,
+                                      color: Theme.of(context).colorScheme.primary,
+                                    ),
+                                    const SizedBox(height: 12),
+                                    Text(
+                                      context.l10n.treatmentsTitle,
+                                      style: Theme.of(context).textTheme.titleMedium,
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      context.l10n.viewTreatments,
+                                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                            color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                          ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Card(
+                            child: InkWell(
+                              onTap: () => context.goNamed('HospitalsScreen'),
+                              borderRadius: BorderRadius.circular(12),
+                              child: Padding(
+                                padding: const EdgeInsets.all(20.0),
+                                child: Column(
+                                  children: [
+                                    Icon(
+                                      Icons.local_hospital_outlined,
+                                      size: 48,
+                                      color: Theme.of(context).colorScheme.primary,
+                                    ),
+                                    const SizedBox(height: 12),
+                                    Text(
+                                      context.l10n.hospitalsTitle,
+                                      style: Theme.of(context).textTheme.titleMedium,
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      context.l10n.viewHospitals,
+                                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                            color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                          ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
               ),
-            ),
+            ],
           ),
         ),
       ),
