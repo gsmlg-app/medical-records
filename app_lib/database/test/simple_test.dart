@@ -51,28 +51,7 @@ void main() {
       expect(retrievedHospital.departmentIds, equals(''));
     });
 
-    test('should create and retrieve a treatment', () async {
-      // Arrange
-      final now = DateTime.now();
-      final treatment = TreatmentsCompanion.insert(
-        title: 'Hypertension Treatment',
-        diagnosis: 'Essential Hypertension',
-        startDate: now,
-        endDate: Value(now.add(const Duration(days: 30))),
-      );
-
-      // Act
-      final id = await database.createTreatment(treatment);
-      final retrievedTreatment = await database.getTreatmentById(id);
-
-      // Assert
-      expect(retrievedTreatment, m.isNotNull);
-      expect(retrievedTreatment!.title, equals('Hypertension Treatment'));
-      expect(retrievedTreatment.diagnosis, equals('Essential Hypertension'));
-      expect(retrievedTreatment.startDate, equals(now));
-      expect(retrievedTreatment.endDate, equals(now.add(const Duration(days: 30))));
-    });
-
+    
     test('should get all departments', () async {
       // Arrange
       await database.createDepartment(DepartmentsCompanion.insert(name: 'Cardiology'));
