@@ -82,7 +82,7 @@ class HomeScreen extends StatelessWidget {
                         Expanded(
                           child: Card(
                             child: InkWell(
-                              onTap: () => context.goNamed('TreatmentsScreen'),
+                              onTap: () => context.goNamed('Treatments'),
                               borderRadius: BorderRadius.circular(12),
                               child: Padding(
                                 padding: const EdgeInsets.all(20.0),
@@ -115,7 +115,7 @@ class HomeScreen extends StatelessWidget {
                         Expanded(
                           child: Card(
                             child: InkWell(
-                              onTap: () => context.goNamed('HospitalsScreen'),
+                              onTap: () => context.goNamed('Hospitals'),
                               borderRadius: BorderRadius.circular(12),
                               child: Padding(
                                 padding: const EdgeInsets.all(20.0),
