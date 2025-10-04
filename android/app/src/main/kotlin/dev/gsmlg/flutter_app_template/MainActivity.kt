@@ -1,4 +1,4 @@
-package dev.gsmlg.flutter_app_template
+package app.gsmlg.medicalrecords
 
 import io.flutter.embedding.android.FlutterActivity
 
