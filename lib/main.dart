@@ -5,6 +5,8 @@ import 'package:app_locale/app_locale.dart';
 import 'package:app_logging/app_logging.dart';
 import 'package:app_provider/app_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:hospital_bloc/hospital_bloc.dart';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -53,12 +55,15 @@ void main(List<String> args) async {
     MainProvider(
       sharedPrefs: sharedPrefs,
       database: database,
-      child: MaterialApp(
-        debugShowCheckedModeBanner: false,
-        localizationsDelegates: AppLocale.localizationsDelegates,
-        supportedLocales: AppLocale.supportedLocales,
-        home: CrashReportingWidget(
-          child: const App(),
+      child: BlocProvider(
+        create: (context) => HospitalBloc(database),
+        child: MaterialApp(
+          debugShowCheckedModeBanner: false,
+          localizationsDelegates: AppLocale.localizationsDelegates,
+          supportedLocales: AppLocale.supportedLocales,
+          home: CrashReportingWidget(
+            child: const App(),
+          ),
         ),
       ),
     ),

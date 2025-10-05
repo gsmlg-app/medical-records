@@ -14,9 +14,12 @@ workspace:
   - app_lib/provider
   - app_lib/logging
   - app_bloc/theme
+  - app_bloc/hospital
+  - app_bloc/hospital_form_bloc
   - app_widget/adaptive
   - app_widget/artwork
   - app_widget/feedback
+  - app_widget/hospital_form
   - app_widget/web_view
   - third_party/form_bloc
   - third_party/flutter_form_bloc
@@ -43,6 +46,7 @@ dependencies:
   flutter_svg: ^2.0.16
   lottie: ^3.3.1
   google_fonts: ^6.2.1
+  intl: ^0.20.2
 
   # workspace packages
   app_database: any
@@ -50,6 +54,9 @@ dependencies:
   app_locale: any
   app_provider: any
   theme_bloc: any
+  hospital_bloc: any
+  hospital_form_bloc: any
+  hospital_form: any
   app_artwork: any
   app_feedback: any
   app_adaptive_widgets: any
@@ -67,6 +74,9 @@ dev_dependencies:
 
   melos: ^7.0.0
   dependency_validator: ^5.0.2
+
+  mockito: ^5.4.4
+  build_test: ^2.1.7
 
 flutter:
   uses-material-design: true
@@ -100,6 +110,10 @@ melos:
         - melos bootstrap
         - melos run gen-l10n
         - melos run build-all
+
+    gen-l10n:
+      run: melos exec --scope="app_locale" flutter gen-l10n
+      description: Generate localization files from ARB files.
 
     build-all:
       run: melos exec --order-dependents dart run build_runner build --delete-conflicting-outputs
