@@ -1,0 +1,27 @@
+name: hospital_bloc
+description: Hospital BLoC for medical records app
+version: 0.1.0
+publish_to: none
+resolution: workspace
+
+environment:
+  sdk: ^3.9.2
+  flutter: ">=3.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  app_database:
+    path: ../../app_lib/database
+  bloc: ^9.0.0
+  drift: ^2.28.2
+  equatable: ^2.0.5
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  # No assets or fonts needed for this package

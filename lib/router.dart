@@ -3,6 +3,9 @@ import 'package:medical_records/screens/app/error_screen.dart';
 import 'package:medical_records/screens/app/splash_screen.dart';
 import 'package:medical_records/screens/home/home_screen.dart';
 import 'package:medical_records/screens/hospitals/hospitals_screen.dart';
+import 'package:medical_records/screens/hospitals/add_hospital_screen.dart';
+import 'package:medical_records/screens/hospitals/edit_hospital_screen.dart';
+import 'package:medical_records/screens/hospitals/department_and_doctor_screen.dart';
 import 'package:medical_records/screens/treatments/treatments_screen.dart';
 import 'package:medical_records/screens/settings/app_settings_screen.dart';
 import 'package:medical_records/screens/settings/settings_screen.dart';
@@ -66,6 +69,45 @@ class AppRouter {
           child: const HospitalsScreen(),
         );
       },
+      routes: [
+        GoRoute(
+          name: AddHospitalScreen.name,
+          path: AddHospitalScreen.path,
+          pageBuilder: (context, state) {
+            return NoTransitionPage<void>(
+              key: state.pageKey,
+              restorationId: state.pageKey.value,
+              child: const AddHospitalScreen(),
+            );
+          },
+        ),
+        GoRoute(
+          name: EditHospitalScreen.name,
+          path: EditHospitalScreen.path,
+          pageBuilder: (context, state) {
+            final hospitalId = int.parse(state.pathParameters['id']!);
+
+            return NoTransitionPage<void>(
+              key: state.pageKey,
+              restorationId: state.pageKey.value,
+              child: EditHospitalScreen(hospitalId: hospitalId),
+            );
+          },
+        ),
+        GoRoute(
+          name: DepartmentAndDoctorScreen.name,
+          path: DepartmentAndDoctorScreen.path,
+          pageBuilder: (context, state) {
+            final hospitalId = int.parse(state.pathParameters['id']!);
+
+            return NoTransitionPage<void>(
+              key: state.pageKey,
+              restorationId: state.pageKey.value,
+              child: DepartmentAndDoctorScreen(hospitalId: hospitalId),
+            );
+          },
+        ),
+      ],
     ),
     GoRoute(
       name: SettingsScreen.name,

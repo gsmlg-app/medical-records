@@ -1,0 +1,27 @@
+name: hospital_form
+description: Hospital form widget for medical records app
+version: 0.1.0
+publish_to: none
+resolution: workspace
+
+environment:
+  sdk: ^3.9.2
+  flutter: ">=3.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  app_locale:
+    path: ../../app_lib/locale
+  hospital_form_bloc:
+    path: ../../app_bloc/hospital_form_bloc
+  flutter_bloc: ^9.0.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  # No assets or fonts needed for this package

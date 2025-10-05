@@ -261,6 +261,234 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Add Hospital'**
   String get addHospital;
+
+  /// No description provided for @editHospital.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Hospital'**
+  String get editHospital;
+
+  /// No description provided for @deleteHospital.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Hospital'**
+  String get deleteHospital;
+
+  /// No description provided for @deleteHospitalConfirmation.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete this hospital?'**
+  String get deleteHospitalConfirmation;
+
+  /// No description provided for @hospitalName.
+  ///
+  /// In en, this message translates to:
+  /// **'Hospital Name'**
+  String get hospitalName;
+
+  /// No description provided for @address.
+  ///
+  /// In en, this message translates to:
+  /// **'Address'**
+  String get address;
+
+  /// No description provided for @hospitalType.
+  ///
+  /// In en, this message translates to:
+  /// **'Hospital Type'**
+  String get hospitalType;
+
+  /// No description provided for @hospitalTypeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g., General Hospital, Specialty Hospital'**
+  String get hospitalTypeHint;
+
+  /// No description provided for @hospitalLevel.
+  ///
+  /// In en, this message translates to:
+  /// **'Hospital Level'**
+  String get hospitalLevel;
+
+  /// No description provided for @hospitalLevelHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g., Class A Grade 3, Class B Grade 2'**
+  String get hospitalLevelHint;
+
+  /// No description provided for @save.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get save;
+
+  /// No description provided for @delete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get delete;
+
+  /// No description provided for @edit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get edit;
+
+  /// No description provided for @fieldRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'This field is required'**
+  String get fieldRequired;
+
+  /// No description provided for @hospitalAddedSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Hospital added successfully'**
+  String get hospitalAddedSuccess;
+
+  /// No description provided for @hospitalUpdatedSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Hospital updated successfully'**
+  String get hospitalUpdatedSuccess;
+
+  /// No description provided for @hospitalDeletedSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Hospital deleted successfully'**
+  String get hospitalDeletedSuccess;
+
+  /// No description provided for @departmentAndDoctor.
+  ///
+  /// In en, this message translates to:
+  /// **'Department & Doctor'**
+  String get departmentAndDoctor;
+
+  /// No description provided for @departmentAndDoctorTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Department & Doctor Management'**
+  String get departmentAndDoctorTitle;
+
+  /// No description provided for @departments.
+  ///
+  /// In en, this message translates to:
+  /// **'Departments'**
+  String get departments;
+
+  /// No description provided for @doctors.
+  ///
+  /// In en, this message translates to:
+  /// **'Doctors'**
+  String get doctors;
+
+  /// No description provided for @addDepartment.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Department'**
+  String get addDepartment;
+
+  /// No description provided for @addDoctor.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Doctor'**
+  String get addDoctor;
+
+  /// No description provided for @departmentName.
+  ///
+  /// In en, this message translates to:
+  /// **'Department Name'**
+  String get departmentName;
+
+  /// No description provided for @doctorName.
+  ///
+  /// In en, this message translates to:
+  /// **'Doctor Name'**
+  String get doctorName;
+
+  /// No description provided for @departmentCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Department Category'**
+  String get departmentCategory;
+
+  /// No description provided for @doctorTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Doctor Title'**
+  String get doctorTitle;
+
+  /// No description provided for @manageDepartments.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage Departments'**
+  String get manageDepartments;
+
+  /// No description provided for @manageDoctors.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage Doctors'**
+  String get manageDoctors;
+
+  /// No description provided for @noDepartments.
+  ///
+  /// In en, this message translates to:
+  /// **'No departments assigned yet'**
+  String get noDepartments;
+
+  /// No description provided for @noDoctors.
+  ///
+  /// In en, this message translates to:
+  /// **'No doctors assigned yet'**
+  String get noDoctors;
+
+  /// No description provided for @departmentAssignedSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Department assigned successfully'**
+  String get departmentAssignedSuccess;
+
+  /// No description provided for @departmentRemovedSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Department removed successfully'**
+  String get departmentRemovedSuccess;
+
+  /// No description provided for @departmentAddedSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Department added successfully'**
+  String get departmentAddedSuccess;
+
+  /// No description provided for @departmentUpdatedSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Department updated successfully'**
+  String get departmentUpdatedSuccess;
+
+  /// No description provided for @doctorAssignedSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Doctor assigned successfully'**
+  String get doctorAssignedSuccess;
+
+  /// No description provided for @doctorRemovedSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Doctor removed successfully'**
+  String get doctorRemovedSuccess;
+
+  /// No description provided for @doctorAddedSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Doctor added successfully'**
+  String get doctorAddedSuccess;
+
+  /// No description provided for @doctorUpdatedSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Doctor updated successfully'**
+  String get doctorUpdatedSuccess;
 }
 
 class _AppLocalizationsDelegate

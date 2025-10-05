@@ -92,4 +92,119 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get addHospital => 'Add Hospital';
+
+  @override
+  String get editHospital => 'Edit Hospital';
+
+  @override
+  String get deleteHospital => 'Delete Hospital';
+
+  @override
+  String get deleteHospitalConfirmation =>
+      'Are you sure you want to delete this hospital?';
+
+  @override
+  String get hospitalName => 'Hospital Name';
+
+  @override
+  String get address => 'Address';
+
+  @override
+  String get hospitalType => 'Hospital Type';
+
+  @override
+  String get hospitalTypeHint => 'e.g., General Hospital, Specialty Hospital';
+
+  @override
+  String get hospitalLevel => 'Hospital Level';
+
+  @override
+  String get hospitalLevelHint => 'e.g., Class A Grade 3, Class B Grade 2';
+
+  @override
+  String get save => 'Save';
+
+  @override
+  String get delete => 'Delete';
+
+  @override
+  String get edit => 'Edit';
+
+  @override
+  String get fieldRequired => 'This field is required';
+
+  @override
+  String get hospitalAddedSuccess => 'Hospital added successfully';
+
+  @override
+  String get hospitalUpdatedSuccess => 'Hospital updated successfully';
+
+  @override
+  String get hospitalDeletedSuccess => 'Hospital deleted successfully';
+
+  @override
+  String get departmentAndDoctor => 'Department & Doctor';
+
+  @override
+  String get departmentAndDoctorTitle => 'Department & Doctor Management';
+
+  @override
+  String get departments => 'Departments';
+
+  @override
+  String get doctors => 'Doctors';
+
+  @override
+  String get addDepartment => 'Add Department';
+
+  @override
+  String get addDoctor => 'Add Doctor';
+
+  @override
+  String get departmentName => 'Department Name';
+
+  @override
+  String get doctorName => 'Doctor Name';
+
+  @override
+  String get departmentCategory => 'Department Category';
+
+  @override
+  String get doctorTitle => 'Doctor Title';
+
+  @override
+  String get manageDepartments => 'Manage Departments';
+
+  @override
+  String get manageDoctors => 'Manage Doctors';
+
+  @override
+  String get noDepartments => 'No departments assigned yet';
+
+  @override
+  String get noDoctors => 'No doctors assigned yet';
+
+  @override
+  String get departmentAssignedSuccess => 'Department assigned successfully';
+
+  @override
+  String get departmentRemovedSuccess => 'Department removed successfully';
+
+  @override
+  String get departmentAddedSuccess => 'Department added successfully';
+
+  @override
+  String get departmentUpdatedSuccess => 'Department updated successfully';
+
+  @override
+  String get doctorAssignedSuccess => 'Doctor assigned successfully';
+
+  @override
+  String get doctorRemovedSuccess => 'Doctor removed successfully';
+
+  @override
+  String get doctorAddedSuccess => 'Doctor added successfully';
+
+  @override
+  String get doctorUpdatedSuccess => 'Doctor updated successfully';
 }
