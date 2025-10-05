@@ -7,6 +7,10 @@ import 'package:medical_records/screens/hospitals/add_hospital_screen.dart';
 import 'package:medical_records/screens/hospitals/edit_hospital_screen.dart';
 import 'package:medical_records/screens/hospitals/department_and_doctor_screen.dart';
 import 'package:medical_records/screens/treatments/treatments_screen.dart';
+import 'package:medical_records/screens/treatments/add_treatment_screen.dart';
+import 'package:medical_records/screens/treatments/edit_treatment_screen.dart';
+import 'package:medical_records/screens/treatments/treatment_detail_screen.dart';
+import 'package:medical_records/screens/visits/visits_screen.dart';
 import 'package:medical_records/screens/settings/app_settings_screen.dart';
 import 'package:medical_records/screens/settings/settings_screen.dart';
 import 'package:go_router/go_router.dart';
@@ -56,6 +60,56 @@ class AppRouter {
           key: state.pageKey,
           restorationId: state.pageKey.value,
           child: const TreatmentsScreen(),
+        );
+      },
+      routes: [
+        GoRoute(
+          name: AddTreatmentScreen.name,
+          path: AddTreatmentScreen.path,
+          pageBuilder: (context, state) {
+            return NoTransitionPage<void>(
+              key: state.pageKey,
+              restorationId: state.pageKey.value,
+              child: const AddTreatmentScreen(),
+            );
+          },
+        ),
+        GoRoute(
+          name: EditTreatmentScreen.name,
+          path: EditTreatmentScreen.path,
+          pageBuilder: (context, state) {
+            final treatmentId = int.parse(state.pathParameters['id']!);
+
+            return NoTransitionPage<void>(
+              key: state.pageKey,
+              restorationId: state.pageKey.value,
+              child: EditTreatmentScreen(treatmentId: treatmentId),
+            );
+          },
+        ),
+        GoRoute(
+          name: TreatmentDetailScreen.name,
+          path: TreatmentDetailScreen.path,
+          pageBuilder: (context, state) {
+            final treatmentId = int.parse(state.pathParameters['id']!);
+
+            return NoTransitionPage<void>(
+              key: state.pageKey,
+              restorationId: state.pageKey.value,
+              child: TreatmentDetailScreen(treatmentId: treatmentId),
+            );
+          },
+        ),
+      ],
+    ),
+    GoRoute(
+      name: VisitsScreen.name,
+      path: VisitsScreen.path,
+      pageBuilder: (context, state) {
+        return NoTransitionPage<void>(
+          key: state.pageKey,
+          restorationId: state.pageKey.value,
+          child: const VisitsScreen(),
         );
       },
     ),

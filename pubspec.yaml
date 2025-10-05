@@ -16,6 +16,9 @@ workspace:
   - app_bloc/theme
   - app_bloc/hospital
   - app_bloc/hospital_form_bloc
+  - app_bloc/treatment
+  - app_bloc/treatment_form_bloc
+  - app_bloc/visit
   - app_widget/adaptive
   - app_widget/artwork
   - app_widget/feedback
@@ -56,6 +59,9 @@ dependencies:
   theme_bloc: any
   hospital_bloc: any
   hospital_form_bloc: any
+  treatment_bloc: any
+  treatment_form_bloc: any
+  visit_bloc: any
   hospital_form: any
   app_artwork: any
   app_feedback: any

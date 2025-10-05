@@ -207,4 +207,104 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get doctorUpdatedSuccess => 'Doctor updated successfully';
+
+  @override
+  String get treatmentTitle => 'Treatment Title';
+
+  @override
+  String get diagnosis => 'Diagnosis';
+
+  @override
+  String get startDate => 'Start Date';
+
+  @override
+  String get endDate => 'End Date';
+
+  @override
+  String get selectDate => 'Select Date';
+
+  @override
+  String get optional => 'Optional';
+
+  @override
+  String get editTreatment => 'Edit Treatment';
+
+  @override
+  String get deleteTreatment => 'Delete Treatment';
+
+  @override
+  String get deleteTreatmentConfirmation =>
+      'Are you sure you want to delete this treatment?';
+
+  @override
+  String get treatmentDetails => 'Treatment Details';
+
+  @override
+  String get treatmentAddedSuccess => 'Treatment added successfully';
+
+  @override
+  String get treatmentUpdatedSuccess => 'Treatment updated successfully';
+
+  @override
+  String get treatmentDeletedSuccess => 'Treatment deleted successfully';
+
+  @override
+  String get visits => 'Visits';
+
+  @override
+  String get noVisits => 'No visits added yet';
+
+  @override
+  String get noVisitsForTreatment => 'No visits for this treatment';
+
+  @override
+  String get addFirstVisit => 'Add your first visit to track your progress';
+
+  @override
+  String get addFirstVisitHint => 'Add your first visit to get started';
+
+  @override
+  String get addVisit => 'Add Visit';
+
+  @override
+  String get visitCategory => 'Visit Category';
+
+  @override
+  String get outpatient => 'Outpatient';
+
+  @override
+  String get inpatient => 'Inpatient';
+
+  @override
+  String get visitDate => 'Visit Date';
+
+  @override
+  String get visitDetails => 'Visit Details';
+
+  @override
+  String get selectHospital => 'Select Hospital (Optional)';
+
+  @override
+  String get selectDepartment => 'Select Department (Optional)';
+
+  @override
+  String get selectDoctor => 'Select Doctor (Optional)';
+
+  @override
+  String get additionalInfo => 'Additional Information (Optional)';
+
+  @override
+  String get loadVisits => 'Load Visits';
+
+  @override
+  String get visitAddedSuccess => 'Visit added successfully';
+
+  @override
+  String get visitUpdatedSuccess => 'Visit updated successfully';
+
+  @override
+  String get visitDeletedSuccess => 'Visit deleted successfully';
+
+  @override
+  String get retry => 'Retry';
 }

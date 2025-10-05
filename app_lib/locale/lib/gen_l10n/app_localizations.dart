@@ -489,6 +489,204 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Doctor updated successfully'**
   String get doctorUpdatedSuccess;
+
+  /// No description provided for @treatmentTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Treatment Title'**
+  String get treatmentTitle;
+
+  /// No description provided for @diagnosis.
+  ///
+  /// In en, this message translates to:
+  /// **'Diagnosis'**
+  String get diagnosis;
+
+  /// No description provided for @startDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Start Date'**
+  String get startDate;
+
+  /// No description provided for @endDate.
+  ///
+  /// In en, this message translates to:
+  /// **'End Date'**
+  String get endDate;
+
+  /// No description provided for @selectDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Date'**
+  String get selectDate;
+
+  /// No description provided for @optional.
+  ///
+  /// In en, this message translates to:
+  /// **'Optional'**
+  String get optional;
+
+  /// No description provided for @editTreatment.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Treatment'**
+  String get editTreatment;
+
+  /// No description provided for @deleteTreatment.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Treatment'**
+  String get deleteTreatment;
+
+  /// No description provided for @deleteTreatmentConfirmation.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete this treatment?'**
+  String get deleteTreatmentConfirmation;
+
+  /// No description provided for @treatmentDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Treatment Details'**
+  String get treatmentDetails;
+
+  /// No description provided for @treatmentAddedSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Treatment added successfully'**
+  String get treatmentAddedSuccess;
+
+  /// No description provided for @treatmentUpdatedSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Treatment updated successfully'**
+  String get treatmentUpdatedSuccess;
+
+  /// No description provided for @treatmentDeletedSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Treatment deleted successfully'**
+  String get treatmentDeletedSuccess;
+
+  /// No description provided for @visits.
+  ///
+  /// In en, this message translates to:
+  /// **'Visits'**
+  String get visits;
+
+  /// No description provided for @noVisits.
+  ///
+  /// In en, this message translates to:
+  /// **'No visits added yet'**
+  String get noVisits;
+
+  /// No description provided for @noVisitsForTreatment.
+  ///
+  /// In en, this message translates to:
+  /// **'No visits for this treatment'**
+  String get noVisitsForTreatment;
+
+  /// No description provided for @addFirstVisit.
+  ///
+  /// In en, this message translates to:
+  /// **'Add your first visit to track your progress'**
+  String get addFirstVisit;
+
+  /// No description provided for @addFirstVisitHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Add your first visit to get started'**
+  String get addFirstVisitHint;
+
+  /// No description provided for @addVisit.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Visit'**
+  String get addVisit;
+
+  /// No description provided for @visitCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Visit Category'**
+  String get visitCategory;
+
+  /// No description provided for @outpatient.
+  ///
+  /// In en, this message translates to:
+  /// **'Outpatient'**
+  String get outpatient;
+
+  /// No description provided for @inpatient.
+  ///
+  /// In en, this message translates to:
+  /// **'Inpatient'**
+  String get inpatient;
+
+  /// No description provided for @visitDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Visit Date'**
+  String get visitDate;
+
+  /// No description provided for @visitDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Visit Details'**
+  String get visitDetails;
+
+  /// No description provided for @selectHospital.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Hospital (Optional)'**
+  String get selectHospital;
+
+  /// No description provided for @selectDepartment.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Department (Optional)'**
+  String get selectDepartment;
+
+  /// No description provided for @selectDoctor.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Doctor (Optional)'**
+  String get selectDoctor;
+
+  /// No description provided for @additionalInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Additional Information (Optional)'**
+  String get additionalInfo;
+
+  /// No description provided for @loadVisits.
+  ///
+  /// In en, this message translates to:
+  /// **'Load Visits'**
+  String get loadVisits;
+
+  /// No description provided for @visitAddedSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Visit added successfully'**
+  String get visitAddedSuccess;
+
+  /// No description provided for @visitUpdatedSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Visit updated successfully'**
+  String get visitUpdatedSuccess;
+
+  /// No description provided for @visitDeletedSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Visit deleted successfully'**
+  String get visitDeletedSuccess;
+
+  /// No description provided for @retry.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get retry;
 }
 
 class _AppLocalizationsDelegate

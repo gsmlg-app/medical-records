@@ -3,6 +3,8 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:theme_bloc/theme_bloc.dart';
+import 'package:treatment_bloc/treatment_bloc.dart';
+import 'package:visit_bloc/visit_bloc.dart';
 
 class MainProvider extends StatelessWidget {
   const MainProvider({
@@ -32,6 +34,16 @@ class MainProvider extends StatelessWidget {
           BlocProvider<ThemeBloc>(
             create: (BuildContext context) => ThemeBloc(
               context.read<SharedPreferences>(),
+            ),
+          ),
+          BlocProvider<TreatmentBloc>(
+            create: (BuildContext context) => TreatmentBloc(
+              context.read<AppDatabase>(),
+            ),
+          ),
+          BlocProvider<VisitBloc>(
+            create: (BuildContext context) => VisitBloc(
+              context.read<AppDatabase>(),
             ),
           ),
         ],
