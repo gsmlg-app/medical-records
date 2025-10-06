@@ -306,5 +306,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get visitDeletedSuccess => 'Visit deleted successfully';
 
   @override
+  String get editVisit => 'Edit Visit';
+
+  @override
+  String get deleteVisit => 'Delete Visit';
+
+  @override
+  String get deleteVisitConfirmation =>
+      'Are you sure you want to delete this visit?';
+
+  @override
   String get retry => 'Retry';
 }

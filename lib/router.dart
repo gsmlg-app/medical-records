@@ -1,4 +1,7 @@
+import 'package:app_database/app_database.dart';
+import 'package:app_provider/app_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:medical_records/screens/app/error_screen.dart';
 import 'package:medical_records/screens/app/splash_screen.dart';
 import 'package:medical_records/screens/home/home_screen.dart';
@@ -10,7 +13,9 @@ import 'package:medical_records/screens/treatments/treatments_screen.dart';
 import 'package:medical_records/screens/treatments/add_treatment_screen.dart';
 import 'package:medical_records/screens/treatments/edit_treatment_screen.dart';
 import 'package:medical_records/screens/treatments/treatment_detail_screen.dart';
-import 'package:medical_records/screens/visits/visits_screen.dart';
+import 'package:medical_records/screens/visits/add_visit_screen.dart';
+import 'package:medical_records/screens/visits/edit_visit_screen.dart';
+import 'package:medical_records/screens/visits/visit_detail_screen.dart';
 import 'package:medical_records/screens/settings/app_settings_screen.dart';
 import 'package:medical_records/screens/settings/settings_screen.dart';
 import 'package:go_router/go_router.dart';
@@ -103,13 +108,35 @@ class AppRouter {
       ],
     ),
     GoRoute(
-      name: VisitsScreen.name,
-      path: VisitsScreen.path,
+      name: EditVisitScreen.name,
+      path: EditVisitScreen.path,
       pageBuilder: (context, state) {
         return NoTransitionPage<void>(
           key: state.pageKey,
           restorationId: state.pageKey.value,
-          child: const VisitsScreen(),
+          child: const EditVisitScreen(),
+        );
+      },
+    ),
+    GoRoute(
+      name: VisitDetailScreen.name,
+      path: VisitDetailScreen.path,
+      pageBuilder: (context, state) {
+        return NoTransitionPage<void>(
+          key: state.pageKey,
+          restorationId: state.pageKey.value,
+          child: const VisitDetailScreen(),
+        );
+      },
+    ),
+    GoRoute(
+      name: AddVisitScreen.name,
+      path: AddVisitScreen.path,
+      pageBuilder: (context, state) {
+        return NoTransitionPage<void>(
+          key: state.pageKey,
+          restorationId: state.pageKey.value,
+          child: const AddVisitScreen(),
         );
       },
     ),

@@ -1,0 +1,27 @@
+name: visit_form_bloc
+description: A BLoC for visit form state management in the medical records app.
+version: 0.1.0
+publish_to: none
+resolution: workspace
+
+environment:
+  sdk: '^3.9.2'
+  flutter: ">=3.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  bloc: ^9.0.0
+  equatable: ^2.0.5
+  app_database:
+    path: ../../app_lib/database
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+  bloc_test: ^10.0.0
+  mocktail: ^1.0.4
+
+flutter:
+  uses-material-design: false

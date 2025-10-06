@@ -4,4 +4,3 @@ output-dir: lib/l10n/gen_l10n
 output-localization-file: feedback_localizations.dart
 output-class: FeedbackLocalizations
 nullable-getter: false
-synthetic-package: false

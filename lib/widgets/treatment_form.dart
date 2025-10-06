@@ -32,7 +32,7 @@ class TreatmentForm extends StatefulWidget {
     required String diagnosis,
     required DateTime startDate,
     DateTime? endDate,
-  }) onSave;
+  })? onSave;
 
   @override
   State<TreatmentForm> createState() => _TreatmentFormState();
@@ -185,7 +185,7 @@ class _TreatmentFormState extends State<TreatmentForm> {
       }
 
       try {
-        await widget.onSave(
+        await widget.onSave?.call(
           title: blocState.title.trim(),
           diagnosis: blocState.diagnosis.trim(),
           startDate: blocState.startDate!,

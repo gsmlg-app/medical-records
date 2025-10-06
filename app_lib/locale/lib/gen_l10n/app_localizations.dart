@@ -682,6 +682,24 @@ abstract class AppLocalizations {
   /// **'Visit deleted successfully'**
   String get visitDeletedSuccess;
 
+  /// No description provided for @editVisit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Visit'**
+  String get editVisit;
+
+  /// No description provided for @deleteVisit.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Visit'**
+  String get deleteVisit;
+
+  /// No description provided for @deleteVisitConfirmation.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete this visit?'**
+  String get deleteVisitConfirmation;
+
   /// No description provided for @retry.
   ///
   /// In en, this message translates to:

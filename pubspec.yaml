@@ -19,10 +19,14 @@ workspace:
   - app_bloc/treatment
   - app_bloc/treatment_form_bloc
   - app_bloc/visit
+  - app_bloc/visit_form_bloc
+  - app_bloc/department
+  - app_bloc/doctor
   - app_widget/adaptive
   - app_widget/artwork
   - app_widget/feedback
   - app_widget/hospital_form
+  - app_widget/visit_form
   - app_widget/web_view
   - third_party/form_bloc
   - third_party/flutter_form_bloc
@@ -62,7 +66,11 @@ dependencies:
   treatment_bloc: any
   treatment_form_bloc: any
   visit_bloc: any
+  visit_form_bloc: any
+  department_bloc: any
+  doctor_bloc: any
   hospital_form: any
+  visit_form_widget: any
   app_artwork: any
   app_feedback: any
   app_adaptive_widgets: any

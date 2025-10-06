@@ -6,7 +6,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:medical_records/destination.dart';
 import 'package:medical_records/screens/treatments/edit_treatment_screen.dart';
+import 'package:medical_records/screens/visits/add_visit_screen.dart';
+import 'package:medical_records/screens/visits/visit_detail_screen.dart';
 import 'package:treatment_bloc/treatment_bloc.dart';
+import 'package:visit_bloc/visit_bloc.dart';
 
 class TreatmentDetailScreen extends StatefulWidget {
   static const name = 'TreatmentDetail';
@@ -22,11 +25,13 @@ class TreatmentDetailScreen extends StatefulWidget {
 
 class _TreatmentDetailScreenState extends State<TreatmentDetailScreen> {
   Treatment? _treatment;
+  List<Visit> _visits = [];
 
   @override
   void initState() {
     super.initState();
     _loadTreatment();
+    _loadVisits();
   }
 
   void _loadTreatment() {
@@ -37,6 +42,10 @@ class _TreatmentDetailScreenState extends State<TreatmentDetailScreen> {
         orElse: () => throw Exception('Treatment not found'),
       );
     }
+  }
+
+  void _loadVisits() {
+    context.read<VisitBloc>().add(LoadVisitsByTreatment(widget.treatmentId));
   }
 
   @override
@@ -166,7 +175,10 @@ class _TreatmentDetailScreenState extends State<TreatmentDetailScreen> {
             ),
             TextButton.icon(
               onPressed: () {
-                // TODO: Navigate to add visit screen with treatmentId
+                context.goNamed(
+                  AddVisitScreen.name,
+                  pathParameters: {'treatmentId': widget.treatmentId.toString()},
+                );
               },
               icon: const Icon(Icons.add),
               label: Text(context.l10n.addVisit),
@@ -174,31 +186,112 @@ class _TreatmentDetailScreenState extends State<TreatmentDetailScreen> {
           ],
         ),
         const SizedBox(height: 8),
-        Card(
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Center(
-              child: Column(
-                children: [
-                  Icon(
-                    Icons.event_note_outlined,
-                    size: 48,
-                    color: Theme.of(context).colorScheme.primary,
+        BlocBuilder<VisitBloc, VisitState>(
+          builder: (context, state) {
+            if (state is VisitLoading) {
+              return const Card(
+                child: Padding(
+                  padding: EdgeInsets.all(32.0),
+                  child: Center(child: CircularProgressIndicator()),
+                ),
+              );
+            } else if (state is VisitLoaded) {
+              final treatmentVisits = state.visits.where((v) => v.treatmentId == widget.treatmentId).toList();
+
+              if (treatmentVisits.isEmpty) {
+                return Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Center(
+                      child: Column(
+                        children: [
+                          Icon(
+                            Icons.event_note_outlined,
+                            size: 48,
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            context.l10n.noVisitsForTreatment,
+                            style: Theme.of(context).textTheme.titleMedium,
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            context.l10n.addFirstVisit,
+                            style: Theme.of(context).textTheme.bodyMedium,
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
-                  const SizedBox(height: 8),
-                  Text(
-                    context.l10n.noVisitsForTreatment,
-                    style: Theme.of(context).textTheme.titleMedium,
+                );
+              }
+
+              return ListView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: treatmentVisits.length,
+                itemBuilder: (context, index) {
+                  final visit = treatmentVisits[index];
+                  return Card(
+                    margin: const EdgeInsets.only(bottom: 8.0),
+                    child: ListTile(
+                      leading: CircleAvatar(
+                        backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+                        child: Icon(
+                          Icons.calendar_today,
+                          color: Theme.of(context).colorScheme.onPrimaryContainer,
+                        ),
+                      ),
+                      title: Text(_formatDate(visit.date)),
+                      subtitle: Text(
+                        visit.details.length > 50
+                            ? '${visit.details.substring(0, 50)}...'
+                            : visit.details,
+                      ),
+                      trailing: const Icon(Icons.chevron_right),
+                      onTap: () {
+                        context.goNamed(
+                          VisitDetailScreen.name,
+                          pathParameters: {'id': visit.id.toString()},
+                        );
+                      },
+                    ),
+                  );
+                },
+              );
+            } else if (state is VisitError) {
+              return Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Center(
+                    child: Column(
+                      children: [
+                        Icon(
+                          Icons.error_outline,
+                          size: 48,
+                          color: Theme.of(context).colorScheme.error,
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'Error loading visits',
+                          style: Theme.of(context).textTheme.titleMedium,
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          state.message,
+                          style: Theme.of(context).textTheme.bodyMedium,
+                          textAlign: TextAlign.center,
+                        ),
+                      ],
+                    ),
                   ),
-                  const SizedBox(height: 8),
-                  Text(
-                    context.l10n.addFirstVisit,
-                    style: Theme.of(context).textTheme.bodyMedium,
-                  ),
-                ],
-              ),
-            ),
-          ),
+                ),
+              );
+            }
+
+            return const SizedBox.shrink();
+          },
         ),
       ],
     );

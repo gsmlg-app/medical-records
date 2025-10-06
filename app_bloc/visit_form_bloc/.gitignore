@@ -1,0 +1,28 @@
+# See https://www.dartlang.org/guides/libraries/private-files
+# Copyright 2014 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Files and directories created by pub
+.dart_tool/
+.packages
+.pub-cache/
+.pub/
+build/
+fvm_packages/
+
+# Configuration file for the analysis tool.
+analysis_options.yaml
+
+# There may additionally be a file named .packages, which is a hidden file
+# that should be ignored. There may also be a file named analysis_options.yaml
+# which is a hidden file that should be ignored.
+
+# If you're using the analysis_options.yaml package from:
+# https://github.com/dart-lang/sdk/tree/main/pkg/analysis_options
+# then include the following in your .gitignore:
+# analysis_options.yaml
+
+# Conventional naming of temporary files
+*.tmp
+*.temp

@@ -8,6 +8,11 @@ class VisitCategory {
   static const VisitCategory outpatient = VisitCategory._('outpatient');
   static const VisitCategory inpatient = VisitCategory._('inpatient');
 
+  static const List<VisitCategory> values = [
+    outpatient,
+    inpatient,
+  ];
+
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
