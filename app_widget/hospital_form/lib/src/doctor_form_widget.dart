@@ -58,15 +58,14 @@ class _DoctorFormWidgetState extends State<DoctorFormWidget> {
         await widget.onSave(
           _nameController.text.trim(),
           _selectedDepartmentId!,
-          _levelController.text.trim().isEmpty ? null : _levelController.text.trim(),
+          _levelController.text.trim().isEmpty
+              ? null
+              : _levelController.text.trim(),
         );
       } catch (e) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Error: $e'),
-              backgroundColor: Colors.red,
-            ),
+            SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
           );
         }
       } finally {
@@ -131,11 +130,13 @@ class _DoctorFormWidgetState extends State<DoctorFormWidget> {
               }
               return null;
             },
-            onChanged: (_isSubmitting || widget.availableDepartments.isEmpty) ? null : (value) {
-              setState(() {
-                _selectedDepartmentId = value;
-              });
-            },
+            onChanged: (_isSubmitting || widget.availableDepartments.isEmpty)
+                ? null
+                : (value) {
+                    setState(() {
+                      _selectedDepartmentId = value;
+                    });
+                  },
           ),
           if (widget.availableDepartments.isEmpty)
             Padding(
@@ -172,16 +173,20 @@ class _DoctorFormWidgetState extends State<DoctorFormWidget> {
               const SizedBox(width: 16),
               Expanded(
                 child: ElevatedButton(
-                  onPressed: (_isSubmitting || _selectedDepartmentId == null) ? null : _onSave,
+                  onPressed: (_isSubmitting || _selectedDepartmentId == null)
+                      ? null
+                      : _onSave,
                   child: _isSubmitting
                       ? const SizedBox(
                           height: 20,
                           width: 20,
                           child: CircularProgressIndicator(strokeWidth: 2),
                         )
-                      : Text(widget.isEditMode
-                          ? context.l10n.save
-                          : context.l10n.addDoctor),
+                      : Text(
+                          widget.isEditMode
+                              ? context.l10n.save
+                              : context.l10n.addDoctor,
+                        ),
                 ),
               ),
             ],

@@ -38,7 +38,9 @@ class _HospitalFormWidgetState extends State<HospitalFormWidget> {
   void initState() {
     super.initState();
     _nameController = TextEditingController(text: widget.initialName ?? '');
-    _addressController = TextEditingController(text: widget.initialAddress ?? '');
+    _addressController = TextEditingController(
+      text: widget.initialAddress ?? '',
+    );
     _typeController = TextEditingController(text: widget.initialType ?? '');
     _levelController = TextEditingController(text: widget.initialLevel ?? '');
 
@@ -87,10 +89,7 @@ class _HospitalFormWidgetState extends State<HospitalFormWidget> {
       listener: (context, state) {
         if (state is HospitalFormSubmissionFailure) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(state.error),
-              backgroundColor: Colors.red,
-            ),
+            SnackBar(content: Text(state.error), backgroundColor: Colors.red),
           );
         } else if (state is HospitalFormSubmissionSuccess) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -202,19 +201,25 @@ class _HospitalFormWidgetState extends State<HospitalFormWidget> {
                     const SizedBox(width: 16),
                     Expanded(
                       child: ElevatedButton(
-                        onPressed: (isSubmitting ||
-                                !(state is HospitalFormLoaded && state.isNameValid))
+                        onPressed:
+                            (isSubmitting ||
+                                !(state is HospitalFormLoaded &&
+                                    state.isNameValid))
                             ? null
                             : _onSave,
                         child: isSubmitting
                             ? const SizedBox(
                                 height: 20,
                                 width: 20,
-                                child: CircularProgressIndicator(strokeWidth: 2),
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
                               )
-                            : Text(widget.isEditMode
-                                ? context.l10n.save
-                                : context.l10n.addHospital),
+                            : Text(
+                                widget.isEditMode
+                                    ? context.l10n.save
+                                    : context.l10n.addHospital,
+                              ),
                       ),
                     ),
                   ],

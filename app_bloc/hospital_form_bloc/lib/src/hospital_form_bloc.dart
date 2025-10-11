@@ -28,26 +28,22 @@ class HospitalFormBloc extends Bloc<HospitalFormEvent, HospitalFormState> {
     final level = event.level ?? '';
     final isNameValid = name.trim().isNotEmpty;
 
-    emit(HospitalFormLoaded(
-      name: name,
-      address: address,
-      type: type,
-      level: level,
-      isNameValid: isNameValid,
-    ));
+    emit(
+      HospitalFormLoaded(
+        name: name,
+        address: address,
+        type: type,
+        level: level,
+        isNameValid: isNameValid,
+      ),
+    );
   }
 
-  void _onNameChanged(
-    NameChanged event,
-    Emitter<HospitalFormState> emit,
-  ) {
+  void _onNameChanged(NameChanged event, Emitter<HospitalFormState> emit) {
     if (state is HospitalFormLoaded) {
       final currentState = state as HospitalFormLoaded;
       final isNameValid = event.name.trim().isNotEmpty;
-      emit(currentState.copyWith(
-        name: event.name,
-        isNameValid: isNameValid,
-      ));
+      emit(currentState.copyWith(name: event.name, isNameValid: isNameValid));
     }
   }
 
@@ -61,54 +57,46 @@ class HospitalFormBloc extends Bloc<HospitalFormEvent, HospitalFormState> {
     }
   }
 
-  void _onTypeChanged(
-    TypeChanged event,
-    Emitter<HospitalFormState> emit,
-  ) {
+  void _onTypeChanged(TypeChanged event, Emitter<HospitalFormState> emit) {
     if (state is HospitalFormLoaded) {
       final currentState = state as HospitalFormLoaded;
       emit(currentState.copyWith(type: event.type));
     }
   }
 
-  void _onLevelChanged(
-    LevelChanged event,
-    Emitter<HospitalFormState> emit,
-  ) {
+  void _onLevelChanged(LevelChanged event, Emitter<HospitalFormState> emit) {
     if (state is HospitalFormLoaded) {
       final currentState = state as HospitalFormLoaded;
       emit(currentState.copyWith(level: event.level));
     }
   }
 
-  void _onFormSubmitted(
-    FormSubmitted event,
-    Emitter<HospitalFormState> emit,
-  ) {
+  void _onFormSubmitted(FormSubmitted event, Emitter<HospitalFormState> emit) {
     if (state is HospitalFormLoaded) {
       final currentState = state as HospitalFormLoaded;
       if (currentState.isNameValid) {
-        emit(HospitalFormSubmissionInProgress(
-          name: currentState.name,
-          address: currentState.address,
-          type: currentState.type,
-          level: currentState.level,
-        ));
+        emit(
+          HospitalFormSubmissionInProgress(
+            name: currentState.name,
+            address: currentState.address,
+            type: currentState.type,
+            level: currentState.level,
+          ),
+        );
       }
     }
   }
 
-  void _onFormReset(
-    FormReset event,
-    Emitter<HospitalFormState> emit,
-  ) {
-    emit(HospitalFormLoaded(
-      name: '',
-      address: '',
-      type: '',
-      level: '',
-      isNameValid: false,
-    ));
+  void _onFormReset(FormReset event, Emitter<HospitalFormState> emit) {
+    emit(
+      HospitalFormLoaded(
+        name: '',
+        address: '',
+        type: '',
+        level: '',
+        isNameValid: false,
+      ),
+    );
   }
 
   void _onHospitalFormSuccess(
@@ -126,13 +114,15 @@ class HospitalFormBloc extends Bloc<HospitalFormEvent, HospitalFormState> {
   ) {
     if (state is HospitalFormSubmissionInProgress) {
       final currentState = state as HospitalFormSubmissionInProgress;
-      emit(HospitalFormSubmissionFailure(
-        error: event.error,
-        name: currentState.name,
-        address: currentState.address,
-        type: currentState.type,
-        level: currentState.level,
-      ));
+      emit(
+        HospitalFormSubmissionFailure(
+          error: event.error,
+          name: currentState.name,
+          address: currentState.address,
+          type: currentState.type,
+          level: currentState.level,
+        ),
+      );
     }
   }
 
@@ -160,18 +150,34 @@ class HospitalFormBloc extends Bloc<HospitalFormEvent, HospitalFormState> {
     if (state is HospitalFormLoaded) {
       final currentState = state as HospitalFormLoaded;
       return {
-        'name': currentState.name.trim().isEmpty ? null : currentState.name.trim(),
-        'address': currentState.address.trim().isEmpty ? null : currentState.address.trim(),
-        'type': currentState.type.trim().isEmpty ? null : currentState.type.trim(),
-        'level': currentState.level.trim().isEmpty ? null : currentState.level.trim(),
+        'name': currentState.name.trim().isEmpty
+            ? null
+            : currentState.name.trim(),
+        'address': currentState.address.trim().isEmpty
+            ? null
+            : currentState.address.trim(),
+        'type': currentState.type.trim().isEmpty
+            ? null
+            : currentState.type.trim(),
+        'level': currentState.level.trim().isEmpty
+            ? null
+            : currentState.level.trim(),
       };
     } else if (state is HospitalFormSubmissionInProgress) {
       final currentState = state as HospitalFormSubmissionInProgress;
       return {
-        'name': currentState.name.trim().isEmpty ? null : currentState.name.trim(),
-        'address': currentState.address.trim().isEmpty ? null : currentState.address.trim(),
-        'type': currentState.type.trim().isEmpty ? null : currentState.type.trim(),
-        'level': currentState.level.trim().isEmpty ? null : currentState.level.trim(),
+        'name': currentState.name.trim().isEmpty
+            ? null
+            : currentState.name.trim(),
+        'address': currentState.address.trim().isEmpty
+            ? null
+            : currentState.address.trim(),
+        'type': currentState.type.trim().isEmpty
+            ? null
+            : currentState.type.trim(),
+        'level': currentState.level.trim().isEmpty
+            ? null
+            : currentState.level.trim(),
       };
     }
     return {};

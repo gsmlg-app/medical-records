@@ -23,13 +23,18 @@ class SafeDropdownFieldBlocBuilder<T> extends StatefulWidget {
   final void Function(T)? onChanged;
 
   @override
-  State<SafeDropdownFieldBlocBuilder<T>> createState() => _SafeDropdownFieldBlocBuilderState<T>();
+  State<SafeDropdownFieldBlocBuilder<T>> createState() =>
+      _SafeDropdownFieldBlocBuilderState<T>();
 }
 
-class _SafeDropdownFieldBlocBuilderState<T> extends State<SafeDropdownFieldBlocBuilder<T>> {
+class _SafeDropdownFieldBlocBuilderState<T>
+    extends State<SafeDropdownFieldBlocBuilder<T>> {
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<SelectFieldBloc<T, dynamic>, SelectFieldBlocState<T, dynamic>>(
+    return BlocBuilder<
+      SelectFieldBloc<T, dynamic>,
+      SelectFieldBlocState<T, dynamic>
+    >(
       bloc: widget.selectFieldBloc,
       builder: (context, state) {
         // Only render when we have valid items
@@ -57,12 +62,14 @@ class _SafeDropdownFieldBlocBuilderState<T> extends State<SafeDropdownFieldBlocB
               child: widget.itemBuilder(context, item),
             );
           }).toList(),
-          onChanged: widget.isEnabled ? (T? newValue) {
-            if (newValue != null) {
-              widget.selectFieldBloc.updateValue(newValue);
-              widget.onChanged?.call(newValue);
-            }
-          } : null,
+          onChanged: widget.isEnabled
+              ? (T? newValue) {
+                  if (newValue != null) {
+                    widget.selectFieldBloc.updateValue(newValue);
+                    widget.onChanged?.call(newValue);
+                  }
+                }
+              : null,
         );
       },
     );

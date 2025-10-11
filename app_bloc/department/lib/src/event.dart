@@ -19,10 +19,7 @@ class AddDepartment extends DepartmentEvent {
   final String name;
   final String? category;
 
-  const AddDepartment({
-    required this.name,
-    this.category,
-  });
+  const AddDepartment({required this.name, this.category});
 
   @override
   List<Object?> get props => [name, category];

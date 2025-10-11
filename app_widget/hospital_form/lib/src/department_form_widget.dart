@@ -47,7 +47,9 @@ class _DepartmentFormWidgetState extends State<DepartmentFormWidget> {
   void initState() {
     super.initState();
     _nameController = TextEditingController(text: widget.initialName ?? '');
-    _categoryController = TextEditingController(text: widget.initialCategory ?? '');
+    _categoryController = TextEditingController(
+      text: widget.initialCategory ?? '',
+    );
     _selectedCategory = widget.initialCategory;
   }
 
@@ -96,10 +98,7 @@ class _DepartmentFormWidgetState extends State<DepartmentFormWidget> {
       } catch (e) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Error: $e'),
-              backgroundColor: Colors.red,
-            ),
+            SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
           );
         }
       } finally {
@@ -153,10 +152,7 @@ class _DepartmentFormWidgetState extends State<DepartmentFormWidget> {
               prefixIcon: const Icon(Icons.category),
             ),
             items: [
-              const DropdownMenuItem<String>(
-                value: null,
-                child: Text('None'),
-              ),
+              const DropdownMenuItem<String>(value: null, child: Text('None')),
               ..._departmentCategories.map((category) {
                 return DropdownMenuItem<String>(
                   value: category,
@@ -164,11 +160,13 @@ class _DepartmentFormWidgetState extends State<DepartmentFormWidget> {
                 );
               }),
             ],
-            onChanged: _isSubmitting ? null : (value) {
-              setState(() {
-                _selectedCategory = value;
-              });
-            },
+            onChanged: _isSubmitting
+                ? null
+                : (value) {
+                    setState(() {
+                      _selectedCategory = value;
+                    });
+                  },
           ),
           const SizedBox(height: 24),
           Row(
@@ -189,9 +187,11 @@ class _DepartmentFormWidgetState extends State<DepartmentFormWidget> {
                           width: 20,
                           child: CircularProgressIndicator(strokeWidth: 2),
                         )
-                      : Text(widget.isEditMode
-                          ? context.l10n.save
-                          : context.l10n.addDepartment),
+                      : Text(
+                          widget.isEditMode
+                              ? context.l10n.save
+                              : context.l10n.addDepartment,
+                        ),
                 ),
               ),
             ],

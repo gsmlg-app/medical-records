@@ -79,7 +79,8 @@ void main() {
         act: (bloc) => bloc.add(LoadTreatments()),
         expect: () => [
           TreatmentLoading(),
-          const TreatmentError('Failed to load treatments: Exception: Database error'),
+          const TreatmentError(
+              'Failed to load treatments: Exception: Database error'),
         ],
       );
     });
@@ -127,7 +128,8 @@ void main() {
         )),
         expect: () => [
           TreatmentLoading(),
-          const TreatmentError('Failed to add treatment: Exception: Database error'),
+          const TreatmentError(
+              'Failed to add treatment: Exception: Database error'),
         ],
       );
     });
@@ -225,7 +227,8 @@ void main() {
         act: (bloc) => bloc.add(const DeleteTreatment(treatmentId)),
         expect: () => [
           TreatmentLoading(),
-          const TreatmentError('Failed to delete treatment: Exception: Database error'),
+          const TreatmentError(
+              'Failed to delete treatment: Exception: Database error'),
         ],
       );
     });

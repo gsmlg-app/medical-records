@@ -21,13 +21,13 @@ class Visits extends Table {
 
   IntColumn get doctorId => integer().nullable()();
 
-  TextColumn get informations => text().nullable()(); // JSON field for additional data
+  TextColumn get informations =>
+      text().nullable()(); // JSON field for additional data
 
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
 
   DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
-
-  }
+}
 
 // Custom converter for VisitCategory enum
 class VisitCategoryConverter extends TypeConverter<VisitCategory, String> {

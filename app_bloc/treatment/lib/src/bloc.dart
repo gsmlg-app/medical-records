@@ -15,7 +15,8 @@ class TreatmentBloc extends Bloc<TreatmentEvent, TreatmentState> {
     on<DeleteTreatment>(_onDeleteTreatment);
   }
 
-  Future<void> _onLoadTreatments(LoadTreatments event, Emitter<TreatmentState> emit) async {
+  Future<void> _onLoadTreatments(
+      LoadTreatments event, Emitter<TreatmentState> emit) async {
     emit(TreatmentLoading());
     try {
       final treatments = await _database.getAllTreatments();
@@ -25,7 +26,8 @@ class TreatmentBloc extends Bloc<TreatmentEvent, TreatmentState> {
     }
   }
 
-  Future<void> _onAddTreatment(AddTreatment event, Emitter<TreatmentState> emit) async {
+  Future<void> _onAddTreatment(
+      AddTreatment event, Emitter<TreatmentState> emit) async {
     emit(TreatmentLoading());
     try {
       await _database.createTreatment(
@@ -45,7 +47,8 @@ class TreatmentBloc extends Bloc<TreatmentEvent, TreatmentState> {
     }
   }
 
-  Future<void> _onUpdateTreatment(UpdateTreatment event, Emitter<TreatmentState> emit) async {
+  Future<void> _onUpdateTreatment(
+      UpdateTreatment event, Emitter<TreatmentState> emit) async {
     emit(TreatmentLoading());
     try {
       final existingTreatment = await _database.getTreatmentById(event.id);
@@ -74,7 +77,8 @@ class TreatmentBloc extends Bloc<TreatmentEvent, TreatmentState> {
     }
   }
 
-  Future<void> _onDeleteTreatment(DeleteTreatment event, Emitter<TreatmentState> emit) async {
+  Future<void> _onDeleteTreatment(
+      DeleteTreatment event, Emitter<TreatmentState> emit) async {
     emit(TreatmentLoading());
     try {
       await _database.deleteTreatment(event.id);

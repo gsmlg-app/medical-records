@@ -136,7 +136,8 @@ void main() {
         act: (bloc) => bloc.add(const LoadVisitsByTreatment(treatmentId)),
         expect: () => [
           VisitLoading(),
-          const VisitError('Failed to load visits for treatment: Exception: Database error'),
+          const VisitError(
+              'Failed to load visits for treatment: Exception: Database error'),
         ],
       );
     });
@@ -152,8 +153,7 @@ void main() {
         setUp: () {
           when(() => mockDatabase.createVisit(any()))
               .thenAnswer((_) async => 1);
-          when(() => mockDatabase.getAllVisits())
-              .thenAnswer((_) async => []);
+          when(() => mockDatabase.getAllVisits()).thenAnswer((_) async => []);
         },
         build: () => visitBloc,
         act: (bloc) => bloc.add(AddVisit(
@@ -217,8 +217,7 @@ void main() {
               .thenAnswer((_) async => existingVisit);
           when(() => mockDatabase.updateVisit(any()))
               .thenAnswer((_) async => true);
-          when(() => mockDatabase.getAllVisits())
-              .thenAnswer((_) async => []);
+          when(() => mockDatabase.getAllVisits()).thenAnswer((_) async => []);
         },
         build: () => visitBloc,
         act: (bloc) => bloc.add(UpdateVisit(
@@ -264,8 +263,7 @@ void main() {
         setUp: () {
           when(() => mockDatabase.deleteVisit(visitId))
               .thenAnswer((_) async => 1);
-          when(() => mockDatabase.getAllVisits())
-              .thenAnswer((_) async => []);
+          when(() => mockDatabase.getAllVisits()).thenAnswer((_) async => []);
         },
         build: () => visitBloc,
         act: (bloc) => bloc.add(const DeleteVisit(visitId)),

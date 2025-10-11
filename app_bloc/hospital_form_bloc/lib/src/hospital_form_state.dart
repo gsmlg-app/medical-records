@@ -48,13 +48,13 @@ class HospitalFormLoaded extends HospitalFormState {
 
   @override
   List<Object?> get props => [
-        name,
-        address,
-        type,
-        level,
-        isNameValid,
-        isSubmitting,
-      ];
+    name,
+    address,
+    type,
+    level,
+    isNameValid,
+    isSubmitting,
+  ];
 }
 
 class HospitalFormSubmissionInProgress extends HospitalFormState {

@@ -12,7 +12,9 @@ class DoctorBloc extends Bloc<DoctorEvent, DoctorState> {
     on<LoadDoctors>(_onLoadDoctors);
     on<LoadDoctorsByHospital>(_onLoadDoctorsByHospital);
     on<LoadDoctorsByDepartment>(_onLoadDoctorsByDepartment);
-    on<LoadDoctorsByHospitalAndDepartment>(_onLoadDoctorsByHospitalAndDepartment);
+    on<LoadDoctorsByHospitalAndDepartment>(
+      _onLoadDoctorsByHospitalAndDepartment,
+    );
     on<AddDoctor>(_onAddDoctor);
     on<UpdateDoctor>(_onUpdateDoctor);
     on<DeleteDoctor>(_onDeleteDoctor);
@@ -56,7 +58,9 @@ class DoctorBloc extends Bloc<DoctorEvent, DoctorState> {
           .toList();
       emit(DoctorLoaded(filteredDoctors));
     } catch (e) {
-      emit(DoctorError('Failed to load doctors for department: ${e.toString()}'));
+      emit(
+        DoctorError('Failed to load doctors for department: ${e.toString()}'),
+      );
     }
   }
 
@@ -68,9 +72,11 @@ class DoctorBloc extends Bloc<DoctorEvent, DoctorState> {
     try {
       final allDoctors = await _database.getAllDoctors();
       final filteredDoctors = allDoctors
-          .where((doctor) =>
-              doctor.hospitalId == event.hospitalId &&
-              doctor.departmentId == event.departmentId)
+          .where(
+            (doctor) =>
+                doctor.hospitalId == event.hospitalId &&
+                doctor.departmentId == event.departmentId,
+          )
           .toList();
       emit(DoctorLoaded(filteredDoctors));
     } catch (e) {
@@ -78,10 +84,7 @@ class DoctorBloc extends Bloc<DoctorEvent, DoctorState> {
     }
   }
 
-  Future<void> _onAddDoctor(
-    AddDoctor event,
-    Emitter<DoctorState> emit,
-  ) async {
+  Future<void> _onAddDoctor(AddDoctor event, Emitter<DoctorState> emit) async {
     emit(DoctorLoading());
     try {
       await _database.createDoctor(

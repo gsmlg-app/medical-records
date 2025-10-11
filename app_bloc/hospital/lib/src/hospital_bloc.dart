@@ -15,7 +15,10 @@ class HospitalBloc extends Bloc<HospitalEvent, HospitalState> {
     on<DeleteHospital>(_onDeleteHospital);
   }
 
-  Future<void> _onLoadHospitals(LoadHospitals event, Emitter<HospitalState> emit) async {
+  Future<void> _onLoadHospitals(
+    LoadHospitals event,
+    Emitter<HospitalState> emit,
+  ) async {
     emit(HospitalLoading());
     try {
       final hospitals = await _database.getAllHospitals();
@@ -25,7 +28,10 @@ class HospitalBloc extends Bloc<HospitalEvent, HospitalState> {
     }
   }
 
-  Future<void> _onAddHospital(AddHospital event, Emitter<HospitalState> emit) async {
+  Future<void> _onAddHospital(
+    AddHospital event,
+    Emitter<HospitalState> emit,
+  ) async {
     emit(HospitalLoading());
     try {
       await _database.createHospital(
@@ -46,7 +52,10 @@ class HospitalBloc extends Bloc<HospitalEvent, HospitalState> {
     }
   }
 
-  Future<void> _onUpdateHospital(UpdateHospital event, Emitter<HospitalState> emit) async {
+  Future<void> _onUpdateHospital(
+    UpdateHospital event,
+    Emitter<HospitalState> emit,
+  ) async {
     emit(HospitalLoading());
     try {
       final existingHospital = await _database.getHospitalById(event.id);
@@ -76,7 +85,10 @@ class HospitalBloc extends Bloc<HospitalEvent, HospitalState> {
     }
   }
 
-  Future<void> _onDeleteHospital(DeleteHospital event, Emitter<HospitalState> emit) async {
+  Future<void> _onDeleteHospital(
+    DeleteHospital event,
+    Emitter<HospitalState> emit,
+  ) async {
     emit(HospitalLoading());
     try {
       await _database.deleteHospital(event.id);

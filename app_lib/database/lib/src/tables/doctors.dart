@@ -10,10 +10,10 @@ class Doctors extends Table {
 
   TextColumn get name => text().withLength(min: 1, max: 255)();
 
-  TextColumn get level => text().nullable()(); // e.g., "Attending Physician", "Resident"
+  TextColumn get level =>
+      text().nullable()(); // e.g., "Attending Physician", "Resident"
 
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
 
   DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
-
-  }
+}

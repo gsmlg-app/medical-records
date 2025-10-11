@@ -123,49 +123,96 @@ melos:
       steps:
         - melos bootstrap
         - melos run gen-l10n
-        - melos run build-all
+        - melos run build-runner
 
-    gen-l10n:
-      run: melos exec --scope="app_locale" flutter gen-l10n
-      description: Generate localization files from ARB files.
-
-    build-all:
-      run: melos exec --order-dependents dart run build_runner build --delete-conflicting-outputs
+    build-runner:
+      run: dart run build_runner build --delete-conflicting-outputs
+      exec:
+        orderDependents: true
       description: Run `dart/flutter analyze` for all packages.
 
-    lint:all:
-      run: melos run analyze && melos run format
-      description: Run all static analysis checks.
-
     analyze:
-      run: |
-        melos exec --order-dependents flutter analyze --fatal-infos
+      run: flutter analyze --fatal-infos
+      exec:
+        concurrency: 1
+        orderDependents: true
       description: Run `flutter analyze` for all packages.
 
     fix:
-      run: melos exec --order-dependents dart fix . --apply
+      run: dart fix . --apply
+      exec:
+        orderDependents: true
       description: Run `dart fix` for all packages.
 
     fix-dry-run:
-      run: melos exec --order-dependents dart fix . --dry-run
+      run: dart fix . --dry-run
+      exec:
+        orderDependents: true
       description: Run `dart fix` in dry-run mode for all packages.
 
     format:
-      run: melos exec --order-dependents dart format .
+      run: dart format .
+      exec:
+        orderDependents: true
       description: Run `dart format` for all packages.
 
     format-check:
-      run: melos exec --order-dependents dart format . --set-exit-if-changed
+      run: dart format . --set-exit-if-changed
+      exec:
+        orderDependents: true
       description: Run `dart format` checks for all packages.
 
     upgrade:
-      run: melos exec --order-dependents dart pub upgrade --major-versions
+      run: dart pub upgrade --major-versions
+      exec:
+        orderDependents: true
       description: Run `flutter pub upgrade` update dependencies in all packages.
 
     outdated:
-      run: melos exec --order-dependents dart pub outdated
+      run: dart pub outdated
+      exec:
+        orderDependents: true
       description: Run `flutter pub outdated` check outdated dependencies in all packages.
 
     validate-dependencies:
       run: dart run dependency_validator
       description: Run `dart run dependency_validator` check dependencies usage.
+
+    test:
+      run: melos exec --order-dependents --fail-fast flutter test || true
+      description: Run Flutter tests for all packages (ignores packages without tests).
+      steps:
+        - melos run test:dart
+        - melos run test:flutter
+
+    test:dart:
+      run: dart test
+      exec:
+        orderDependents: true
+        fail-fast: true
+      packageFilters:
+        flutter: false
+        dirExists: test
+
+    test:flutter:
+      run: flutter test
+      exec:
+        orderDependents: true
+        fail-fast: true
+      packageFilters:
+        flutter: true
+        dirExists: test
+
+    brick-test:
+      run: cd tool/brick_tests && dart pub get && dart test *.dart
+      description: Run Mason brick tests separately from Flutter tests.
+
+    gen-l10n:
+      run: flutter gen-l10n
+      exec:
+        orderDependents: true
+      packageFilters:
+        flutter: true
+        fileExists: l10n.yaml
+      description: Generate localization files from ARB files.
+

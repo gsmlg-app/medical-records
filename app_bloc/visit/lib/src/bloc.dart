@@ -28,7 +28,8 @@ class VisitBloc extends Bloc<VisitEvent, VisitState> {
     }
   }
 
-  Future<void> _onLoadVisitsByTreatment(LoadVisitsByTreatment event, Emitter<VisitState> emit) async {
+  Future<void> _onLoadVisitsByTreatment(
+      LoadVisitsByTreatment event, Emitter<VisitState> emit) async {
     _currentTreatmentId = event.treatmentId; // Remember current filter
     emit(VisitLoading());
     try {
@@ -64,7 +65,7 @@ class VisitBloc extends Bloc<VisitEvent, VisitState> {
         // Otherwise load all visits
         visits = await _database.getAllVisits();
       }
-      
+
       emit(VisitOperationSuccess('Visit added successfully'));
       emit(VisitLoaded(visits));
     } catch (e) {
@@ -72,7 +73,8 @@ class VisitBloc extends Bloc<VisitEvent, VisitState> {
     }
   }
 
-  Future<void> _onUpdateVisit(UpdateVisit event, Emitter<VisitState> emit) async {
+  Future<void> _onUpdateVisit(
+      UpdateVisit event, Emitter<VisitState> emit) async {
     emit(VisitLoading());
     try {
       final existingVisit = await _database.getVisitById(event.id);
@@ -106,7 +108,7 @@ class VisitBloc extends Bloc<VisitEvent, VisitState> {
         // Otherwise load all visits
         visits = await _database.getAllVisits();
       }
-      
+
       emit(VisitOperationSuccess('Visit updated successfully'));
       emit(VisitLoaded(visits));
     } catch (e) {
@@ -114,7 +116,8 @@ class VisitBloc extends Bloc<VisitEvent, VisitState> {
     }
   }
 
-  Future<void> _onDeleteVisit(DeleteVisit event, Emitter<VisitState> emit) async {
+  Future<void> _onDeleteVisit(
+      DeleteVisit event, Emitter<VisitState> emit) async {
     emit(VisitLoading());
     try {
       await _database.deleteVisit(event.id);
@@ -128,7 +131,7 @@ class VisitBloc extends Bloc<VisitEvent, VisitState> {
         // Otherwise load all visits
         visits = await _database.getAllVisits();
       }
-      
+
       emit(VisitOperationSuccess('Visit deleted successfully'));
       emit(VisitLoaded(visits));
     } catch (e) {

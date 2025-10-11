@@ -9,14 +9,16 @@ class Hospitals extends Table {
 
   TextColumn get address => text().nullable()();
 
-  TextColumn get type => text().nullable()(); // e.g., "General Hospital", "Specialty Hospital"
+  TextColumn get type =>
+      text().nullable()(); // e.g., "General Hospital", "Specialty Hospital"
 
-  TextColumn get level => text().nullable()(); // e.g., "Class A Grade 3", "Class B Grade 2"
+  TextColumn get level =>
+      text().nullable()(); // e.g., "Class A Grade 3", "Class B Grade 2"
 
-  TextColumn get departmentIds => text()(); // JSON encoded list of department IDs
+  TextColumn get departmentIds =>
+      text()(); // JSON encoded list of department IDs
 
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
 
   DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
-
-  }
+}

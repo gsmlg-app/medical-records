@@ -24,13 +24,14 @@ class VisitFormState extends Equatable {
 
   @override
   List<Object> get props => [
-        availableHospitals,
-        availableDepartments,
-        availableDoctors,
-      ];
+    availableHospitals,
+    availableDepartments,
+    availableDoctors,
+  ];
 
   @override
-  String toString() => 'VisitFormState('
+  String toString() =>
+      'VisitFormState('
       'availableHospitals: ${availableHospitals.length}, '
       'availableDepartments: ${availableDepartments.length}, '
       'availableDoctors: ${availableDoctors.length})';

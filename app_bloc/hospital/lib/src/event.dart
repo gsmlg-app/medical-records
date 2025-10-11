@@ -15,12 +15,7 @@ class AddHospital extends HospitalEvent {
   final String? type;
   final String? level;
 
-  const AddHospital({
-    required this.name,
-    this.address,
-    this.type,
-    this.level,
-  });
+  const AddHospital({required this.name, this.address, this.type, this.level});
 
   @override
   List<Object?> get props => [name, address, type, level];

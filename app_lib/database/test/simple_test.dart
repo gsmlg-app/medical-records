@@ -51,12 +51,14 @@ void main() {
       expect(retrievedHospital.departmentIds, equals(''));
     });
 
-    
     test('should get all departments', () async {
       // Arrange
-      await database.createDepartment(DepartmentsCompanion.insert(name: 'Cardiology'));
-      await database.createDepartment(DepartmentsCompanion.insert(name: 'Neurology'));
-      await database.createDepartment(DepartmentsCompanion.insert(name: 'Pediatrics'));
+      await database
+          .createDepartment(DepartmentsCompanion.insert(name: 'Cardiology'));
+      await database
+          .createDepartment(DepartmentsCompanion.insert(name: 'Neurology'));
+      await database
+          .createDepartment(DepartmentsCompanion.insert(name: 'Pediatrics'));
 
       // Act
       final departments = await database.getAllDepartments();

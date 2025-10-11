@@ -29,31 +29,37 @@ void main() {
         isA<TreatmentFormState>()
           ..having((s) => s.title, 'title', equals('Test Title'))
           ..having((s) => s.isTitleValid, 'isTitleValid', isTrue)
-          ..having((s) => s.isFormValid, 'isFormValid', isFalse), // Form not valid yet
+          ..having((s) => s.isFormValid, 'isFormValid',
+              isFalse), // Form not valid yet
       ],
     );
 
     blocTest<TreatmentFormBloc, TreatmentFormState>(
       'emits updated state when diagnosis is changed',
       build: () => treatmentFormBloc,
-      act: (bloc) => bloc.add(const TreatmentFormDiagnosisChanged('Test Diagnosis')),
+      act: (bloc) =>
+          bloc.add(const TreatmentFormDiagnosisChanged('Test Diagnosis')),
       expect: () => [
         isA<TreatmentFormState>()
           ..having((s) => s.diagnosis, 'diagnosis', equals('Test Diagnosis'))
           ..having((s) => s.isDiagnosisValid, 'isDiagnosisValid', isTrue)
-          ..having((s) => s.isFormValid, 'isFormValid', isFalse), // Form not valid yet
+          ..having((s) => s.isFormValid, 'isFormValid',
+              isFalse), // Form not valid yet
       ],
     );
 
     blocTest<TreatmentFormBloc, TreatmentFormState>(
       'emits updated state when start date is changed',
       build: () => treatmentFormBloc,
-      act: (bloc) => bloc.add(TreatmentFormStartDateChanged(DateTime(2023, 1, 1))),
+      act: (bloc) =>
+          bloc.add(TreatmentFormStartDateChanged(DateTime(2023, 1, 1))),
       expect: () => [
         isA<TreatmentFormState>()
-          ..having((s) => s.startDate, 'startDate', equals(DateTime(2023, 1, 1)))
+          ..having(
+              (s) => s.startDate, 'startDate', equals(DateTime(2023, 1, 1)))
           ..having((s) => s.isStartDateValid, 'isStartDateValid', isTrue)
-          ..having((s) => s.isFormValid, 'isFormValid', isFalse), // Form not valid yet
+          ..having((s) => s.isFormValid, 'isFormValid',
+              isFalse), // Form not valid yet
       ],
     );
 
@@ -75,16 +81,19 @@ void main() {
           ..having((s) => s.isDiagnosisValid, 'isDiagnosisValid', isTrue)
           ..having((s) => s.isFormValid, 'isFormValid', isFalse),
         isA<TreatmentFormState>()
-          ..having((s) => s.startDate, 'startDate', equals(DateTime(2023, 1, 1)))
+          ..having(
+              (s) => s.startDate, 'startDate', equals(DateTime(2023, 1, 1)))
           ..having((s) => s.isStartDateValid, 'isStartDateValid', isTrue)
-          ..having((s) => s.isFormValid, 'isFormValid', isTrue), // Now form is valid
+          ..having(
+              (s) => s.isFormValid, 'isFormValid', isTrue), // Now form is valid
       ],
     );
 
     blocTest<TreatmentFormBloc, TreatmentFormState>(
       'emits updated state when end date is changed',
       build: () => treatmentFormBloc,
-      act: (bloc) => bloc.add(TreatmentFormEndDateChanged(DateTime(2023, 2, 1))),
+      act: (bloc) =>
+          bloc.add(TreatmentFormEndDateChanged(DateTime(2023, 2, 1))),
       expect: () => [
         isA<TreatmentFormState>()
           ..having((s) => s.endDate, 'endDate', equals(DateTime(2023, 2, 1))),
@@ -132,8 +141,10 @@ void main() {
       expect: () => [
         isA<TreatmentFormState>()
           ..having((s) => s.title, 'title', equals('Existing Treatment'))
-          ..having((s) => s.diagnosis, 'diagnosis', equals('Existing Diagnosis'))
-          ..having((s) => s.startDate, 'startDate', equals(DateTime(2023, 1, 1)))
+          ..having(
+              (s) => s.diagnosis, 'diagnosis', equals('Existing Diagnosis'))
+          ..having(
+              (s) => s.startDate, 'startDate', equals(DateTime(2023, 1, 1)))
           ..having((s) => s.endDate, 'endDate', equals(DateTime(2023, 2, 1)))
           ..having((s) => s.isFormValid, 'isFormValid', isTrue),
       ],

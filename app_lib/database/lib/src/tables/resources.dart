@@ -10,15 +10,15 @@ class Resources extends Table {
   // Custom enum column for resource type
   TextColumn get type => text()();
 
-  TextColumn get filePath => text().withLength(min: 1, max: 500)(); // Local storage path
+  TextColumn get filePath =>
+      text().withLength(min: 1, max: 500)(); // Local storage path
 
   TextColumn get notes => text().nullable()();
 
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
 
   DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
-
-  }
+}
 
 // Custom converter for ResourceType enum
 class ResourceTypeConverter extends TypeConverter<ResourceType, String> {

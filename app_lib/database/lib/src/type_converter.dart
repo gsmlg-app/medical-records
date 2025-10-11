@@ -9,7 +9,9 @@ class IntListConverter extends TypeConverter<List<int>, String> {
   @override
   List<int> fromSql(String fromDb) {
     if (fromDb.isEmpty) return [];
-    return (json.decode(fromDb) as List).map((e) => int.parse(e.toString())).toList();
+    return (json.decode(fromDb) as List)
+        .map((e) => int.parse(e.toString()))
+        .toList();
   }
 
   @override

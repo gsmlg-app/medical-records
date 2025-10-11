@@ -35,7 +35,8 @@ class VisitForm extends StatefulWidget {
     int? departmentId,
     int? doctorId,
     String? informations,
-  }) onSave;
+  })
+  onSave;
 
   @override
   State<VisitForm> createState() => _VisitFormState();
@@ -47,14 +48,18 @@ class _VisitFormState extends State<VisitForm> {
     super.initState();
 
     // Debug: Print if visit is provided
-    print('DEBUG: VisitForm initState - widget.visit: ${widget.visit?.toJson()}');
+    print(
+      'DEBUG: VisitForm initState - widget.visit: ${widget.visit?.toJson()}',
+    );
 
     // Populate form with existing visit data after initialization
     if (widget.visit != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
           print('DEBUG: VisitForm - Populating form with visit data');
-          context.read<VisitFormBloc>().add(VisitFormEventPopulate(widget.visit!));
+          context.read<VisitFormBloc>().add(
+            VisitFormEventPopulate(widget.visit!),
+          );
         }
       });
     }
@@ -72,7 +77,9 @@ class _VisitFormState extends State<VisitForm> {
           );
         } else if (state.isFailure) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(state.failureResponse ?? 'An error occurred')),
+            SnackBar(
+              content: Text(state.failureResponse ?? 'An error occurred'),
+            ),
           );
         }
       },
@@ -119,7 +126,9 @@ class _VisitFormState extends State<VisitForm> {
                       lastDate: DateTime.now().add(const Duration(days: 365)),
                     );
                     if (selectedDate != null) {
-                      context.read<VisitFormBloc>().dateFieldBloc.updateValue(selectedDate);
+                      context.read<VisitFormBloc>().dateFieldBloc.updateValue(
+                        selectedDate,
+                      );
                     }
                   },
                 );
@@ -160,11 +169,13 @@ class _VisitFormState extends State<VisitForm> {
                     child: Text('Select Hospital'),
                   );
                 }
-                
-                final hospital = context.read<VisitFormBloc>().availableHospitals
+
+                final hospital = context
+                    .read<VisitFormBloc>()
+                    .availableHospitals
                     .where((h) => h.id == hospitalId)
                     .firstOrNull;
-                
+
                 if (hospital == null) return null;
 
                 return DropdownMenuItem(
@@ -177,9 +188,12 @@ class _VisitFormState extends State<VisitForm> {
                       if (hospital.type != null)
                         Text(
                           hospital.type!,
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: Theme.of(context).colorScheme.onSurfaceVariant,
-                          ),
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onSurfaceVariant,
+                              ),
                         ),
                     ],
                   ),
@@ -196,7 +210,9 @@ class _VisitFormState extends State<VisitForm> {
 
             // Department Selector
             DropdownFieldBlocBuilder<int?>(
-              selectFieldBloc: context.read<VisitFormBloc>().departmentFieldBloc,
+              selectFieldBloc: context
+                  .read<VisitFormBloc>()
+                  .departmentFieldBloc,
               decoration: InputDecoration(
                 labelText: 'Department',
                 border: const OutlineInputBorder(),
@@ -209,11 +225,13 @@ class _VisitFormState extends State<VisitForm> {
                     child: Text('Select Department'),
                   );
                 }
-                
-                final department = context.read<VisitFormBloc>().availableDepartments
+
+                final department = context
+                    .read<VisitFormBloc>()
+                    .availableDepartments
                     .where((d) => d.id == departmentId)
                     .firstOrNull;
-                
+
                 if (department == null) return null;
 
                 return DropdownMenuItem(
@@ -222,7 +240,10 @@ class _VisitFormState extends State<VisitForm> {
                 );
               },
               onChanged: (departmentId) {
-                final hospitalId = context.read<VisitFormBloc>().hospitalFieldBloc.value;
+                final hospitalId = context
+                    .read<VisitFormBloc>()
+                    .hospitalFieldBloc
+                    .value;
                 // Load doctors for selected hospital and department
                 context.read<VisitFormBloc>().add(
                   VisitFormEventLoadDoctorsForHospitalAndDepartment(
@@ -249,11 +270,13 @@ class _VisitFormState extends State<VisitForm> {
                     child: Text('Select Doctor'),
                   );
                 }
-                
-                final doctor = context.read<VisitFormBloc>().availableDoctors
+
+                final doctor = context
+                    .read<VisitFormBloc>()
+                    .availableDoctors
                     .where((d) => d.id == doctorId)
                     .firstOrNull;
-                
+
                 if (doctor == null) return null;
 
                 return DropdownMenuItem(
@@ -266,9 +289,12 @@ class _VisitFormState extends State<VisitForm> {
                       if (doctor.level != null)
                         Text(
                           doctor.level!,
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: Theme.of(context).colorScheme.onSurfaceVariant,
-                          ),
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onSurfaceVariant,
+                              ),
                         ),
                     ],
                   ),
@@ -279,7 +305,9 @@ class _VisitFormState extends State<VisitForm> {
 
             // Additional Information
             TextFieldBlocBuilder(
-              textFieldBloc: context.read<VisitFormBloc>().informationsFieldBloc,
+              textFieldBloc: context
+                  .read<VisitFormBloc>()
+                  .informationsFieldBloc,
               decoration: InputDecoration(
                 labelText: 'Additional Information',
                 border: const OutlineInputBorder(),

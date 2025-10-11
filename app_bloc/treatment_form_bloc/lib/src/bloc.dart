@@ -135,7 +135,9 @@ class TreatmentFormBloc extends Bloc<TreatmentFormEvent, TreatmentFormState> {
   ) {
     DateTime? newEndDate = state.endDate;
     // If end date is before start date, clear it
-    if (event.startDate != null && state.endDate != null && state.endDate!.isBefore(event.startDate!)) {
+    if (event.startDate != null &&
+        state.endDate != null &&
+        state.endDate!.isBefore(event.startDate!)) {
       newEndDate = null;
     }
 

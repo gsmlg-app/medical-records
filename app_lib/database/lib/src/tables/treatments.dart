@@ -10,10 +10,10 @@ class Treatments extends Table {
 
   DateTimeColumn get startDate => dateTime()();
 
-  DateTimeColumn get endDate => dateTime().nullable()(); // Optional, as treatment may be ongoing
+  DateTimeColumn get endDate =>
+      dateTime().nullable()(); // Optional, as treatment may be ongoing
 
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
 
   DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
-
-  }
+}

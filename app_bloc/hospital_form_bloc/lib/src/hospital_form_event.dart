@@ -13,12 +13,7 @@ class InitializeForm extends HospitalFormEvent {
   final String? type;
   final String? level;
 
-  const InitializeForm({
-    this.name,
-    this.address,
-    this.type,
-    this.level,
-  });
+  const InitializeForm({this.name, this.address, this.type, this.level});
 
   @override
   List<Object?> get props => [name, address, type, level];
