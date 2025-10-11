@@ -192,9 +192,9 @@ class _HospitalDropdown extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        // Hospital dropdown using SelectFieldBlocBuilder
+        // Hospital dropdown using DropdownFieldBlocBuilder
         Expanded(
-          child: SelectFieldBlocBuilder<int?>(
+          child: DropdownFieldBlocBuilder<int?>(
             selectFieldBloc: visitFormBloc.hospitalFieldBloc,
             decoration: InputDecoration(
               labelText: 'Hospital',
