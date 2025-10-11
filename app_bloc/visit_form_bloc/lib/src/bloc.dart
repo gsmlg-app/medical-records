@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:app_database/app_database.dart';
+import 'package:app_logging/app_logging.dart';
 import 'package:drift/drift.dart' show Value;
 import 'package:equatable/equatable.dart';
 import 'package:form_bloc/form_bloc.dart';
@@ -36,7 +37,7 @@ class VisitFormBloc extends FormBloc<String, String> {
   /// Optional parameter to select the most recently added hospital
   Future<void> refreshHospitals({bool selectNewest = false}) async {
     try {
-      print('DEBUG: Refreshing hospitals list, selectNewest: $selectNewest');
+      AppLogger().d('Refreshing hospitals list, selectNewest: $selectNewest');
 
       // Store current hospital count to identify new hospital
       final previousCount = availableHospitals.length;
@@ -60,11 +61,11 @@ class VisitFormBloc extends FormBloc<String, String> {
           ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
         final newestHospital = sortedHospitals.first;
 
-        print('DEBUG: Selecting newly added hospital: ${newestHospital.name}');
+        AppLogger().d('Selecting newly added hospital: ${newestHospital.name}');
         hospitalFieldBloc.updateValue(newestHospital.id);
       }
 
-      print('DEBUG: Refreshed hospitals with ${availableHospitals.length} items');
+      AppLogger().d('Refreshed hospitals with ${availableHospitals.length} items');
 
       // Update department options since hospital list changed
       _updateDepartmentOptions();
@@ -76,7 +77,7 @@ class VisitFormBloc extends FormBloc<String, String> {
       hospitalFieldBloc.updateValue(currentValue);
 
     } catch (e) {
-      print('DEBUG: Failed to refresh hospitals: $e');
+      AppLogger().e('Failed to refresh hospitals: $e');
     }
   }
 
@@ -85,7 +86,7 @@ class VisitFormBloc extends FormBloc<String, String> {
     try {
       final hospitalId = hospitalFieldBloc.value;
       if (hospitalId == null) {
-        print('DEBUG: Cannot add department - no hospital selected');
+        AppLogger().w('Cannot add department - no hospital selected');
         return false;
       }
 
@@ -94,7 +95,7 @@ class VisitFormBloc extends FormBloc<String, String> {
         DepartmentsCompanion(name: Value(name), category: Value(category)),
       );
 
-      print('DEBUG: Created new department with ID: $departmentId');
+      AppLogger().d('Created new department with ID: $departmentId');
 
       // Get current hospital to update its departmentIds
       final hospitals = await _database.getAllHospitals();
@@ -109,7 +110,7 @@ class VisitFormBloc extends FormBloc<String, String> {
               .toList();
           currentIds.addAll(ids);
         } catch (e) {
-          print('DEBUG: Error parsing existing departmentIds: $e');
+          AppLogger().e('Error parsing existing departmentIds: $e');
         }
       }
 
@@ -121,7 +122,7 @@ class VisitFormBloc extends FormBloc<String, String> {
         hospital.copyWith(departmentIds: json.encode(currentIds)),
       );
 
-      print('DEBUG: Updated hospital with new department ID');
+      AppLogger().d('Updated hospital with new department ID');
 
       // Refresh the available departments list
       availableDepartments = await _database.getAllDepartments();
@@ -137,7 +138,7 @@ class VisitFormBloc extends FormBloc<String, String> {
 
       return true;
     } catch (e) {
-      print('DEBUG: Failed to add department: $e');
+      AppLogger().e('Failed to add department: $e');
       return false;
     }
   }
@@ -149,8 +150,8 @@ class VisitFormBloc extends FormBloc<String, String> {
   VisitFormBloc(this._database, {this.visitToEdit, VisitBloc? visitBloc})
     : _visitBloc = visitBloc,
       super(isLoading: true) {
-    print(
-      'DEBUG: VisitFormBloc constructor called with visitToEdit: ${visitToEdit?.id}',
+    AppLogger().d(
+      'VisitFormBloc constructor called with visitToEdit: ${visitToEdit?.id}',
     );
     // Add field blocs
     addFieldBloc(fieldBloc: categoryFieldBloc);
@@ -159,7 +160,7 @@ class VisitFormBloc extends FormBloc<String, String> {
     addFieldBloc(fieldBloc: hospitalFieldBloc);
     addFieldBloc(fieldBloc: departmentFieldBloc);
     addFieldBloc(fieldBloc: doctorFieldBloc);
-    print('DEBUG: VisitFormBloc constructor completed');
+    AppLogger().d('VisitFormBloc constructor completed');
   }
 
   /// Visit Category field bloc
@@ -208,7 +209,7 @@ class VisitFormBloc extends FormBloc<String, String> {
   @override
   void onLoading() async {
     try {
-      print('DEBUG: VisitFormBloc onLoading() started');
+      AppLogger().d('VisitFormBloc onLoading() started');
 
       // Load all data in parallel
       final hospitalsFuture = _database.getAllHospitals();
@@ -225,16 +226,16 @@ class VisitFormBloc extends FormBloc<String, String> {
       availableDepartments = results[1] as List<Department>;
       availableDoctors = results[2] as List<Doctor>;
 
-      print(
-        'DEBUG: Loaded ${availableHospitals.length} hospitals, ${availableDepartments.length} departments, ${availableDoctors.length} doctors',
+      AppLogger().d(
+        'Loaded ${availableHospitals.length} hospitals, ${availableDepartments.length} departments, ${availableDoctors.length} doctors',
       );
 
       // Prepare items - always include null as first option
       final hospitalItems = [null, ...availableHospitals.map((h) => h.id)];
       final doctorItems = [null, ...availableDoctors.map((d) => d.id)];
 
-      print(
-        'DEBUG: Prepared items - hospitals: ${hospitalItems.length}, doctors: ${doctorItems.length}',
+      AppLogger().d(
+        'Prepared items - hospitals: ${hospitalItems.length}, doctors: ${doctorItems.length}',
       );
 
       // CRITICAL: Update items FIRST, then ensure values are valid
@@ -262,7 +263,7 @@ class VisitFormBloc extends FormBloc<String, String> {
         doctorFieldBloc.updateValue(null);
       }
 
-      print('DEBUG: Updated all field items and ensured valid values');
+      AppLogger().d('Updated all field items and ensured valid values');
 
       // Now that items are loaded, populate form with existing visit data if provided
       if (visitToEdit != null) {
@@ -283,7 +284,7 @@ class VisitFormBloc extends FormBloc<String, String> {
       } else {
         // For add visits, DON'T set up dependencies here
         // They will be set up manually from the UI after a longer delay
-        print('DEBUG: Skipping automatic field dependency setup for Add Visit');
+        AppLogger().d('Skipping automatic field dependency setup for Add Visit');
       }
     } catch (e) {
       emitFailure(failureResponse: 'Failed to load form data: ${e.toString()}');
@@ -400,7 +401,7 @@ class VisitFormBloc extends FormBloc<String, String> {
   }
 
   void _setupFieldDependencies() {
-    print('DEBUG: Setting up field dependencies');
+    AppLogger().d('Setting up field dependencies');
 
     // Cancel any existing subscriptions to avoid duplicates
     _hospitalSubscription?.cancel();
@@ -408,8 +409,8 @@ class VisitFormBloc extends FormBloc<String, String> {
 
     // Listen to hospital field changes with a delay to avoid immediate updates
     _hospitalSubscription = hospitalFieldBloc.stream.listen((_) {
-      print(
-        'DEBUG: Hospital field changed - clearing department and doctor, updating options',
+      AppLogger().d(
+        'Hospital field changed - clearing department and doctor, updating options',
       );
 
       // Use a microtask to delay the updates and avoid dropdown assertion errors
@@ -428,8 +429,8 @@ class VisitFormBloc extends FormBloc<String, String> {
 
     // Listen to department field changes with a delay to avoid immediate updates
     _departmentSubscription = departmentFieldBloc.stream.listen((_) {
-      print(
-        'DEBUG: Department field changed - clearing doctor, updating options',
+      AppLogger().d(
+        'Department field changed - clearing doctor, updating options',
       );
 
       // Use a microtask to delay the updates and avoid dropdown assertion errors
@@ -445,8 +446,8 @@ class VisitFormBloc extends FormBloc<String, String> {
 
   /// Sets up field dependencies for Add Visit forms without immediate triggers
   void _setupFieldDependenciesForAdd() {
-    print(
-      'DEBUG: Setting up field dependencies for Add Visit (no immediate triggers)',
+    AppLogger().d(
+      'Setting up field dependencies for Add Visit (no immediate triggers)',
     );
 
     // Cancel any existing subscriptions to avoid duplicates
@@ -463,12 +464,12 @@ class VisitFormBloc extends FormBloc<String, String> {
     // Listen to hospital field changes, but skip the initial value
     _hospitalSubscription = hospitalFieldBloc.stream.listen((value) {
       if (value == initialHospitalValue) {
-        print('DEBUG: Skipping initial hospital field value: $value');
+        AppLogger().d('Skipping initial hospital field value: $value');
         return;
       }
 
-      print(
-        'DEBUG: Hospital field changed from $initialHospitalValue to $value - clearing department and doctor, updating options',
+      AppLogger().d(
+        'Hospital field changed from $initialHospitalValue to $value - clearing department and doctor, updating options',
       );
 
       // Use a microtask to delay the updates and avoid dropdown assertion errors
@@ -488,12 +489,12 @@ class VisitFormBloc extends FormBloc<String, String> {
     // Listen to department field changes, but skip the initial value
     _departmentSubscription = departmentFieldBloc.stream.listen((value) {
       if (value == initialDepartmentValue) {
-        print('DEBUG: Skipping initial department field value: $value');
+        AppLogger().d('Skipping initial department field value: $value');
         return;
       }
 
-      print(
-        'DEBUG: Department field changed from $initialDepartmentValue to $value - clearing doctor, updating options',
+      AppLogger().d(
+        'Department field changed from $initialDepartmentValue to $value - clearing doctor, updating options',
       );
 
       // Use a microtask to delay the updates and avoid dropdown assertion errors
@@ -510,20 +511,20 @@ class VisitFormBloc extends FormBloc<String, String> {
   /// Called when hospital field changes
   void _onHospitalChanged() {
     final hospitalId = hospitalFieldBloc.value;
-    print('DEBUG: Hospital changed to: $hospitalId');
+    AppLogger().d('Hospital changed to: $hospitalId');
 
     // 1. Clear department value (always clear when hospital changes)
-    print('DEBUG: Clearing department selection due to hospital change');
+    AppLogger().d('Clearing department selection due to hospital change');
     departmentFieldBloc.updateValue(null);
 
     // 2. Clear doctor value (always clear when hospital changes)
-    print('DEBUG: Clearing doctor selection due to hospital change');
+    AppLogger().d('Clearing doctor selection due to hospital change');
     doctorFieldBloc.updateValue(null);
 
     // 3. Update department options (departments are not filtered by hospital)
     final departmentItems = [null, ...availableDepartments.map((d) => d.id)];
-    print(
-      'DEBUG: Updating department options with ${departmentItems.length} items',
+    AppLogger().d(
+      'Updating department options with ${departmentItems.length} items',
     );
     departmentFieldBloc.updateItems(departmentItems);
 
@@ -534,10 +535,10 @@ class VisitFormBloc extends FormBloc<String, String> {
   /// Called when department field changes
   void _onDepartmentChanged() {
     final departmentId = departmentFieldBloc.value;
-    print('DEBUG: Department changed to: $departmentId');
+    AppLogger().d('Department changed to: $departmentId');
 
     // 1. Clear doctor value (always clear when department changes)
-    print('DEBUG: Clearing doctor selection due to department change');
+    AppLogger().d('Clearing doctor selection due to department change');
     doctorFieldBloc.updateValue(null);
 
     // 2. Update doctor options based on current hospital and new department
@@ -549,8 +550,8 @@ class VisitFormBloc extends FormBloc<String, String> {
     final hospitalId = hospitalFieldBloc.value;
     final departmentId = departmentFieldBloc.value;
 
-    print(
-      'DEBUG: Updating doctor options with hospitalId: $hospitalId, departmentId: $departmentId',
+    AppLogger().d(
+      'Updating doctor options with hospitalId: $hospitalId, departmentId: $departmentId',
     );
 
     List<Doctor> filteredDoctors = availableDoctors;
@@ -560,8 +561,8 @@ class VisitFormBloc extends FormBloc<String, String> {
       filteredDoctors = filteredDoctors
           .where((d) => d.hospitalId == hospitalId)
           .toList();
-      print(
-        'DEBUG: Filtered doctors by hospital: ${filteredDoctors.length} remaining',
+      AppLogger().d(
+        'Filtered doctors by hospital: ${filteredDoctors.length} remaining',
       );
     }
 
@@ -570,14 +571,14 @@ class VisitFormBloc extends FormBloc<String, String> {
       filteredDoctors = filteredDoctors
           .where((d) => d.departmentId == departmentId)
           .toList();
-      print(
-        'DEBUG: Filtered doctors by department: ${filteredDoctors.length} remaining',
+      AppLogger().d(
+        'Filtered doctors by department: ${filteredDoctors.length} remaining',
       );
     }
 
     final doctorItems = [null, ...filteredDoctors.map((d) => d.id)];
-    print(
-      'DEBUG: Updating doctor field with ${doctorItems.length} items, current doctor value: ${doctorFieldBloc.value}',
+    AppLogger().d(
+      'Updating doctor field with ${doctorItems.length} items, current doctor value: ${doctorFieldBloc.value}',
     );
 
     // Update doctor items (value is already cleared by calling methods)
@@ -588,7 +589,7 @@ class VisitFormBloc extends FormBloc<String, String> {
   void _updateDepartmentOptions() {
     final hospitalId = hospitalFieldBloc.value;
 
-    print('DEBUG: Updating department options with hospitalId: $hospitalId');
+    AppLogger().d('Updating department options with hospitalId: $hospitalId');
 
     List<Department> filteredDepartments = availableDepartments;
 
@@ -608,24 +609,24 @@ class VisitFormBloc extends FormBloc<String, String> {
           filteredDepartments = availableDepartments
               .where((d) => departmentIds.contains(d.id))
               .toList();
-          print(
-            'DEBUG: Filtered departments by hospital: ${filteredDepartments.length} remaining',
+          AppLogger().d(
+            'Filtered departments by hospital: ${filteredDepartments.length} remaining',
           );
         } catch (e) {
-          print('DEBUG: Error parsing hospital departmentIds: $e');
+          AppLogger().e('Error parsing hospital departmentIds: $e');
           // If parsing fails, show no departments
           filteredDepartments = [];
         }
       } else {
         // Hospital has no departments
         filteredDepartments = [];
-        print('DEBUG: Hospital has no departments assigned');
+        AppLogger().d('Hospital has no departments assigned');
       }
     }
 
     final departmentItems = [null, ...filteredDepartments.map((d) => d.id)];
-    print(
-      'DEBUG: Updating department field with ${departmentItems.length} items, current department value: ${departmentFieldBloc.value}',
+    AppLogger().d(
+      'Updating department field with ${departmentItems.length} items, current department value: ${departmentFieldBloc.value}',
     );
 
     // Update department items (value is already cleared by calling methods)
@@ -638,8 +639,8 @@ class VisitFormBloc extends FormBloc<String, String> {
 
     final visit = visitToEdit!;
 
-    print(
-      'DEBUG: Populating form with visit data - hospitalId: ${visit.hospitalId}, departmentId: ${visit.departmentId}, doctorId: ${visit.doctorId}',
+    AppLogger().d(
+      'Populating form with visit data - hospitalId: ${visit.hospitalId}, departmentId: ${visit.departmentId}, doctorId: ${visit.doctorId}',
     );
 
     // Update field blocs with visit data (non-cascading fields first)
@@ -679,8 +680,8 @@ class VisitFormBloc extends FormBloc<String, String> {
               if (filteredDoctors.any((d) => d.id == visit.doctorId)) {
                 doctorFieldBloc.updateValue(visit.doctorId);
               } else {
-                print(
-                  'DEBUG: Doctor ${visit.doctorId} is not valid for current filters, setting to null',
+                AppLogger().w(
+                  'Doctor ${visit.doctorId} is not valid for current filters, setting to null',
                 );
                 doctorFieldBloc.updateValue(null);
               }
@@ -689,8 +690,8 @@ class VisitFormBloc extends FormBloc<String, String> {
         }
       });
     } else {
-      print(
-        'DEBUG: Hospital ${visit.hospitalId} not found in available hospitals',
+      AppLogger().w(
+        'Hospital ${visit.hospitalId} not found in available hospitals',
       );
     }
   }
@@ -714,7 +715,7 @@ class VisitFormBloc extends FormBloc<String, String> {
   /// Public method to set up field dependencies after UI is stable
   /// Call this method for Add Visit forms after the UI is rendered
   void setupFieldDependencies() {
-    print('DEBUG: Manually setting up field dependencies');
+    AppLogger().d('Manually setting up field dependencies');
     if (visitToEdit != null) {
       _setupFieldDependencies();
     } else {

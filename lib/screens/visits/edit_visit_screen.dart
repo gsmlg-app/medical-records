@@ -1,6 +1,7 @@
 import 'package:app_adaptive_widgets/app_adaptive_widgets.dart';
 import 'package:app_database/app_database.dart';
 import 'package:app_locale/app_locale.dart';
+import 'package:app_logging/app_logging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:form_bloc/form_bloc.dart';
@@ -71,7 +72,7 @@ class _EditVisitViewState extends State<_EditVisitView> {
         );
       } catch (e) {
         // Create a dummy visit for testing if none exists
-        print('DEBUG: No visit found with ID $_visitId, creating test visit');
+        AppLogger().w('No visit found with ID $_visitId, creating test visit');
         _visit = Visit(
           id: _visitId!,
           treatmentId: 1,
@@ -88,7 +89,7 @@ class _EditVisitViewState extends State<_EditVisitView> {
       }
 
       // Debug: Print visit data
-      print('DEBUG: Loaded visit for editing: ${_visit?.toJson()}');
+      AppLogger().d('Loaded visit for editing: ${_visit?.toJson()}');
 
       // Populate the form with visit data after it's loaded
       if (_visit != null) {

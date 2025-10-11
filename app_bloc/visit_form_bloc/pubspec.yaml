@@ -15,6 +15,8 @@ dependencies:
   equatable: ^2.0.5
   form_bloc:
     path: ../../third_party/form_bloc
+  app_logging:
+    path: ../../app_lib/logging
   app_database:
     path: ../../app_lib/database
 

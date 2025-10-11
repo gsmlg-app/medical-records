@@ -16,6 +16,8 @@ dependencies:
     path: ../../third_party/flutter_form_bloc
   app_locale:
     path: ../../app_lib/locale
+  app_logging:
+    path: ../../app_lib/logging
   app_database:
     path: ../../app_lib/database
   visit_form_bloc:

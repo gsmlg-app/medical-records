@@ -70,7 +70,7 @@ void main(List<String> args) async {
           BlocProvider(create: (context) => DepartmentBloc(database)),
           BlocProvider(create: (context) => DoctorBloc(database)),
           BlocProvider(create: (context) {
-            print('DEBUG: Creating VisitFormBloc with database: $database');
+            AppLogger().d('Creating VisitFormBloc with database: $database');
             return VisitFormBloc(database);
           }),
         ],

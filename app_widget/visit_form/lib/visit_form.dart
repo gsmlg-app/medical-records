@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:app_database/app_database.dart';
 import 'package:app_locale/app_locale.dart';
+import 'package:app_logging/app_logging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_form_bloc/flutter_form_bloc.dart';
@@ -297,9 +298,9 @@ class _HospitalDropdown extends StatelessWidget {
                   // Refresh the hospital list to include the newly added hospital
                   // and automatically select the newly created hospital
                   final visitFormBloc = context.read<VisitFormBloc>();
-                  print('DEBUG: About to refresh hospitals...');
+                  AppLogger().d('About to refresh hospitals...');
                   await visitFormBloc.refreshHospitals(selectNewest: true);
-                  print('DEBUG: Hospital refresh completed');
+                  AppLogger().d('Hospital refresh completed');
                 } else if (state is HospitalError) {
                   // Notify form bloc of failure
                   context.read<HospitalFormBloc>().handleSubmissionFailure(state.message);

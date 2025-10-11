@@ -1,5 +1,6 @@
 import 'package:app_database/app_database.dart';
 import 'package:app_locale/app_locale.dart';
+import 'package:app_logging/app_logging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_bloc/flutter_form_bloc.dart';
 import 'package:visit_form_bloc/visit_form_bloc.dart';
@@ -47,16 +48,16 @@ class _VisitFormState extends State<VisitForm> {
   void initState() {
     super.initState();
 
-    // Debug: Print if visit is provided
-    print(
-      'DEBUG: VisitForm initState - widget.visit: ${widget.visit?.toJson()}',
+    // Debug: Log if visit is provided
+    AppLogger().d(
+      'VisitForm initState - widget.visit: ${widget.visit?.toJson()}',
     );
 
     // Populate form with existing visit data after initialization
     if (widget.visit != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
-          print('DEBUG: VisitForm - Populating form with visit data');
+          AppLogger().d('VisitForm - Populating form with visit data');
           context.read<VisitFormBloc>().add(
             VisitFormEventPopulate(widget.visit!),
           );
@@ -67,7 +68,7 @@ class _VisitFormState extends State<VisitForm> {
 
   @override
   Widget build(BuildContext context) {
-    print('DEBUG: VisitForm build() called');
+    AppLogger().d('VisitForm build() called');
     return BlocListener<VisitFormBloc, FormBlocState<String, String>>(
       listener: (context, state) {
         // Handle submission success/failure

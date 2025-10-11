@@ -1,6 +1,7 @@
 import 'package:app_adaptive_widgets/app_adaptive_widgets.dart';
 import 'package:app_database/app_database.dart';
 import 'package:app_locale/app_locale.dart';
+import 'package:app_logging/app_logging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:form_bloc/form_bloc.dart';
@@ -54,7 +55,7 @@ class _AddVisitViewState extends State<_AddVisitView> {
       
       Future.delayed(const Duration(milliseconds: 1000), () {
         if (mounted) {
-          print('DEBUG: Setting up field dependencies after UI is stable');
+          AppLogger().d('Setting up field dependencies after UI is stable');
           _visitFormBloc.setupFieldDependencies();
         }
       });
