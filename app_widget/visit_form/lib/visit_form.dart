@@ -193,8 +193,10 @@ class _HospitalDropdown extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<VisitFormBloc, FormBlocState<String, String>>(
       builder: (context, state) {
+        // Force rebuild when state changes
+        AppLogger().d('Building hospital dropdown with ${visitFormBloc.availableHospitals.length} hospitals');
         return DropdownButtonFormField<int?>(
-          key: ValueKey('hospital_dropdown_${visitFormBloc.availableHospitals.length}'),
+          key: ValueKey('hospital_dropdown_${visitFormBloc.hospitalListKey}_${visitFormBloc.availableHospitals.map((h) => h.id).join('_')}'),
           value: visitFormBloc.hospitalFieldBloc.value,
           decoration: InputDecoration(
             labelText: 'Hospital',
@@ -299,8 +301,10 @@ class _HospitalDropdown extends StatelessWidget {
                   // and automatically select the newly created hospital
                   final visitFormBloc = context.read<VisitFormBloc>();
                   AppLogger().d('About to refresh hospitals...');
+                  AppLogger().d('Current hospital count: ${visitFormBloc.availableHospitals.length}');
                   await visitFormBloc.refreshHospitals(selectNewest: true);
                   AppLogger().d('Hospital refresh completed');
+                  AppLogger().d('New hospital count: ${visitFormBloc.availableHospitals.length}');
                 } else if (state is HospitalError) {
                   // Notify form bloc of failure
                   context.read<HospitalFormBloc>().handleSubmissionFailure(state.message);
