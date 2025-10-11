@@ -196,7 +196,7 @@ class _HospitalDropdown extends StatelessWidget {
         // Force rebuild when state changes
         AppLogger().d('Building hospital dropdown with ${visitFormBloc.availableHospitals.length} hospitals');
         return DropdownButtonFormField<int?>(
-          key: ValueKey('hospital_dropdown_${visitFormBloc.hospitalListKey}_${visitFormBloc.availableHospitals.map((h) => h.id).join('_')}'),
+          key: ValueKey('hospital_dropdown_${visitFormBloc.availableHospitals.length}'),
           value: visitFormBloc.hospitalFieldBloc.value,
           decoration: InputDecoration(
             labelText: 'Hospital',

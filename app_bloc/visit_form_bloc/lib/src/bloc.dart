@@ -24,12 +24,6 @@ class VisitFormBloc extends FormBloc<String, String> {
   /// Available hospitals for selection
   List<Hospital> availableHospitals = [];
 
-  /// Hospital list key for forcing widget rebuilds
-  int _hospitalListKey = 0;
-
-  /// Get hospital list key for widget rebuilding
-  int get hospitalListKey => _hospitalListKey;
-
   /// Available departments for selection
   List<Department> availableDepartments = [];
 
@@ -51,11 +45,9 @@ class VisitFormBloc extends FormBloc<String, String> {
       // Reload hospitals from database
       availableHospitals = await _database.getAllHospitals();
 
-      // Increment the hospital list key to force widget rebuild
-      _hospitalListKey++;
-
-      // Update hospital field items
+      // Update hospital field items - this is the key fix!
       final hospitalItems = [null, ...availableHospitals.map((h) => h.id)];
+      AppLogger().d('Updating hospital field items with ${hospitalItems.length} options');
       hospitalFieldBloc.updateItems(hospitalItems);
 
       // Ensure current value is still valid (null is always in items)
@@ -78,15 +70,6 @@ class VisitFormBloc extends FormBloc<String, String> {
 
       // Update department options since hospital list changed
       _updateDepartmentOptions();
-
-      // Force a state change to trigger UI rebuild
-      // Add a small delay to ensure all field updates are processed
-      await Future.delayed(const Duration(milliseconds: 50));
-
-      // Emit a updating fields state first, then loaded to force rebuild
-      emitUpdatingFields();
-      await Future.delayed(const Duration(milliseconds: 50));
-      emitLoaded();
 
     } catch (e) {
       AppLogger().e('Failed to refresh hospitals: $e');
