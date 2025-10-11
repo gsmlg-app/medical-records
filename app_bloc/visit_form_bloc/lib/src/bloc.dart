@@ -32,6 +32,54 @@ class VisitFormBloc extends FormBloc<String, String> {
   /// Visit to populate for editing
   Visit? visitToEdit;
 
+  /// Refresh hospitals list from database and update dropdown options
+  /// Optional parameter to select the most recently added hospital
+  Future<void> refreshHospitals({bool selectNewest = false}) async {
+    try {
+      print('DEBUG: Refreshing hospitals list, selectNewest: $selectNewest');
+
+      // Store current hospital count to identify new hospital
+      final previousCount = availableHospitals.length;
+
+      // Reload hospitals from database
+      availableHospitals = await _database.getAllHospitals();
+
+      // Update hospital field items
+      final hospitalItems = [null, ...availableHospitals.map((h) => h.id)];
+      hospitalFieldBloc.updateItems(hospitalItems);
+
+      // Ensure current value is still valid (null is always in items)
+      if (!hospitalItems.contains(hospitalFieldBloc.value)) {
+        hospitalFieldBloc.updateValue(null);
+      }
+
+      // If requested and a new hospital was added, select the most recent one
+      if (selectNewest && availableHospitals.length > previousCount) {
+        // Sort by creation date (or assume the last one is the newest)
+        final sortedHospitals = List<Hospital>.from(availableHospitals)
+          ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+        final newestHospital = sortedHospitals.first;
+
+        print('DEBUG: Selecting newly added hospital: ${newestHospital.name}');
+        hospitalFieldBloc.updateValue(newestHospital.id);
+      }
+
+      print('DEBUG: Refreshed hospitals with ${availableHospitals.length} items');
+
+      // Update department options since hospital list changed
+      _updateDepartmentOptions();
+
+      // Manually trigger a rebuild by updating a field value briefly
+      final currentValue = hospitalFieldBloc.value;
+      hospitalFieldBloc.updateValue(null);
+      await Future.delayed(const Duration(milliseconds: 10));
+      hospitalFieldBloc.updateValue(currentValue);
+
+    } catch (e) {
+      print('DEBUG: Failed to refresh hospitals: $e');
+    }
+  }
+
   /// Quick add a new department for the selected hospital
   Future<bool> quickAddDepartment(String name, {String? category}) async {
     try {

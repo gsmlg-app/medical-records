@@ -20,6 +20,12 @@ dependencies:
     path: ../../app_lib/database
   visit_form_bloc:
     path: ../../app_bloc/visit_form_bloc
+  hospital_bloc:
+    path: ../../app_bloc/hospital
+  hospital_form_bloc:
+    path: ../../app_bloc/hospital_form_bloc
+  hospital_form:
+    path: ../../app_widget/hospital_form
 
 dev_dependencies:
   flutter_test:

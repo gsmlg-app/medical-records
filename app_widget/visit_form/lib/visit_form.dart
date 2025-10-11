@@ -3,9 +3,12 @@ import 'dart:convert';
 import 'package:app_database/app_database.dart';
 import 'package:app_locale/app_locale.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_form_bloc/flutter_form_bloc.dart';
 import 'package:visit_form_bloc/visit_form_bloc.dart';
-import 'package:department_bloc/department_bloc.dart';
+import 'package:hospital_bloc/hospital_bloc.dart';
+import 'package:hospital_form_bloc/hospital_form_bloc.dart';
+import 'package:hospital_form/hospital_form.dart';
 import 'safe_dropdown_field_bloc_builder.dart';
 
 /// {@template visit_form}
@@ -117,28 +120,8 @@ class _VisitFormState extends State<VisitForm> {
                   const SizedBox(height: 16),
 
                   // Use safe dropdown builders that handle initialization properly
-                  // Hospital
-                  SafeDropdownFieldBlocBuilder<int?>(
-                    selectFieldBloc: visitFormBloc.hospitalFieldBloc,
-                    decoration: InputDecoration(
-                      labelText: 'Hospital',
-                      hintText: 'Select a hospital',
-                    ),
-                    itemBuilder: (context, value) {
-                      if (value == null) {
-                        return Text(
-                          'None',
-                          style: TextStyle(color: Colors.grey[600]),
-                        );
-                      }
-                      final hospitals = visitFormBloc.availableHospitals;
-                      final hospital = hospitals.cast<Hospital?>().firstWhere(
-                        (h) => h?.id == value,
-                        orElse: () => null,
-                      );
-                      return Text(hospital?.name ?? 'Unknown');
-                    },
-                  ),
+                  // Hospital with quick add
+                  _HospitalDropdown(visitFormBloc: visitFormBloc),
                   const SizedBox(height: 16),
 
                   // Department with quick add
@@ -196,6 +179,161 @@ class _VisitFormState extends State<VisitForm> {
       default:
         return category.toString();
     }
+  }
+}
+
+/// Custom hospital dropdown with quick add functionality
+class _HospitalDropdown extends StatelessWidget {
+  const _HospitalDropdown({required this.visitFormBloc});
+
+  final VisitFormBloc visitFormBloc;
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<VisitFormBloc, FormBlocState<String, String>>(
+      builder: (context, state) {
+        return DropdownButtonFormField<int?>(
+          key: ValueKey('hospital_dropdown_${visitFormBloc.availableHospitals.length}'),
+          value: visitFormBloc.hospitalFieldBloc.value,
+          decoration: InputDecoration(
+            labelText: 'Hospital',
+            hintText: 'Select a hospital or add new',
+            border: const OutlineInputBorder(),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 12,
+            ),
+            suffixIcon: IconButton(
+              icon: const Icon(Icons.add),
+              onPressed: () => _showAddHospitalDialog(context),
+              tooltip: 'Add Hospital',
+            ),
+          ),
+          items: [
+            const DropdownMenuItem<int?>(
+              value: null,
+              child: Text('None', style: TextStyle(color: Colors.grey)),
+            ),
+            ...visitFormBloc.availableHospitals.map((hospital) {
+              return DropdownMenuItem<int?>(
+                value: hospital.id,
+                child: Text(hospital.name),
+              );
+            }),
+            const DropdownMenuItem<int?>(
+              value: -1, // Special value for "Add Hospital"
+              child: Row(
+                children: [
+                  Icon(Icons.add, size: 16, color: Colors.blue),
+                  SizedBox(width: 8),
+                  Text(
+                    'Add Hospital',
+                    style: TextStyle(color: Colors.blue),
+                  ),
+                ],
+              ),
+            ),
+          ],
+          onChanged: (value) {
+            if (value == -1) {
+              // "Add Hospital" selected
+              _showAddHospitalDialog(context);
+            } else {
+              visitFormBloc.hospitalFieldBloc.updateValue(value);
+            }
+          },
+        );
+      },
+    );
+  }
+
+  void _showAddHospitalDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => MultiBlocProvider(
+        providers: [
+          BlocProvider(
+            create: (context) => HospitalFormBloc(),
+          ),
+          BlocProvider.value(
+            value: context.read<HospitalBloc>(),
+          ),
+        ],
+        child: MultiBlocListener(
+          listeners: [
+            BlocListener<HospitalFormBloc, HospitalFormState>(
+              listener: (context, formState) {
+                if (formState is HospitalFormSubmissionInProgress) {
+                  // Extract form data and trigger hospital save
+                  final formData = context.read<HospitalFormBloc>().formData;
+                  context.read<HospitalBloc>().add(
+                    AddHospital(
+                      name: formData['name']!,
+                      address: formData['address'],
+                      type: formData['type'],
+                      level: formData['level'],
+                    ),
+                  );
+                }
+              },
+            ),
+            BlocListener<HospitalBloc, HospitalState>(
+              listener: (context, state) async {
+                if (state is HospitalOperationSuccess) {
+                  // Notify form bloc of success
+                  context.read<HospitalFormBloc>().handleSubmissionSuccess();
+
+                  // Close the dialog
+                  Navigator.of(context).pop();
+
+                  // Show success message
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text(state.message)),
+                  );
+
+                  // Add a small delay to ensure database write is completed
+                  await Future.delayed(const Duration(milliseconds: 100));
+
+                  // Refresh the hospital list to include the newly added hospital
+                  // and automatically select the newly created hospital
+                  final visitFormBloc = context.read<VisitFormBloc>();
+                  print('DEBUG: About to refresh hospitals...');
+                  await visitFormBloc.refreshHospitals(selectNewest: true);
+                  print('DEBUG: Hospital refresh completed');
+                } else if (state is HospitalError) {
+                  // Notify form bloc of failure
+                  context.read<HospitalFormBloc>().handleSubmissionFailure(state.message);
+
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(state.message),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                }
+              },
+            ),
+          ],
+          child: AlertDialog(
+            title: const Text('Add Hospital'),
+            content: SizedBox(
+              width: double.maxFinite,
+              child: SingleChildScrollView(
+                child: HospitalFormWidget(
+                  isEditMode: false,
+                  onSave: () {
+                    // Save is triggered by the BlocListener above
+                  },
+                  onCancel: () {
+                    Navigator.of(context).pop();
+                  },
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }
 
