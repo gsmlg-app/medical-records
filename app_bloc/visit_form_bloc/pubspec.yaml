@@ -13,6 +13,8 @@ dependencies:
     sdk: flutter
   bloc: ^9.0.0
   equatable: ^2.0.5
+  form_bloc:
+    path: ../../third_party/form_bloc
   app_database:
     path: ../../app_lib/database
 

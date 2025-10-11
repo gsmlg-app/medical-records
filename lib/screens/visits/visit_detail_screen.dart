@@ -19,31 +19,127 @@ class VisitDetailScreen extends StatefulWidget {
 
 class _VisitDetailScreenState extends State<VisitDetailScreen> {
   Visit? _visit;
+  int? _visitId;
+  Hospital? _hospital;
+  Department? _department;
+  Doctor? _doctor;
+  bool _isLoading = false;
 
   @override
   void initState() {
     super.initState();
-    _loadVisit();
   }
 
-  void _loadVisit() {
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_visitId == null) {
+      // Extract visitId from route parameters
+      _visitId = int.tryParse(GoRouterState.of(context).uri.pathSegments.last) ?? 0;
+      
+      // Ensure VisitBloc has all visits loaded (not filtered)
+      context.read<VisitBloc>().add(LoadVisits());
+      
+      _loadVisit();
+    }
+  }
+
+  void _loadVisit() async {
+    if (_visitId == null) return;
+    
     final state = context.read<VisitBloc>().state;
     if (state is VisitLoaded) {
-      // Extract visitId from route parameters
-      final visitId = int.tryParse(GoRouterState.of(context).uri.pathSegments.last) ?? 0;
-
-      _visit = state.visits.firstWhere(
-        (v) => v.id == visitId,
-        orElse: () => throw Exception('Visit not found'),
-      );
+      try {
+        final updatedVisit = state.visits.firstWhere(
+          (v) => v.id == _visitId,
+        );
+        
+        // Only update if the visit data has actually changed
+        if (_visit == null || 
+            _visit!.details != updatedVisit.details ||
+            _visit!.date != updatedVisit.date ||
+            _visit!.hospitalId != updatedVisit.hospitalId ||
+            _visit!.departmentId != updatedVisit.departmentId ||
+            _visit!.doctorId != updatedVisit.doctorId ||
+            _visit!.informations != updatedVisit.informations) {
+          
+          _visit = updatedVisit;
+          
+          // Load related data
+          await _loadRelatedData();
+        }
+      } catch (e) {
+        // Visit not found in current VisitBloc state, load all visits and try again
+        if (_visit == null) {
+          // First time loading, fetch directly from database
+          await _loadVisitFromDatabase();
+        } else {
+          // Visit was loaded before but not found in current state, 
+          // this might be due to filtering. Load all visits.
+          context.read<VisitBloc>().add(LoadVisits());
+          // Try again after a brief delay
+          await Future.delayed(Duration(milliseconds: 100));
+          _loadVisit();
+        }
+      }
     }
+  }
+
+  Future<void> _loadVisitFromDatabase() async {
+    if (_visitId == null) return;
+    
+    try {
+      final database = context.read<AppDatabase>();
+      final visit = await database.getVisitById(_visitId!);
+      if (visit != null) {
+        _visit = visit;
+        await _loadRelatedData();
+      } else {
+        throw Exception('Visit not found');
+      }
+    } catch (e) {
+      throw Exception('Failed to load visit: ${e.toString()}');
+    }
+  }
+
+  Future<void> _loadRelatedData() async {
+    if (_visit == null) return;
+    
+    setState(() {
+      _isLoading = true;
+    });
+
+    final database = context.read<AppDatabase>();
+    
+    // Load related data in parallel
+    final futures = <Future>[];
+    
+    if (_visit!.hospitalId != null) {
+      futures.add(database.getHospitalById(_visit!.hospitalId!).then((h) => _hospital = h));
+    }
+    
+    if (_visit!.departmentId != null) {
+      futures.add(database.getDepartmentById(_visit!.departmentId!).then((d) => _department = d));
+    }
+    
+    if (_visit!.doctorId != null) {
+      futures.add(database.getDoctorById(_visit!.doctorId!).then((d) => _doctor = d));
+    }
+    
+    await Future.wait(futures);
+    
+    setState(() {
+      _isLoading = false;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return BlocListener<VisitBloc, VisitState>(
       listener: (context, state) {
-        if (_visit == null && state is VisitLoaded) {
+        if (state is VisitLoaded) {
+          // Always reload the visit when VisitBloc state changes
+          // This ensures the visit details update when the visit is edited
           _loadVisit();
         }
       },
@@ -65,7 +161,7 @@ class _VisitDetailScreenState extends State<VisitDetailScreen> {
                     icon: const Icon(Icons.edit),
                     onPressed: () {
                       if (_visit != null) {
-                        context.goNamed(
+                        context.pushNamed(
                           'EditVisit',
                           pathParameters: {'id': _visit!.id.toString()},
                         );
@@ -145,15 +241,17 @@ class _VisitDetailScreenState extends State<VisitDetailScreen> {
               Row(
                 children: [
                   Text(
-                    'Hospital ID:',
+                    'Hospital:',
                     style: Theme.of(context).textTheme.titleMedium,
                   ),
                   const SizedBox(width: 8),
                   Expanded(
-                    child: Text(
-                      _visit!.hospitalId.toString(),
-                      textAlign: TextAlign.end,
-                    ),
+                    child: _isLoading
+                        ? const CircularProgressIndicator()
+                        : Text(
+                            _hospital?.name ?? 'Unknown Hospital',
+                            textAlign: TextAlign.end,
+                          ),
                   ),
                 ],
               ),
@@ -165,15 +263,17 @@ class _VisitDetailScreenState extends State<VisitDetailScreen> {
               Row(
                 children: [
                   Text(
-                    'Department ID:',
+                    'Department:',
                     style: Theme.of(context).textTheme.titleMedium,
                   ),
                   const SizedBox(width: 8),
                   Expanded(
-                    child: Text(
-                      _visit!.departmentId.toString(),
-                      textAlign: TextAlign.end,
-                    ),
+                    child: _isLoading
+                        ? const CircularProgressIndicator()
+                        : Text(
+                            _department?.name ?? 'Unknown Department',
+                            textAlign: TextAlign.end,
+                          ),
                   ),
                 ],
               ),
@@ -185,15 +285,17 @@ class _VisitDetailScreenState extends State<VisitDetailScreen> {
               Row(
                 children: [
                   Text(
-                    'Doctor ID:',
+                    'Doctor:',
                     style: Theme.of(context).textTheme.titleMedium,
                   ),
                   const SizedBox(width: 8),
                   Expanded(
-                    child: Text(
-                      _visit!.doctorId.toString(),
-                      textAlign: TextAlign.end,
-                    ),
+                    child: _isLoading
+                        ? const CircularProgressIndicator()
+                        : Text(
+                            _doctor?.name ?? 'Unknown Doctor',
+                            textAlign: TextAlign.end,
+                          ),
                   ),
                 ],
               ),

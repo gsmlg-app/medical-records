@@ -69,7 +69,10 @@ void main(List<String> args) async {
           BlocProvider(create: (context) => VisitBloc(database)),
           BlocProvider(create: (context) => DepartmentBloc(database)),
           BlocProvider(create: (context) => DoctorBloc(database)),
-          BlocProvider(create: (context) => VisitFormBloc(database)),
+          BlocProvider(create: (context) {
+            print('DEBUG: Creating VisitFormBloc with database: $database');
+            return VisitFormBloc(database);
+          }),
         ],
         child: CrashReportingWidget(
           child: const App(),

@@ -52,7 +52,7 @@ class _TreatmentsScreenState extends State<TreatmentsScreen> {
           floatingActionButton: state is TreatmentLoaded && state.treatments.isNotEmpty
               ? FloatingActionButton(
                   onPressed: () {
-                    context.goNamed(AddTreatmentScreen.name);
+                    context.pushNamed(AddTreatmentScreen.name);
                   },
                   child: const Icon(Icons.add),
                 )
@@ -137,7 +137,7 @@ class _TreatmentsScreenState extends State<TreatmentsScreen> {
             ElevatedButton.icon(
               onPressed: () {
                 context.read<TreatmentBloc>().add(LoadTreatments());
-                context.goNamed(AddTreatmentScreen.name);
+                context.pushNamed(AddTreatmentScreen.name);
               },
               icon: const Icon(Icons.add),
               label: Text(context.l10n.addTreatment),
@@ -204,16 +204,16 @@ class TreatmentCard extends StatelessWidget {
           onSelected: (value) {
             switch (value) {
               case 'view':
-                context.goNamed(
+                context.pushNamed(
                   TreatmentDetailScreen.name,
                   pathParameters: {'id': treatment.id.toString()},
                 );
                 break;
               case 'edit':
-                context.goNamed(
-                  EditTreatmentScreen.name,
-                  pathParameters: {'id': treatment.id.toString()},
-                );
+context.pushNamed(
+                EditTreatmentScreen.name,
+                pathParameters: {'id': treatment.id.toString()},
+              );
                 break;
               case 'delete':
                 _showDeleteDialog(context);

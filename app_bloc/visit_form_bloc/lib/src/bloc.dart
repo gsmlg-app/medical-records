@@ -1,150 +1,106 @@
 import 'package:app_database/app_database.dart';
-import 'package:bloc/bloc.dart';
+import 'package:form_bloc/form_bloc.dart';
+import 'package:equatable/equatable.dart';
+import 'package:visit_bloc/visit_bloc.dart';
+import 'dart:async';
 
-import 'event.dart';
-import 'state.dart';
+part 'event.dart';
+part 'state.dart';
 
-class VisitFormBloc extends Bloc<VisitFormEvent, VisitFormState> {
+/// {@template visit_form_bloc}
+/// VisitFormBloc handles visit form validation and submission.
+/// {@endtemplate}
+class VisitFormBloc extends FormBloc<String, String> {
+  /// {@macro visit_form_bloc}
   final AppDatabase _database;
+  
+  /// VisitBloc for notifying state changes
+  final VisitBloc? _visitBloc;
+  
+  /// Available hospitals for selection
+  List<Hospital> availableHospitals = [];
+  
+  /// Available departments for selection
+  List<Department> availableDepartments = [];
+  
+  /// Available doctors for selection
+  List<Doctor> availableDoctors = [];
 
-  VisitFormBloc(this._database) : super(VisitFormState.initial()) {
-    on<VisitFormCategoryChanged>(_onCategoryChanged);
-    on<VisitFormDateChanged>(_onDateChanged);
-    on<VisitFormDetailsChanged>(_onDetailsChanged);
-    on<VisitFormHospitalIdChanged>(_onHospitalIdChanged);
-    on<VisitFormDepartmentIdChanged>(_onDepartmentIdChanged);
-    on<VisitFormDoctorIdChanged>(_onDoctorIdChanged);
-    on<VisitFormInformationsChanged>(_onInformationsChanged);
-    on<VisitFormPopulate>(_onPopulate);
-    on<VisitFormReset>(_onReset);
+  /// Visit to populate for editing
+  Visit? visitToEdit;
 
-    // New data loading events
-    on<LoadFormData>(_onLoadFormData);
-    on<HospitalsLoaded>(_onHospitalsLoaded);
-    on<DepartmentsLoaded>(_onDepartmentsLoaded);
-    on<DoctorsLoaded>(_onDoctorsLoaded);
+  // Stream subscriptions
+  StreamSubscription? _hospitalSubscription;
+  StreamSubscription? _departmentSubscription;
 
-    // Cascading selection events
-    on<LoadDepartmentsForHospital>(_onLoadDepartmentsForHospital);
-    on<LoadDoctorsForHospitalAndDepartment>(_onLoadDoctorsForHospitalAndDepartment);
+  VisitFormBloc(this._database, {this.visitToEdit, VisitBloc? visitBloc}) : 
+       _visitBloc = visitBloc, super(isLoading: true) {
+    print('DEBUG: VisitFormBloc constructor called with visitToEdit: ${visitToEdit?.id}');
+    // Add field blocs
+    addFieldBloc(fieldBloc: categoryFieldBloc);
+    addFieldBloc(fieldBloc: dateFieldBloc);
+    addFieldBloc(fieldBloc: detailsFieldBloc);
+    addFieldBloc(fieldBloc: hospitalFieldBloc);
+    addFieldBloc(fieldBloc: departmentFieldBloc);
+    addFieldBloc(fieldBloc: doctorFieldBloc);
+    addFieldBloc(fieldBloc: informationsFieldBloc);
+    print('DEBUG: VisitFormBloc constructor completed');
   }
 
-  void _onCategoryChanged(
-    VisitFormCategoryChanged event,
-    Emitter<VisitFormState> emit,
-  ) {
-    emit(state.copyWith(category: event.category));
-    _validateForm(emit);
-  }
+  /// Visit Category field bloc
+  late final categoryFieldBloc = SelectFieldBloc<VisitCategory, dynamic>(
+    name: 'category',
+    items: VisitCategory.values,
+    initialValue: VisitCategory.outpatient, // Always start with safe default
+    validators: [FieldBlocValidators.required],
+  );
 
-  void _onDateChanged(
-    VisitFormDateChanged event,
-    Emitter<VisitFormState> emit,
-  ) {
-    emit(state.copyWith(date: event.date));
-    _validateForm(emit);
-  }
+  /// Visit Date field bloc
+  late final dateFieldBloc = InputFieldBloc<DateTime, dynamic>(
+    name: 'date',
+    initialValue: visitToEdit?.date ?? DateTime.now(),
+    validators: [FieldBlocValidators.required],
+  );
 
-  void _onDetailsChanged(
-    VisitFormDetailsChanged event,
-    Emitter<VisitFormState> emit,
-  ) {
-    emit(state.copyWith(details: event.details));
-    _validateForm(emit);
-  }
+  /// Visit Details field bloc
+  late final detailsFieldBloc = TextFieldBloc(
+    name: 'details',
+    initialValue: visitToEdit?.details ?? '',
+    validators: [FieldBlocValidators.required],
+  );
 
-  void _onHospitalIdChanged(
-    VisitFormHospitalIdChanged event,
-    Emitter<VisitFormState> emit,
-  ) {
-    emit(state.copyWith(
-      hospitalId: event.hospitalId,
-      departmentId: null, // Reset department when hospital changes
-      doctorId: null, // Reset doctor when hospital changes
-    ));
+  /// Hospital field bloc
+  late final hospitalFieldBloc = SelectFieldBloc<int?, dynamic>(
+    name: 'hospitalId',
+    items: [null], // Start with just null to prevent dropdown assertion errors
+    validators: [], // No validators for optional field
+  );
 
-    // Trigger cascading data loading
-    add(LoadDepartmentsForHospital(event.hospitalId));
-    if (event.hospitalId != null) {
-      add(LoadDoctorsForHospitalAndDepartment(
-        hospitalId: event.hospitalId!,
-        departmentId: state.departmentId,
-      ));
-    }
+  /// Department field bloc
+  late final departmentFieldBloc = SelectFieldBloc<int?, dynamic>(
+    name: 'departmentId',
+    items: [null], // Start with just null to prevent dropdown assertion errors
+    validators: [], // No validators for optional field
+  );
 
-    _validateForm(emit);
-  }
+  /// Doctor field bloc
+  late final doctorFieldBloc = SelectFieldBloc<int?, dynamic>(
+    name: 'doctorId',
+    items: [null], // Start with just null to prevent dropdown assertion errors
+    validators: [], // No validators for optional field
+  );
 
-  void _onDepartmentIdChanged(
-    VisitFormDepartmentIdChanged event,
-    Emitter<VisitFormState> emit,
-  ) {
-    emit(state.copyWith(
-      departmentId: event.departmentId,
-      doctorId: null, // Reset doctor when department changes
-    ));
+  /// Additional informations field bloc
+  late final informationsFieldBloc = TextFieldBloc(
+    name: 'informations',
+    initialValue: visitToEdit?.informations ?? '',
+  );
 
-    // Trigger cascading data loading for doctors
-    add(LoadDoctorsForHospitalAndDepartment(
-      hospitalId: state.hospitalId,
-      departmentId: event.departmentId,
-    ));
-
-    _validateForm(emit);
-  }
-
-  void _onDoctorIdChanged(
-    VisitFormDoctorIdChanged event,
-    Emitter<VisitFormState> emit,
-  ) {
-    emit(state.copyWith(doctorId: event.doctorId));
-    _validateForm(emit);
-  }
-
-  void _onInformationsChanged(
-    VisitFormInformationsChanged event,
-    Emitter<VisitFormState> emit,
-  ) {
-    emit(state.copyWith(informations: event.informations));
-    _validateForm(emit);
-  }
-
-  void _onPopulate(
-    VisitFormPopulate event,
-    Emitter<VisitFormState> emit,
-  ) {
-    final data = event.data;
-    emit(state.copyWith(
-      category: data['category'] as VisitCategory? ?? VisitCategory.outpatient,
-      date: data['date'] as DateTime?,
-      details: data['details'] as String? ?? '',
-      hospitalId: data['hospitalId'] as int?,
-      departmentId: data['departmentId'] as int?,
-      doctorId: data['doctorId'] as int?,
-      informations: data['informations'] as String?,
-    ));
-    _validateForm(emit);
-  }
-
-  void _onReset(
-    VisitFormReset event,
-    Emitter<VisitFormState> emit,
-  ) {
-    emit(VisitFormState.initial());
-  }
-
-  // New data loading event handlers
-  Future<void> _onLoadFormData(
-    LoadFormData event,
-    Emitter<VisitFormState> emit,
-  ) async {
-    emit(state.copyWith(
-      isLoadingHospitals: true,
-      isLoadingDepartments: true,
-      isLoadingDoctors: true,
-    ));
-
+  @override
+  void onLoading() async {
     try {
+      print('DEBUG: VisitFormBloc onLoading() started');
+      
       // Load all data in parallel
       final hospitalsFuture = _database.getAllHospitals();
       final departmentsFuture = _database.getAllDepartments();
@@ -156,116 +112,440 @@ class VisitFormBloc extends Bloc<VisitFormEvent, VisitFormState> {
         doctorsFuture,
       ]);
 
-      emit(state.copyWith(
-        availableHospitals: results[0] as List<Hospital>,
-        availableDepartments: results[1] as List<Department>,
-        availableDoctors: results[2] as List<Doctor>,
-        isLoadingHospitals: false,
-        isLoadingDepartments: false,
-        isLoadingDoctors: false,
-      ));
-    } catch (e) {
-      emit(state.copyWith(
-        error: 'Failed to load form data: ${e.toString()}',
-        isLoadingHospitals: false,
-        isLoadingDepartments: false,
-        isLoadingDoctors: false,
-      ));
-    }
-  }
+      availableHospitals = results[0] as List<Hospital>;
+      availableDepartments = results[1] as List<Department>;
+      availableDoctors = results[2] as List<Doctor>;
 
-  void _onHospitalsLoaded(
-    HospitalsLoaded event,
-    Emitter<VisitFormState> emit,
-  ) {
-    emit(state.copyWith(
-      availableHospitals: event.hospitals,
-      isLoadingHospitals: false,
-    ));
-  }
+      print('DEBUG: Loaded ${availableHospitals.length} hospitals, ${availableDepartments.length} departments, ${availableDoctors.length} doctors');
 
-  void _onDepartmentsLoaded(
-    DepartmentsLoaded event,
-    Emitter<VisitFormState> emit,
-  ) {
-    emit(state.copyWith(
-      availableDepartments: event.departments,
-      isLoadingDepartments: false,
-    ));
-  }
+      // Prepare items - always include null as first option
+      final hospitalItems = [null, ...availableHospitals.map((h) => h.id)];
+      final departmentItems = [null, ...availableDepartments.map((d) => d.id)];
+      final doctorItems = [null, ...availableDoctors.map((d) => d.id)];
+      
+      print('DEBUG: Prepared items - hospitals: ${hospitalItems.length}, departments: ${departmentItems.length}, doctors: ${doctorItems.length}');
 
-  void _onDoctorsLoaded(
-    DoctorsLoaded event,
-    Emitter<VisitFormState> emit,
-  ) {
-    emit(state.copyWith(
-      availableDoctors: event.doctors,
-      isLoadingDoctors: false,
-    ));
-  }
-
-  // Cascading selection event handlers
-  Future<void> _onLoadDepartmentsForHospital(
-    LoadDepartmentsForHospital event,
-    Emitter<VisitFormState> emit,
-  ) async {
-    emit(state.copyWith(isLoadingDepartments: true));
-
-    try {
-      final allDepartments = await _database.getAllDepartments();
-      emit(state.copyWith(
-        availableDepartments: allDepartments,
-        isLoadingDepartments: false,
-      ));
-    } catch (e) {
-      emit(state.copyWith(
-        error: 'Failed to load departments: ${e.toString()}',
-        isLoadingDepartments: false,
-      ));
-    }
-  }
-
-  Future<void> _onLoadDoctorsForHospitalAndDepartment(
-    LoadDoctorsForHospitalAndDepartment event,
-    Emitter<VisitFormState> emit,
-  ) async {
-    emit(state.copyWith(isLoadingDoctors: true));
-
-    try {
-      final allDoctors = await _database.getAllDoctors();
-      List<Doctor> filteredDoctors = allDoctors;
-
-      // Filter by hospital if specified
-      if (event.hospitalId != null) {
-        filteredDoctors = filteredDoctors
-            .where((doctor) => doctor.hospitalId == event.hospitalId)
-            .toList();
+      // CRITICAL: Update items FIRST, then ensure values are valid
+      // This prevents dropdown assertion errors by ensuring value always exists in items
+      
+      // Update hospital field
+      hospitalFieldBloc.updateItems(hospitalItems);
+      // Ensure value is valid (null is always in items)
+      if (!hospitalItems.contains(hospitalFieldBloc.value)) {
+        hospitalFieldBloc.updateValue(null);
+      }
+      
+      // Update department field
+      departmentFieldBloc.updateItems(departmentItems);
+      // Ensure value is valid (null is always in items)
+      if (!departmentItems.contains(departmentFieldBloc.value)) {
+        departmentFieldBloc.updateValue(null);
+      }
+      
+      // Update doctor field
+      doctorFieldBloc.updateItems(doctorItems);
+      // Ensure value is valid (null is always in items)
+      if (!doctorItems.contains(doctorFieldBloc.value)) {
+        doctorFieldBloc.updateValue(null);
       }
 
-      // Filter by department if specified
-      if (event.departmentId != null) {
-        filteredDoctors = filteredDoctors
-            .where((doctor) => doctor.departmentId == event.departmentId)
-            .toList();
+      print('DEBUG: Updated all field items and ensured valid values');
+
+      // Now that items are loaded, populate form with existing visit data if provided
+      if (visitToEdit != null) {
+        // Use a small delay to ensure all field updates are processed
+        await Future.delayed(const Duration(milliseconds: 100));
+        _populateFormAfterItemsLoaded();
       }
 
-      emit(state.copyWith(
-        availableDoctors: filteredDoctors,
-        isLoadingDoctors: false,
-      ));
+      // Use emitLoaded to indicate the form is ready for interaction
+      emitLoaded();
+      
+      // Set up field dependencies differently for Add vs Edit
+      if (visitToEdit != null) {
+        // For edit visits, set up dependencies immediately after a short delay
+        Future.delayed(const Duration(milliseconds: 200), () {
+          _setupFieldDependencies();
+        });
+      } else {
+        // For add visits, DON'T set up dependencies here
+        // They will be set up manually from the UI after a longer delay
+        print('DEBUG: Skipping automatic field dependency setup for Add Visit');
+      }
     } catch (e) {
-      emit(state.copyWith(
-        error: 'Failed to load doctors: ${e.toString()}',
-        isLoadingDoctors: false,
-      ));
+      emitFailure(failureResponse: 'Failed to load form data: ${e.toString()}');
     }
   }
 
-  void _validateForm(Emitter<VisitFormState> emit) {
-    if (state.isFormValid) {
-      emit(state.copyWith(status: VisitFormStatus.valid, error: null));
+  @override
+  void onSubmitting() async {
+    try {
+      // Extract form values
+      final category = categoryFieldBloc.value!;
+      final date = dateFieldBloc.value;
+      final details = detailsFieldBloc.value;
+      final hospitalId = hospitalFieldBloc.value;
+      final departmentId = departmentFieldBloc.value;
+      final doctorId = doctorFieldBloc.value;
+      final informations = informationsFieldBloc.value;
+
+      if (visitToEdit != null) {
+        // Update existing visit
+        if (_visitBloc != null) {
+          // Use VisitBloc to update the visit and notify listeners
+          // Wait for the VisitBloc to complete the update before emitting success
+          bool updateCompleted = false;
+          String? errorMessage;
+          
+          // Listen for the completion of the update
+          final subscription = _visitBloc!.stream.listen((state) {
+            if (state is VisitOperationSuccess) {
+              updateCompleted = true;
+            } else if (state is VisitError) {
+              errorMessage = state.message;
+              updateCompleted = true;
+            }
+          });
+          
+          // Dispatch the update event
+          _visitBloc!.add(UpdateVisit(
+            id: visitToEdit!.id,
+            treatmentId: visitToEdit!.treatmentId,
+            category: category,
+            date: date,
+            details: details,
+            hospitalId: hospitalId,
+            departmentId: departmentId,
+            doctorId: doctorId,
+            informations: informations.isEmpty ? null : informations,
+          ));
+          
+          // Wait for the update to complete (with timeout)
+          int attempts = 0;
+          while (!updateCompleted && attempts < 50) {
+            await Future.delayed(Duration(milliseconds: 100));
+            attempts++;
+          }
+          
+          await subscription.cancel();
+          
+          if (errorMessage != null) {
+            emitFailure(failureResponse: errorMessage);
+          } else if (updateCompleted) {
+            // Update the visitToEdit reference to reflect the changes
+            if (visitToEdit != null) {
+              visitToEdit = Visit(
+                id: visitToEdit!.id,
+                treatmentId: visitToEdit!.treatmentId,
+                category: category.value,
+                date: date,
+                details: details,
+                hospitalId: hospitalId,
+                departmentId: departmentId,
+                doctorId: doctorId,
+                informations: informations.isEmpty ? null : informations,
+                createdAt: visitToEdit!.createdAt,
+                updatedAt: DateTime.now(),
+              );
+            }
+            
+            emitSuccess(successResponse: 'Visit saved successfully!');
+          } else {
+            emitFailure(failureResponse: 'Update timed out');
+          }
+        } else {
+          // Fallback: Update directly in database (won't notify UI)
+          final updatedVisit = Visit(
+            id: visitToEdit!.id,
+            treatmentId: visitToEdit!.treatmentId,
+            category: category.value,
+            date: date,
+            details: details,
+            hospitalId: hospitalId,
+            departmentId: departmentId,
+            doctorId: doctorId,
+            informations: informations.isEmpty ? null : informations,
+            createdAt: visitToEdit!.createdAt,
+            updatedAt: DateTime.now(),
+          );
+
+          await _database.updateVisit(updatedVisit);
+          
+          // Update the visitToEdit reference to reflect the changes
+          visitToEdit = updatedVisit;
+          
+          emitSuccess(successResponse: 'Visit saved successfully!');
+        }
+      } else {
+        // Create new visit - this would need treatmentId from context
+        // For now, we'll emit a failure since we don't have all required data
+        emitFailure(failureResponse: 'Cannot create visit: treatmentId is required');
+      }
+    } catch (e) {
+      emitFailure(failureResponse: 'Failed to save visit: ${e.toString()}');
+    }
+  }
+
+  void _setupFieldDependencies() {
+    print('DEBUG: Setting up field dependencies');
+    
+    // Cancel any existing subscriptions to avoid duplicates
+    _hospitalSubscription?.cancel();
+    _departmentSubscription?.cancel();
+    
+    // Listen to hospital field changes with a delay to avoid immediate updates
+    _hospitalSubscription = hospitalFieldBloc.stream.listen((_) {
+      print('DEBUG: Hospital field changed - clearing department and doctor, updating options');
+      
+      // Use a microtask to delay the updates and avoid dropdown assertion errors
+      Future.microtask(() {
+        // Update department options first (always show all departments when hospital changes)
+        final departmentItems = [null, ...availableDepartments.map((d) => d.id)];
+        print('DEBUG: Updating department options with ${departmentItems.length} items');
+        departmentFieldBloc.updateItems(departmentItems);
+        
+        // Clear dependent field values AFTER updating items to ensure valid state
+        departmentFieldBloc.updateValue(null);
+        doctorFieldBloc.updateValue(null);
+        
+        // Update doctor options based on new hospital selection
+        _updateDoctorOptions();
+      });
+    });
+
+    // Listen to department field changes with a delay to avoid immediate updates
+    _departmentSubscription = departmentFieldBloc.stream.listen((_) {
+      print('DEBUG: Department field changed - clearing doctor, updating options');
+      
+      // Use a microtask to delay the updates and avoid dropdown assertion errors
+      Future.microtask(() {
+        // Update doctor options first
+        _updateDoctorOptions();
+        
+        // Clear doctor field value AFTER updating items to ensure valid state
+        doctorFieldBloc.updateValue(null);
+      });
+    });
+  }
+
+  /// Sets up field dependencies for Add Visit forms without immediate triggers
+  void _setupFieldDependenciesForAdd() {
+    print('DEBUG: Setting up field dependencies for Add Visit (no immediate triggers)');
+    
+    // Cancel any existing subscriptions to avoid duplicates
+    _hospitalSubscription?.cancel();
+    _departmentSubscription?.cancel();
+    
+    // For Add Visit, we need to be more careful about stream initialization
+    // Use a different approach that doesn't trigger immediate updates
+    
+    // Get current values to skip them
+    final initialHospitalValue = hospitalFieldBloc.value;
+    final initialDepartmentValue = departmentFieldBloc.value;
+    
+    // Listen to hospital field changes, but skip the initial value
+    _hospitalSubscription = hospitalFieldBloc.stream.listen((value) {
+      if (value == initialHospitalValue) {
+        print('DEBUG: Skipping initial hospital field value: $value');
+        return;
+      }
+      
+      print('DEBUG: Hospital field changed from $initialHospitalValue to $value - clearing department and doctor, updating options');
+      
+      // Use a microtask to delay the updates and avoid dropdown assertion errors
+      Future.microtask(() {
+        // Update department options first (always show all departments when hospital changes)
+        final departmentItems = [null, ...availableDepartments.map((d) => d.id)];
+        print('DEBUG: Updating department options with ${departmentItems.length} items');
+        departmentFieldBloc.updateItems(departmentItems);
+        
+        // Clear dependent field values AFTER updating items to ensure valid state
+        departmentFieldBloc.updateValue(null);
+        doctorFieldBloc.updateValue(null);
+        
+        // Update doctor options based on new hospital selection
+        _updateDoctorOptions();
+      });
+    });
+
+    // Listen to department field changes, but skip the initial value
+    _departmentSubscription = departmentFieldBloc.stream.listen((value) {
+      if (value == initialDepartmentValue) {
+        print('DEBUG: Skipping initial department field value: $value');
+        return;
+      }
+      
+      print('DEBUG: Department field changed from $initialDepartmentValue to $value - clearing doctor, updating options');
+      
+      // Use a microtask to delay the updates and avoid dropdown assertion errors
+      Future.microtask(() {
+        // Update doctor options first
+        _updateDoctorOptions();
+        
+        // Clear doctor field value AFTER updating items to ensure valid state
+        doctorFieldBloc.updateValue(null);
+      });
+    });
+  }
+
+  /// Called when hospital field changes
+  void _onHospitalChanged() {
+    final hospitalId = hospitalFieldBloc.value;
+    print('DEBUG: Hospital changed to: $hospitalId');
+    
+    // 1. Clear department value (always clear when hospital changes)
+    print('DEBUG: Clearing department selection due to hospital change');
+    departmentFieldBloc.updateValue(null);
+    
+    // 2. Clear doctor value (always clear when hospital changes)
+    print('DEBUG: Clearing doctor selection due to hospital change');
+    doctorFieldBloc.updateValue(null);
+    
+    // 3. Update department options (departments are not filtered by hospital)
+    final departmentItems = [null, ...availableDepartments.map((d) => d.id)];
+    print('DEBUG: Updating department options with ${departmentItems.length} items');
+    departmentFieldBloc.updateItems(departmentItems);
+    
+    // 4. Update doctor options based on new hospital
+    _updateDoctorOptions();
+  }
+
+  /// Called when department field changes
+  void _onDepartmentChanged() {
+    final departmentId = departmentFieldBloc.value;
+    print('DEBUG: Department changed to: $departmentId');
+    
+    // 1. Clear doctor value (always clear when department changes)
+    print('DEBUG: Clearing doctor selection due to department change');
+    doctorFieldBloc.updateValue(null);
+    
+    // 2. Update doctor options based on current hospital and new department
+    _updateDoctorOptions();
+  }
+
+  /// Updates doctor options based on current hospital and department filters
+  void _updateDoctorOptions() {
+    final hospitalId = hospitalFieldBloc.value;
+    final departmentId = departmentFieldBloc.value;
+    
+    print('DEBUG: Updating doctor options with hospitalId: $hospitalId, departmentId: $departmentId');
+    
+    List<Doctor> filteredDoctors = availableDoctors;
+
+    // Filter by hospital if selected
+    if (hospitalId != null) {
+      filteredDoctors = filteredDoctors
+          .where((d) => d.hospitalId == hospitalId)
+          .toList();
+      print('DEBUG: Filtered doctors by hospital: ${filteredDoctors.length} remaining');
+    }
+
+    // Filter by department if selected
+    if (departmentId != null) {
+      filteredDoctors = filteredDoctors
+          .where((d) => d.departmentId == departmentId)
+          .toList();
+      print('DEBUG: Filtered doctors by department: ${filteredDoctors.length} remaining');
+    }
+
+    final doctorItems = [null, ...filteredDoctors.map((d) => d.id)];
+    print('DEBUG: Updating doctor field with ${doctorItems.length} items, current doctor value: ${doctorFieldBloc.value}');
+    
+    // Update doctor items (value is already cleared by calling methods)
+    doctorFieldBloc.updateItems(doctorItems);
+  }
+
+  /// Internal method to populate form after items are loaded
+  void _populateFormAfterItemsLoaded() {
+    if (visitToEdit == null) return;
+    
+    final visit = visitToEdit!;
+    
+    print('DEBUG: Populating form with visit data - hospitalId: ${visit.hospitalId}, departmentId: ${visit.departmentId}, doctorId: ${visit.doctorId}');
+    
+    // Update field blocs with visit data (non-cascading fields first)
+    final category = VisitCategory.values.firstWhere((c) => c.value == visit.category);
+    categoryFieldBloc.updateValue(category);
+    dateFieldBloc.updateValue(visit.date);
+    detailsFieldBloc.updateValue(visit.details);
+    informationsFieldBloc.updateValue(visit.informations ?? '');
+    
+    // For cascading fields, validate values exist before setting them
+    if (visit.hospitalId != null && availableHospitals.any((h) => h.id == visit.hospitalId)) {
+      hospitalFieldBloc.updateValue(visit.hospitalId);
+      
+      // Wait for hospital to be set, then set department if valid
+      Future.delayed(const Duration(milliseconds: 100), () {
+        if (visit.departmentId != null && availableDepartments.any((d) => d.id == visit.departmentId)) {
+          departmentFieldBloc.updateValue(visit.departmentId);
+          
+          // Wait for department to be set, then set doctor if valid
+          Future.delayed(const Duration(milliseconds: 100), () {
+            if (visit.doctorId != null && availableDoctors.any((d) => d.id == visit.doctorId)) {
+              // Check if doctor is valid for current hospital/department filter
+              final filteredDoctors = availableDoctors.where((d) {
+                final hospitalMatch = visit.hospitalId == null || d.hospitalId == visit.hospitalId;
+                final departmentMatch = visit.departmentId == null || d.departmentId == visit.departmentId;
+                return hospitalMatch && departmentMatch;
+              }).toList();
+              
+              if (filteredDoctors.any((d) => d.id == visit.doctorId)) {
+                doctorFieldBloc.updateValue(visit.doctorId);
+              } else {
+                print('DEBUG: Doctor ${visit.doctorId} is not valid for current filters, setting to null');
+                doctorFieldBloc.updateValue(null);
+              }
+            }
+          });
+        }
+      });
     } else {
-      emit(state.copyWith(status: VisitFormStatus.invalid, error: null));
+      print('DEBUG: Hospital ${visit.hospitalId} not found in available hospitals');
     }
+  }
+
+  /// Public method to populate form with visit data
+  void populateForm(Visit visit) {
+    visitToEdit = visit;
+    
+    // Update field blocs with visit data
+    final category = VisitCategory.values.firstWhere((c) => c.value == visit.category);
+    categoryFieldBloc.updateValue(category);
+    dateFieldBloc.updateValue(visit.date);
+    detailsFieldBloc.updateValue(visit.details);
+    hospitalFieldBloc.updateValue(visit.hospitalId);
+    departmentFieldBloc.updateValue(visit.departmentId);
+    doctorFieldBloc.updateValue(visit.doctorId);
+    informationsFieldBloc.updateValue(visit.informations ?? '');
+  }
+
+  /// Public method to set up field dependencies after UI is stable
+  /// Call this method for Add Visit forms after the UI is rendered
+  void setupFieldDependencies() {
+    print('DEBUG: Manually setting up field dependencies');
+    if (visitToEdit != null) {
+      _setupFieldDependencies();
+    } else {
+      _setupFieldDependenciesForAdd();
+    }
+  }
+
+  /// Public method to reset form
+  void resetForm() {
+    categoryFieldBloc.updateValue(VisitCategory.outpatient);
+    dateFieldBloc.updateValue(DateTime.now());
+    detailsFieldBloc.updateValue('');
+    hospitalFieldBloc.updateValue(null);
+    departmentFieldBloc.updateValue(null);
+    doctorFieldBloc.updateValue(null);
+    informationsFieldBloc.updateValue('');
+    visitToEdit = null;
+  }
+
+  @override
+  Future<void> close() async {
+    await _hospitalSubscription?.cancel();
+    await _departmentSubscription?.cancel();
+    return super.close();
   }
 }

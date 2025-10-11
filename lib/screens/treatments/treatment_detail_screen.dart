@@ -73,7 +73,7 @@ class _TreatmentDetailScreenState extends State<TreatmentDetailScreen> {
                   IconButton(
                     icon: const Icon(Icons.edit),
                     onPressed: () {
-                      context.goNamed(
+                      context.pushNamed(
                         EditTreatmentScreen.name,
                         pathParameters: {'id': widget.treatmentId.toString()},
                       );
@@ -175,7 +175,7 @@ class _TreatmentDetailScreenState extends State<TreatmentDetailScreen> {
             ),
             TextButton.icon(
               onPressed: () {
-                context.goNamed(
+                context.pushNamed(
                   AddVisitScreen.name,
                   pathParameters: {'treatmentId': widget.treatmentId.toString()},
                 );
@@ -251,7 +251,7 @@ class _TreatmentDetailScreenState extends State<TreatmentDetailScreen> {
                       ),
                       trailing: const Icon(Icons.chevron_right),
                       onTap: () {
-                        context.goNamed(
+                        context.pushNamed(
                           VisitDetailScreen.name,
                           pathParameters: {'id': visit.id.toString()},
                         );

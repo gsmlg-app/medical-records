@@ -11,6 +11,9 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_bloc: ^9.0.0
+  flutter_form_bloc:
+    path: ../../third_party/flutter_form_bloc
   app_locale:
     path: ../../app_lib/locale
   app_database:

@@ -1,112 +1,37 @@
-import 'package:app_database/app_database.dart';
-import 'package:equatable/equatable.dart';
+part of 'bloc.dart';
 
-enum VisitFormStatus {
-  initial,
-  loading,
-  valid,
-  invalid,
-}
-
+/// {@template visit_form_state}
+/// VisitFormState represents the state of the visit form.
+/// Note: With FormBloc, we primarily use FormBlocState instead of custom states.
+/// This class is kept for compatibility and potential future extensions.
+/// {@endtemplate}
 class VisitFormState extends Equatable {
-  final VisitCategory category;
-  final DateTime? date;
-  final String details;
-  final int? hospitalId;
-  final int? departmentId;
-  final int? doctorId;
-  final String? informations;
-  final VisitFormStatus status;
-  final String? error;
-
-  // Available data for dropdowns
-  final List<Hospital> availableHospitals;
-  final List<Department> availableDepartments;
-  final List<Doctor> availableDoctors;
-  final bool isLoadingHospitals;
-  final bool isLoadingDepartments;
-  final bool isLoadingDoctors;
-
+  /// {@macro visit_form_state}
   const VisitFormState({
-    this.category = VisitCategory.outpatient,
-    this.date,
-    this.details = '',
-    this.hospitalId,
-    this.departmentId,
-    this.doctorId,
-    this.informations,
-    this.status = VisitFormStatus.initial,
-    this.error,
-    this.availableHospitals = const [],
-    this.availableDepartments = const [],
-    this.availableDoctors = const [],
-    this.isLoadingHospitals = false,
-    this.isLoadingDepartments = false,
-    this.isLoadingDoctors = false,
+    required this.availableHospitals,
+    required this.availableDepartments,
+    required this.availableDoctors,
   });
 
-  factory VisitFormState.initial() {
-    return const VisitFormState();
-  }
+  /// Available hospitals for selection
+  final List<Hospital> availableHospitals;
 
-  VisitFormState copyWith({
-    VisitCategory? category,
-    DateTime? date,
-    String? details,
-    int? hospitalId,
-    int? departmentId,
-    int? doctorId,
-    String? informations,
-    VisitFormStatus? status,
-    String? error,
-    List<Hospital>? availableHospitals,
-    List<Department>? availableDepartments,
-    List<Doctor>? availableDoctors,
-    bool? isLoadingHospitals,
-    bool? isLoadingDepartments,
-    bool? isLoadingDoctors,
-  }) {
-    return VisitFormState(
-      category: category ?? this.category,
-      date: date ?? this.date,
-      details: details ?? this.details,
-      hospitalId: hospitalId ?? this.hospitalId,
-      departmentId: departmentId ?? this.departmentId,
-      doctorId: doctorId ?? this.doctorId,
-      informations: informations ?? this.informations,
-      status: status ?? this.status,
-      error: error ?? this.error,
-      availableHospitals: availableHospitals ?? this.availableHospitals,
-      availableDepartments: availableDepartments ?? this.availableDepartments,
-      availableDoctors: availableDoctors ?? this.availableDoctors,
-      isLoadingHospitals: isLoadingHospitals ?? this.isLoadingHospitals,
-      isLoadingDepartments: isLoadingDepartments ?? this.isLoadingDepartments,
-      isLoadingDoctors: isLoadingDoctors ?? this.isLoadingDoctors,
-    );
-  }
+  /// Available departments for selection
+  final List<Department> availableDepartments;
+
+  /// Available doctors for selection
+  final List<Doctor> availableDoctors;
 
   @override
-  List<Object?> get props => [
-        category,
-        date,
-        details,
-        hospitalId,
-        departmentId,
-        doctorId,
-        informations,
-        status,
-        error,
+  List<Object> get props => [
         availableHospitals,
         availableDepartments,
         availableDoctors,
-        isLoadingHospitals,
-        isLoadingDepartments,
-        isLoadingDoctors,
       ];
 
-  bool get isCategoryValid => category != VisitCategory.outpatient || true; // Category is always valid
-  bool get isDateValid => date != null;
-  bool get isDetailsValid => details.trim().isNotEmpty;
-
-  bool get isFormValid => isCategoryValid && isDateValid && isDetailsValid;
+  @override
+  String toString() => 'VisitFormState('
+      'availableHospitals: ${availableHospitals.length}, '
+      'availableDepartments: ${availableDepartments.length}, '
+      'availableDoctors: ${availableDoctors.length})';
 }

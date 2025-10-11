@@ -111,10 +111,12 @@ class AppRouter {
       name: EditVisitScreen.name,
       path: EditVisitScreen.path,
       pageBuilder: (context, state) {
+        final visitId = int.parse(state.pathParameters['id']!);
+
         return NoTransitionPage<void>(
           key: state.pageKey,
           restorationId: state.pageKey.value,
-          child: const EditVisitScreen(),
+          child: EditVisitScreen(visitId: visitId),
         );
       },
     ),

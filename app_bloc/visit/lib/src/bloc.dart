@@ -7,6 +7,7 @@ import 'state.dart';
 
 class VisitBloc extends Bloc<VisitEvent, VisitState> {
   final AppDatabase _database;
+  int? _currentTreatmentId;
 
   VisitBloc(this._database) : super(VisitInitial()) {
     on<LoadVisits>(_onLoadVisits);
@@ -17,6 +18,7 @@ class VisitBloc extends Bloc<VisitEvent, VisitState> {
   }
 
   Future<void> _onLoadVisits(LoadVisits event, Emitter<VisitState> emit) async {
+    _currentTreatmentId = null; // Reset filter
     emit(VisitLoading());
     try {
       final visits = await _database.getAllVisits();
@@ -27,6 +29,7 @@ class VisitBloc extends Bloc<VisitEvent, VisitState> {
   }
 
   Future<void> _onLoadVisitsByTreatment(LoadVisitsByTreatment event, Emitter<VisitState> emit) async {
+    _currentTreatmentId = event.treatmentId; // Remember current filter
     emit(VisitLoading());
     try {
       final visits = await _database.getVisitsByTreatment(event.treatmentId);
@@ -52,7 +55,16 @@ class VisitBloc extends Bloc<VisitEvent, VisitState> {
         ),
       );
 
-      final visits = await _database.getAllVisits();
+      // Reload visits using the current filter to maintain consistency
+      List<Visit> visits;
+      if (_currentTreatmentId != null) {
+        // If we have a treatment filter, reload filtered visits
+        visits = await _database.getVisitsByTreatment(_currentTreatmentId!);
+      } else {
+        // Otherwise load all visits
+        visits = await _database.getAllVisits();
+      }
+      
       emit(VisitOperationSuccess('Visit added successfully'));
       emit(VisitLoaded(visits));
     } catch (e) {
@@ -85,7 +97,16 @@ class VisitBloc extends Bloc<VisitEvent, VisitState> {
 
       await _database.updateVisit(updatedVisit);
 
-      final visits = await _database.getAllVisits();
+      // Reload visits using the current filter to maintain consistency
+      List<Visit> visits;
+      if (_currentTreatmentId != null) {
+        // If we have a treatment filter, reload filtered visits
+        visits = await _database.getVisitsByTreatment(_currentTreatmentId!);
+      } else {
+        // Otherwise load all visits
+        visits = await _database.getAllVisits();
+      }
+      
       emit(VisitOperationSuccess('Visit updated successfully'));
       emit(VisitLoaded(visits));
     } catch (e) {
@@ -98,7 +119,16 @@ class VisitBloc extends Bloc<VisitEvent, VisitState> {
     try {
       await _database.deleteVisit(event.id);
 
-      final visits = await _database.getAllVisits();
+      // Reload visits using the current filter to maintain consistency
+      List<Visit> visits;
+      if (_currentTreatmentId != null) {
+        // If we have a treatment filter, reload filtered visits
+        visits = await _database.getVisitsByTreatment(_currentTreatmentId!);
+      } else {
+        // Otherwise load all visits
+        visits = await _database.getAllVisits();
+      }
+      
       emit(VisitOperationSuccess('Visit deleted successfully'));
       emit(VisitLoaded(visits));
     } catch (e) {

@@ -1,8 +1,9 @@
 import 'package:app_database/app_database.dart';
 import 'package:app_locale/app_locale.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_form_bloc/flutter_form_bloc.dart';
 import 'package:visit_form_bloc/visit_form_bloc.dart';
+import 'safe_dropdown_field_bloc_builder.dart';
 
 /// {@template visit_form}
 /// A reusable form widget for creating and editing visits.
@@ -45,277 +46,161 @@ class _VisitFormState extends State<VisitForm> {
   @override
   void initState() {
     super.initState();
-
-    // Load form data
-    context.read<VisitFormBloc>().add(LoadFormData());
-
-    // Populate form with existing visit data if editing
-    if (widget.visit != null) {
-      // Schedule population after data is loaded
-      Future.delayed(Duration.zero, () {
-        context.read<VisitFormBloc>().add(
-              VisitFormPopulate({
-                'category': widget.visit!.category,
-                'date': widget.visit!.date,
-                'details': widget.visit!.details,
-                'hospitalId': widget.visit!.hospitalId,
-                'departmentId': widget.visit!.departmentId,
-                'doctorId': widget.visit!.doctorId,
-                'informations': widget.visit!.informations,
-              }),
-            );
-      });
-    }
+    // Form population is now handled internally in the VisitFormBloc
+    // after items are loaded to avoid dropdown conflicts
   }
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<VisitFormBloc, VisitFormState>(
+    return BlocListener<VisitFormBloc, FormBlocState<String, String>>(
       listener: (context, state) {
-        // Handle any state changes that require UI actions
-        if (state.error != null) {
+        // Handle submission success/failure
+        if (state is FormBlocSuccess) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(state.error!)),
+            SnackBar(content: Text('Visit saved successfully!')),
+          );
+        } else if (state is FormBlocFailure) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('An error occurred')),
           );
         }
       },
-      child: Form(
-        key: widget.formKey ?? GlobalKey<FormState>(),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Visit Category
-            BlocBuilder<VisitFormBloc, VisitFormState>(
-              builder: (context, state) {
-                return DropdownButtonFormField<VisitCategory>(
-                  value: state.category,
-                  decoration: InputDecoration(
-                    labelText: context.l10n.visitCategory,
-                    border: const OutlineInputBorder(),
-                  ),
-                  items: VisitCategory.values.map((category) {
-                    return DropdownMenuItem(
-                      value: category,
-                      child: Text(_formatCategoryName(category)),
-                    );
-                  }).toList(),
-                  onChanged: (category) {
-                    if (category != null) {
-                      context.read<VisitFormBloc>().add(
-                            VisitFormCategoryChanged(category),
-                          );
-                    }
-                  },
-                );
-              },
-            ),
-            const SizedBox(height: 16),
-
-            // Visit Date
-            BlocBuilder<VisitFormBloc, VisitFormState>(
-              builder: (context, state) {
-                return ListTile(
-                  title: Text(context.l10n.visitDate),
-                  subtitle: Text(
-                    state.date != null
-                        ? _formatDate(state.date!)
-                        : context.l10n.selectDate,
-                  ),
-                  trailing: const Icon(Icons.calendar_today),
-                  onTap: () => _selectDate(),
-                );
-              },
-            ),
-            const SizedBox(height: 16),
-
-            // Visit Details
-            TextFormField(
-              initialValue: widget.visit?.details,
-              decoration: InputDecoration(
-                labelText: context.l10n.visitDetails,
-                border: const OutlineInputBorder(),
+      child: BlocBuilder<VisitFormBloc, FormBlocState<String, String>>(
+        builder: (context, state) {
+          // Show loading indicator while form data is being loaded
+          if (state is FormBlocLoading) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          
+          final visitFormBloc = context.read<VisitFormBloc>();
+          
+          return FormThemeProvider(
+            theme: FormTheme(
+              decorationTheme: const InputDecorationTheme(
+                border: OutlineInputBorder(),
+                contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               ),
-              maxLines: 3,
-              validator: (value) {
-                if (value == null || value.trim().isEmpty) {
-                  return context.l10n.fieldRequired;
-                }
-                return null;
-              },
-              onChanged: (value) {
-                context.read<VisitFormBloc>().add(
-                      VisitFormDetailsChanged(value),
-                    );
-              },
             ),
-
-            // Optional fields section
-            const SizedBox(height: 24),
-            Text(
-              'Optional Information',
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
-            const SizedBox(height: 8),
-
-            // Hospital Selector
-            BlocBuilder<VisitFormBloc, VisitFormState>(
-              builder: (context, state) {
-                return DropdownButtonFormField<int?>(
-                  value: state.hospitalId,
-                  decoration: InputDecoration(
-                    labelText: 'Hospital',
-                    border: const OutlineInputBorder(),
-                    helperText: 'Optional',
-                    suffixIcon: state.isLoadingHospitals
-                        ? const SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : null,
+            child: Form(
+              key: widget.formKey ?? GlobalKey<FormState>(),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Visit Category
+                  DropdownFieldBlocBuilder<VisitCategory>(
+                    selectFieldBloc: visitFormBloc.categoryFieldBloc,
+                    decoration: InputDecoration(
+                      labelText: context.l10n.visitCategory,
+                    ),
+                    itemBuilder: (context, value) => FieldItem(
+                      child: Text(_formatCategoryName(value)),
+                    ),
                   ),
-                  items: state.availableHospitals.map((hospital) {
-                    return DropdownMenuItem<int?>(
-                      value: hospital.id,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(hospital.name),
-                          if (hospital.type != null)
-                            Text(
-                              hospital.type!,
-                              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: Theme.of(context).colorScheme.onSurfaceVariant,
-                              ),
-                            ),
-                        ],
-                      ),
-                    );
-                  }).toList(),
-                  onChanged: (hospitalId) {
-                    context.read<VisitFormBloc>().add(
-                      VisitFormHospitalIdChanged(hospitalId),
-                    );
-                  },
-                );
-              },
-            ),
-            const SizedBox(height: 16),
+                  const SizedBox(height: 16),
 
-            // Department Selector
-            BlocBuilder<VisitFormBloc, VisitFormState>(
-              builder: (context, state) {
-                return DropdownButtonFormField<int?>(
-                  value: state.departmentId,
-                  decoration: InputDecoration(
-                    labelText: 'Department',
-                    border: const OutlineInputBorder(),
-                    helperText: 'Optional',
-                    suffixIcon: state.isLoadingDepartments
-                        ? const SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : null,
+                  // Visit Date
+                  DateTimeFieldBlocBuilder(
+                    dateTimeFieldBloc: visitFormBloc.dateFieldBloc,
+                    format: DateFormat('yyyy-MM-dd'),
+                    initialDate: DateTime.now(),
+                    firstDate: DateTime(2000),
+                    lastDate: DateTime.now().add(const Duration(days: 365)),
+                    decoration: InputDecoration(
+                      labelText: context.l10n.visitDate,
+                    ),
                   ),
-                  items: state.availableDepartments.map((department) {
-                    return DropdownMenuItem<int?>(
-                      value: department.id,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(department.name),
-                          if (department.category != null)
-                            Text(
-                              department.category!,
-                              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: Theme.of(context).colorScheme.onSurfaceVariant,
-                              ),
-                            ),
-                        ],
-                      ),
-                    );
-                  }).toList(),
-                  onChanged: (departmentId) {
-                    context.read<VisitFormBloc>().add(
-                      VisitFormDepartmentIdChanged(departmentId),
-                    );
-                  },
-                );
-              },
-            ),
-            const SizedBox(height: 16),
+                  const SizedBox(height: 16),
 
-            // Doctor Selector
-            BlocBuilder<VisitFormBloc, VisitFormState>(
-              builder: (context, state) {
-                return DropdownButtonFormField<int?>(
-                  value: state.doctorId,
-                  decoration: InputDecoration(
-                    labelText: 'Doctor',
-                    border: const OutlineInputBorder(),
-                    helperText: 'Optional',
-                    suffixIcon: state.isLoadingDoctors
-                        ? const SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : null,
+                  // Visit Details
+                  TextFieldBlocBuilder(
+                    textFieldBloc: visitFormBloc.detailsFieldBloc,
+                    decoration: InputDecoration(
+                      labelText: context.l10n.visitDetails,
+                    ),
+                    maxLines: 3,
                   ),
-                  items: state.availableDoctors.map((doctor) {
-                    return DropdownMenuItem<int?>(
-                      value: doctor.id,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(doctor.name),
-                          if (doctor.level != null)
-                            Text(
-                              doctor.level!,
-                              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: Theme.of(context).colorScheme.onSurfaceVariant,
-                              ),
-                            ),
-                        ],
-                      ),
-                    );
-                  }).toList(),
-                  onChanged: (doctorId) {
-                    context.read<VisitFormBloc>().add(
-                      VisitFormDoctorIdChanged(doctorId),
-                    );
-                  },
-                );
-              },
+                  const SizedBox(height: 16),
+
+                   // Use safe dropdown builders that handle initialization properly
+                   // Hospital
+                   SafeDropdownFieldBlocBuilder<int?>(
+                     selectFieldBloc: visitFormBloc.hospitalFieldBloc,
+                     decoration: InputDecoration(
+                       labelText: 'Hospital',
+                       hintText: 'Select a hospital',
+                     ),
+                     itemBuilder: (context, value) {
+                       if (value == null) {
+                         return Text('None', style: TextStyle(color: Colors.grey[600]));
+                       }
+                       final hospitals = visitFormBloc.availableHospitals;
+                       final hospital = hospitals.cast<Hospital?>().firstWhere(
+                         (h) => h?.id == value,
+                         orElse: () => null,
+                       );
+                       return Text(hospital?.name ?? 'Unknown');
+                     },
+                   ),
+                   const SizedBox(height: 16),
+
+                   // Department
+                   SafeDropdownFieldBlocBuilder<int?>(
+                     selectFieldBloc: visitFormBloc.departmentFieldBloc,
+                     decoration: InputDecoration(
+                       labelText: 'Department',
+                       hintText: 'Select a department',
+                     ),
+                     itemBuilder: (context, value) {
+                       if (value == null) {
+                         return Text('None', style: TextStyle(color: Colors.grey[600]));
+                       }
+                       final departments = visitFormBloc.availableDepartments;
+                       final department = departments.cast<Department?>().firstWhere(
+                         (d) => d?.id == value,
+                         orElse: () => null,
+                       );
+                       return Text(department?.name ?? 'Unknown');
+                     },
+                   ),
+                   const SizedBox(height: 16),
+
+                   // Doctor
+                   SafeDropdownFieldBlocBuilder<int?>(
+                     selectFieldBloc: visitFormBloc.doctorFieldBloc,
+                     decoration: InputDecoration(
+                       labelText: 'Doctor',
+                       hintText: 'Select a doctor',
+                     ),
+                     itemBuilder: (context, value) {
+                       if (value == null) {
+                         return Text('None', style: TextStyle(color: Colors.grey[600]));
+                       }
+                       final doctors = visitFormBloc.availableDoctors;
+                       final doctor = doctors.cast<Doctor?>().firstWhere(
+                         (d) => d?.id == value,
+                         orElse: () => null,
+                       );
+                       return Text(doctor?.name ?? 'Unknown');
+                     },
+                   ),
+                   const SizedBox(height: 16),
+
+                  // Additional Informations
+                  TextFieldBlocBuilder(
+                    textFieldBloc: visitFormBloc.informationsFieldBloc,
+                    decoration: InputDecoration(
+                      labelText: 'Additional Information',
+                      hintText: 'Enter any additional notes...',
+                    ),
+                    maxLines: 2,
+                  ),
+                ],
+              ),
             ),
-          ],
-        ),
+          );
+        },
       ),
     );
-  }
-
-  Future<void> _selectDate() async {
-    final DateTime? picked = await showDatePicker(
-      context: context,
-      initialDate: context.read<VisitFormBloc>().state.date ?? DateTime.now(),
-      firstDate: DateTime(2000),
-      lastDate: DateTime(2101),
-    );
-
-    if (picked != null) {
-      context.read<VisitFormBloc>().add(
-            VisitFormDateChanged(picked),
-          );
-    }
-  }
-
-  String _formatDate(DateTime date) {
-    return '${date.day}/${date.month}/${date.year}';
   }
 
   String _formatCategoryName(VisitCategory category) {
@@ -327,53 +212,5 @@ class _VisitFormState extends State<VisitForm> {
       default:
         return category.toString();
     }
-  }
-
-  /// Validates and saves the form
-  Future<bool> saveForm() async {
-    final formState = widget.formKey?.currentState;
-    if (formState?.validate() ?? false) {
-      final blocState = context.read<VisitFormBloc>().state;
-
-      if (!blocState.isFormValid) {
-        if (!blocState.isDateValid) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Please select a visit date')),
-          );
-          return false;
-        }
-        if (!blocState.isDetailsValid) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Please enter visit details')),
-          );
-          return false;
-        }
-        return false;
-      }
-
-      try {
-        await widget.onSave(
-          category: blocState.category,
-          date: blocState.date!,
-          details: blocState.details.trim(),
-          hospitalId: blocState.hospitalId,
-          departmentId: blocState.departmentId,
-          doctorId: blocState.doctorId,
-          informations: blocState.informations,
-        );
-        return true;
-      } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: ${e.toString()}')),
-        );
-        return false;
-      }
-    }
-    return false;
-  }
-
-  /// Public method to trigger form validation and save
-  Future<bool> validateAndSave() async {
-    return await saveForm();
   }
 }
