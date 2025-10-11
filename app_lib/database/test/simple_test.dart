@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:drift/drift.dart';
 import 'package:matcher/matcher.dart' as m;
-import '../lib/src/database.dart';
+import 'package:app_database/app_database.dart';
 
 void main() {
   group('Simple Database Tests', () {

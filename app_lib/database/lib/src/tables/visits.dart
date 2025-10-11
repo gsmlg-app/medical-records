@@ -1,6 +1,5 @@
 import 'package:drift/drift.dart';
 import '../enums.dart';
-import '../type_converter.dart';
 
 @DataClassName('Visit')
 class Visits extends Table {

@@ -1,5 +1,4 @@
 import 'package:drift/drift.dart';
-import '../type_converter.dart';
 
 @DataClassName('Hospital')
 class Hospitals extends Table {
