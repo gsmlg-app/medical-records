@@ -49,12 +49,14 @@ class VisitFormBloc extends FormBloc<String, String> {
       final hospitalItems = [null, ...availableHospitals.map((h) => h.id)];
       AppLogger().d('Updating hospital field items with ${hospitalItems.length} options');
       AppLogger().d('Hospital items before update: ${hospitalFieldBloc.state.items.length}');
-      hospitalFieldBloc.updateItems(hospitalItems);
-      AppLogger().d('Hospital items after update: ${hospitalFieldBloc.state.items.length}');
 
-      // Ensure current value is still valid (null is always in items)
-      if (!hospitalItems.contains(hospitalFieldBloc.value)) {
-        hospitalFieldBloc.updateValue(null);
+      // Ensure current value is valid BEFORE updating items to prevent assertion errors
+      final currentValue = hospitalFieldBloc.value;
+      var newValue = currentValue;
+
+      if (!hospitalItems.contains(currentValue)) {
+        AppLogger().d('Current hospital value $currentValue not in new items, setting to null');
+        newValue = null;
       }
 
       // If requested and a new hospital was added, select the most recent one
@@ -65,7 +67,17 @@ class VisitFormBloc extends FormBloc<String, String> {
         final newestHospital = sortedHospitals.first;
 
         AppLogger().d('Selecting newly added hospital: ${newestHospital.name}');
-        hospitalFieldBloc.updateValue(newestHospital.id);
+        newValue = newestHospital.id;
+      }
+
+      // Update items first
+      hospitalFieldBloc.updateItems(hospitalItems);
+      AppLogger().d('Hospital items after update: ${hospitalFieldBloc.state.items.length}');
+
+      // Then update value if needed
+      if (newValue != currentValue) {
+        hospitalFieldBloc.updateValue(newValue);
+        AppLogger().d('Updated hospital value from $currentValue to $newValue');
       }
 
       AppLogger().d('Refreshed hospitals with ${availableHospitals.length} items');
