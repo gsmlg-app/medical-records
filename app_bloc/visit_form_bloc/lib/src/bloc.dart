@@ -48,7 +48,9 @@ class VisitFormBloc extends FormBloc<String, String> {
       // Update hospital field items - this is the key fix!
       final hospitalItems = [null, ...availableHospitals.map((h) => h.id)];
       AppLogger().d('Updating hospital field items with ${hospitalItems.length} options');
+      AppLogger().d('Hospital items before update: ${hospitalFieldBloc.state.items.length}');
       hospitalFieldBloc.updateItems(hospitalItems);
+      AppLogger().d('Hospital items after update: ${hospitalFieldBloc.state.items.length}');
 
       // Ensure current value is still valid (null is always in items)
       if (!hospitalItems.contains(hospitalFieldBloc.value)) {

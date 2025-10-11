@@ -120,7 +120,6 @@ class _VisitFormState extends State<VisitForm> {
                   ),
                   const SizedBox(height: 16),
 
-                  // Use safe dropdown builders that handle initialization properly
                   // Hospital with quick add
                   _HospitalDropdown(visitFormBloc: visitFormBloc),
                   const SizedBox(height: 16),
@@ -191,62 +190,47 @@ class _HospitalDropdown extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<VisitFormBloc, FormBlocState<String, String>>(
-      builder: (context, state) {
-        // Force rebuild when state changes
-        AppLogger().d('Building hospital dropdown with ${visitFormBloc.availableHospitals.length} hospitals');
-        return DropdownButtonFormField<int?>(
-          key: ValueKey('hospital_dropdown_${visitFormBloc.availableHospitals.length}'),
-          value: visitFormBloc.hospitalFieldBloc.value,
-          decoration: InputDecoration(
-            labelText: 'Hospital',
-            hintText: 'Select a hospital or add new',
-            border: const OutlineInputBorder(),
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: 16,
-              vertical: 12,
-            ),
-            suffixIcon: IconButton(
-              icon: const Icon(Icons.add),
-              onPressed: () => _showAddHospitalDialog(context),
-              tooltip: 'Add Hospital',
-            ),
-          ),
-          items: [
-            const DropdownMenuItem<int?>(
-              value: null,
-              child: Text('None', style: TextStyle(color: Colors.grey)),
-            ),
-            ...visitFormBloc.availableHospitals.map((hospital) {
-              return DropdownMenuItem<int?>(
-                value: hospital.id,
-                child: Text(hospital.name),
-              );
-            }),
-            const DropdownMenuItem<int?>(
-              value: -1, // Special value for "Add Hospital"
-              child: Row(
-                children: [
-                  Icon(Icons.add, size: 16, color: Colors.blue),
-                  SizedBox(width: 8),
-                  Text(
-                    'Add Hospital',
-                    style: TextStyle(color: Colors.blue),
-                  ),
-                ],
+    return Row(
+      children: [
+        // Hospital dropdown using SelectFieldBlocBuilder
+        Expanded(
+          child: SelectFieldBlocBuilder<int?>(
+            selectFieldBloc: visitFormBloc.hospitalFieldBloc,
+            decoration: InputDecoration(
+              labelText: 'Hospital',
+              hintText: 'Select a hospital',
+              border: const OutlineInputBorder(),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 12,
               ),
             ),
-          ],
-          onChanged: (value) {
-            if (value == -1) {
-              // "Add Hospital" selected
-              _showAddHospitalDialog(context);
-            } else {
-              visitFormBloc.hospitalFieldBloc.updateValue(value);
-            }
-          },
-        );
-      },
+            itemBuilder: (context, value) {
+              if (value == null) {
+                return const FieldItem(
+                  child: Text('None', style: TextStyle(color: Colors.grey)),
+                );
+              }
+              final hospital = visitFormBloc.availableHospitals
+                  .where((h) => h.id == value)
+                  .firstOrNull;
+              return FieldItem(
+                child: Text(hospital?.name ?? 'Unknown Hospital'),
+              );
+            },
+          ),
+        ),
+        const SizedBox(width: 8),
+        // Add hospital button
+        IconButton(
+          icon: const Icon(Icons.add),
+          onPressed: () => _showAddHospitalDialog(context),
+          tooltip: 'Add Hospital',
+          style: IconButton.styleFrom(
+            backgroundColor: Theme.of(context).primaryColor.withOpacity(0.1),
+          ),
+        ),
+      ],
     );
   }
 
@@ -302,9 +286,12 @@ class _HospitalDropdown extends StatelessWidget {
                   final visitFormBloc = context.read<VisitFormBloc>();
                   AppLogger().d('About to refresh hospitals...');
                   AppLogger().d('Current hospital count: ${visitFormBloc.availableHospitals.length}');
+                  AppLogger().d('Current hospital field items: ${visitFormBloc.hospitalFieldBloc.state.items.length}');
                   await visitFormBloc.refreshHospitals(selectNewest: true);
                   AppLogger().d('Hospital refresh completed');
                   AppLogger().d('New hospital count: ${visitFormBloc.availableHospitals.length}');
+                  AppLogger().d('New hospital field items: ${visitFormBloc.hospitalFieldBloc.state.items.length}');
+                  AppLogger().d('Selected hospital value: ${visitFormBloc.hospitalFieldBloc.value}');
                 } else if (state is HospitalError) {
                   // Notify form bloc of failure
                   context.read<HospitalFormBloc>().handleSubmissionFailure(state.message);
