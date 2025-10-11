@@ -110,16 +110,6 @@ class _VisitFormState extends State<VisitForm> {
                   ),
                   const SizedBox(height: 16),
 
-                  // Visit Details
-                  TextFieldBlocBuilder(
-                    textFieldBloc: visitFormBloc.detailsFieldBloc,
-                    decoration: InputDecoration(
-                      labelText: context.l10n.visitDetails,
-                    ),
-                    maxLines: 3,
-                  ),
-                  const SizedBox(height: 16),
-
                    // Use safe dropdown builders that handle initialization properly
                    // Hospital
                    SafeDropdownFieldBlocBuilder<int?>(
@@ -181,9 +171,20 @@ class _VisitFormState extends State<VisitForm> {
                        );
                        return Text(doctor?.name ?? 'Unknown');
                      },
+                    ),
+                   const SizedBox(height: 16),
+
+                   // Visit Details (optional)
+                   TextFieldBlocBuilder(
+                     textFieldBloc: visitFormBloc.detailsFieldBloc,
+                     decoration: InputDecoration(
+                       labelText: context.l10n.visitDetails,
+                       hintText: 'Enter optional visit details...',
+                     ),
+                     maxLines: 3,
                    ),
-                ],
-              ),
+                 ],
+               ),
             ),
           );
         },

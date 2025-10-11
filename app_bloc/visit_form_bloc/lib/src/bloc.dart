@@ -65,7 +65,7 @@ class VisitFormBloc extends FormBloc<String, String> {
   late final detailsFieldBloc = TextFieldBloc(
     name: 'details',
     initialValue: visitToEdit?.details ?? '',
-    validators: [FieldBlocValidators.required],
+    validators: [], // No validators - details field is optional
   );
 
   /// Hospital field bloc
