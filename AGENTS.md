@@ -21,5 +21,5 @@
 - Types: always specify return types and parameter types
 - Workspace structure: use melos for monorepo management
 - Generated files: exclude *.g.dart, *.freezed.dart from analysis
-- Dependencies: use workspace packages with `any` version constraint
+- Dependencies: use workspace packages with `any` version constraint. When including packages in this project, just add `<package_name>: any`, don't use path
 - Testing: use mockito for mocking, build_test for test utilities

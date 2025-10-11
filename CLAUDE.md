@@ -6,132 +6,111 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 This is a Flutter monorepo managed by Melos, providing a comprehensive medical records application with modular architecture. The project follows clean architecture principles with separation of concerns across multiple packages, specifically designed for healthcare data management.
 
+## Development Commands
+
+### Essential Setup Commands
+```bash
+# Install global dependencies (run once)
+dart pub global activate melos
+dart pub global activate mason_cli
+
+# Bootstrap the entire workspace
+melos bootstrap
+
+# Initialize Mason templates
+mason get
+
+# Prepare for development (generates code, runs build runner)
+melos run prepare
+```
+
+### Core Development Workflow
+```bash
+# Run static analysis across all packages
+melos run analyze
+
+# Fix auto-fixable issues across all packages
+melos run fix
+
+# Format code across all packages
+melos run format
+
+# Run tests across all packages
+melos run test
+
+# Generate code (build_runner, l10n)
+melos run build-runner
+melos run gen-l10n
+
+# Check dependencies and versions
+melos run validate-dependencies
+melos run outdated
+```
+
+### Individual Package Operations
+```bash
+# Navigate to any package directory and run:
+flutter test                    # Run tests for that package
+flutter analyze                 # Analyze that package
+dart run build_runner build     # Generate code for that package
+
+# Example: work with database package
+cd app_lib/database
+flutter test
+dart run build_runner build --delete-conflicting-outputs
+```
+
+### Running the Application
+```bash
+# From root directory
+flutter run
+flutter run -d chrome          # Web
+flutter run -d android         # Android
+flutter run -d ios            # iOS
+```
+
 ## Architecture Structure
 
 ### Monorepo Organization
 - **Main App**: `lib/` - Entry point and main application code
+- **API Layer**: `app_api/` - Generated API client code (OpenAPI/Swagger based)
 - **State Management**: `app_bloc/` - BLoC pattern implementations for business logic
 - **Shared Libraries**: `app_lib/` - Core utilities, themes, localization, database, logging
 - **UI Components**: `app_widget/` - Reusable widgets and UI elements
 - **Code Generation**: `bricks/` - Mason templates for scaffolding
 - **Third-party**: `third_party/` - Modified/custom third-party packages
 
-### Key Packages
-- **app_database**: Database management and data persistence
-- **app_theme**: Theme management with multiple color schemes (fire, green, violet, wheat)
-- **app_locale**: Internationalization support with ARB files, outputs to `lib/gen_l10n/`
-- **app_provider**: Dependency injection and app-level providers using `MainProvider`
-- **app_logging**: Structured logging with file output support
-- **theme_bloc**: State management for theme switching
-- **app_adaptive_widgets**: Responsive/adaptive UI components
-- **app_artwork**: Asset management (icons, lottie animations)
-- **app_feedback**: User feedback mechanisms (snackbars, dialogs, toasts)
-- **app_web_view**: Web view integration components
-- **settings_ui**: Custom settings UI components
+### Key Data Flow Architecture
 
-## Development Commands
+The application follows a **clean data flow pattern** with clear separation of concerns:
 
-### Setup & Installation
-```bash
-# Install global dependencies
-dart pub global activate melos
-dart pub global activate mason_cli
+1. **Database Layer** (`app_database`): Drift ORM with SQLite
+   - Tables: Hospitals, Departments, Doctors, Treatments, Visits, Resources
+   - CRUD operations with companion objects
+   - Supports both mobile and web platforms
 
-# Bootstrap the project
-melos bootstrap
+2. **BLoC Layer** (`app_bloc/*`): Business logic with state management
+   - Each domain entity has its own BLoC (HospitalBloc, TreatmentBloc, VisitBloc, etc.)
+   - Form BLoCs for complex form handling with validation
+   - State classes for loading, loaded, error, and operation success states
 
-# Initialize mason
-mason get
-```
+3. **Provider Layer** (`app_provider`): Dependency injection
+   - `MainProvider` sets up global dependencies (SharedPreferences, AppDatabase)
+   - BLoC instances provided at root level for global state
+   - Clean separation between UI and business logic
 
-### Development Workflow
-```bash
-# Run all static analysis
-melos run lint:all
+4. **UI Layer** (`lib/screens/`, `app_widget/*`): Declarative UI with GoRouter
+   - Screen components organized by domain
+   - Reusable form widgets with BLoC integration
+   - Consistent navigation with NoTransitionPage
 
-# Format all code
-melos run format
+### Entry Points and Key Files
 
-# Run tests across all packages
-flutter test
-melos exec flutter test
-
-# Generate code (build_runner, l10n)
-melos run prepare
-melos run build-all
-
-# Check dependencies
-melos run validate-dependencies
-melos run outdated
-```
-
-### Individual Package Commands
-```bash
-# Run tests for specific package
-cd app_lib/theme && flutter test
-
-# Analyze specific package
-cd app_widget/adaptive && flutter analyze
-
-# Build specific package
-cd app_lib/theme && dart run build_runner build --delete-conflicting-outputs
-
-# Run single test
-flutter test test/widget_test.dart
-```
-
-### Code Generation
-```bash
-# Generate API client
-mason make api_client -o app_api/app_api --package_name=app_api
-# Then add openapi spec to app_api/app_api/openapi.yaml
-
-# Generate new BLoC
-mason make simple_bloc -o app_bloc/feature_name --name=feature_name
-
-# Generate new screen
-mason make screen --name ScreenName --folder subfolder
-
-# Generate new widget
-mason make widget --name WidgetName --type stateless --folder components
-```
-
-### Running the App
-```bash
-# Development
-flutter run
-
-# Specific platform
-flutter run -d chrome
-flutter run -d android
-flutter run -d ios
-
-# Generate app icons
-dart run flutter_launcher_icons:main
-```
-
-## Key Files & Entry Points
-
-- **Main Entry**: `lib/main.dart` - App initialization with `MainProvider`, logging setup, database initialization
-- **App Shell**: `lib/app.dart` - Root widget with `ThemeBloc` integration and `MaterialApp.router`
-- **Routing**: `lib/router.dart` - GoRouter configuration with declarative routing and `NoTransitionPage`
-- **Screens**: `lib/screens/` - Feature screens organized by domain (app/, home/, settings/)
-- **Localization**: `lib/arb/` - ARB files for i18n, generated to `lib/gen_l10n/`
-
-## Configuration Files
-
-- **Melos**: `pubspec.yaml` (workspace configuration with scripts)
-- **Mason**: `mason.yaml` (code generation templates: api_client, simple_bloc, repository, screen, widget)
-- **Analysis**: `analysis_options.yaml` (linting rules, excludes generated files)
-- **Localization**: `app_lib/locale/l10n.yaml` (i18n configuration)
-- **Environment**: `.envrc`, `devenv.nix` (development environment setup)
-
-## Testing Structure
-
-Tests are co-located with their respective packages:
-- Unit tests: `test/` directory in each package
-- Widget tests: `test/` directory in main app
-- Integration tests: Use `flutter test` at root level
+- **Main Entry**: `lib/main.dart` - App initialization, logging setup, database initialization, BLoC providers
+- **App Shell**: `lib/app.dart` - MaterialApp.router with ThemeBloc integration and localization
+- **Router**: `lib/router.dart` - GoRouter configuration with declarative routing and NoTransitionPage
+- **Database**: `app_lib/database/lib/src/database.dart` - Drift database with full CRUD operations
+- **Provider**: `app_lib/provider/lib/src/main.dart` - MainProvider dependency injection setup
 
 ## Package Dependencies
 
@@ -151,7 +130,7 @@ When including internal packages in this project, **do not use path dependencies
 ```yaml
 name: my_feature_package
 environment:
-  sdk: ">=3.6.0 <4.0.0"
+  sdk: ">=3.8.0 <4.0.0"
   resolution: workspace  # Required for Melos workspace
 
 dependencies:
@@ -179,34 +158,61 @@ dependencies:
   app_database: any  # This is correct
 ```
 
-This approach allows:
-- Cleaner dependency management
-- Automatic path resolution by Melos
-- Consistent dependency handling across the workspace
-- Easier package publishing and maintenance
-
 ## Key Architecture Patterns
 
-### Provider Pattern
-The app uses `MainProvider` at the root level to provide shared instances:
-- `SharedPreferences` for local storage
-- `AppDatabase` for data persistence
-- Theme and locale management through BLoC
+### BLoC Pattern Implementation
+Each domain entity follows the standard BLoC pattern:
+- **Events**: User actions (LoadX, AddX, UpdateX, DeleteX)
+- **States**: UI states (XInitial, XLoading, XLoaded, XError, XOperationSuccess)
+- **BLoC**: Business logic that converts events to states
+- Form BLoCs handle complex form validation and submission
 
-### Logging System
-Structured logging with:
-- File-based logging to app support directory
-- Configurable log levels
-- Centralized `AppLogger` instance
+### Database Schema Design
+The medical records system models these relationships:
+- **Hospitals** contain multiple **Departments** and **Doctors**
+- **Treatments** represent medical procedures/therapies
+- **Visits** are appointments linked to **Treatments** and can have **Resources**
+- Proper foreign key relationships and cascade handling
 
-### Theme Management
-Dynamic theme switching through:
-- `ThemeBloc` for state management
-- Multiple predefined color schemes
-- Light/dark theme support
+### State Management Strategy
+- **Global BLoCs**: Provided at app root for entities accessed across multiple screens
+- **Theme Management**: ThemeBloc with persistent storage using SharedPreferences
+- **Form State**: Dedicated form BLoCs for complex validation and submission workflows
 
-### Routing
-Declarative routing with GoRouter:
-- Route definitions with static paths and names
-- `NoTransitionPage` for consistent navigation
-- Error handling with dedicated error screen
+### Logging and Error Handling
+- **Structured Logging**: AppLogger with file output to app support directory
+- **Crash Reporting**: CrashReportingWidget wraps the entire app
+- **Error Screens**: Dedicated error handling in router configuration
+
+## Code Generation with Mason
+
+The project uses Mason templates for consistent code generation:
+
+```bash
+# Generate new BLoC package
+mason make simple_bloc -o app_bloc/feature_name --name=feature_name
+
+# Generate new screen
+mason make screen --name ScreenName --folder subfolder
+
+# Generate new widget
+mason make widget --name WidgetName --type stateless --folder components
+
+# Generate API client
+mason make api_client -o app_api/app_api --package_name=app_api
+```
+
+## Testing Strategy
+
+- **Unit Tests**: Co-located with packages in `test/` directories
+- **Widget Tests**: For UI components, especially form widgets
+- **Integration Tests**: Use `melos run test` for comprehensive testing
+- **Database Testing**: AppDatabase.forTesting() factory for in-memory tests
+
+## Configuration Files
+
+- **Melos**: `pubspec.yaml` (workspace configuration with comprehensive scripts)
+- **Mason**: `mason.yaml` (code generation templates)
+- **Analysis**: `analysis_options.yaml` (excludes generated files, uses flutter_lints)
+- **Localization**: `app_lib/locale/l10n.yaml` (i18n configuration)
+- **Dependencies**: All internal packages use workspace resolution with `any` versions
