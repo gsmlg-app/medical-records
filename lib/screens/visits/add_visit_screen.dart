@@ -77,7 +77,6 @@ class _AddVisitViewState extends State<_AddVisitView> {
         final hospitalId = _visitFormBloc.hospitalFieldBloc.value;
         final departmentId = _visitFormBloc.departmentFieldBloc.value;
         final doctorId = _visitFormBloc.doctorFieldBloc.value;
-        final informations = _visitFormBloc.informationsFieldBloc.value;
 
         context.read<VisitBloc>().add(
               AddVisit(
@@ -88,7 +87,6 @@ class _AddVisitViewState extends State<_AddVisitView> {
                 hospitalId: hospitalId,
                 departmentId: departmentId,
                 doctorId: doctorId,
-                informations: informations.isEmpty ? null : informations,
               ),
             );
         context.pop();
@@ -160,7 +158,6 @@ class _AddVisitViewState extends State<_AddVisitView> {
                         int? hospitalId,
                         int? departmentId,
                         int? doctorId,
-                        String? informations,
                       }) async {
                         // This is handled by the save button in the AppBar
                       },

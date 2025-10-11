@@ -35,7 +35,6 @@ class VisitForm extends StatefulWidget {
     int? hospitalId,
     int? departmentId,
     int? doctorId,
-    String? informations,
   }) onSave;
 
   @override
@@ -183,17 +182,6 @@ class _VisitFormState extends State<VisitForm> {
                        return Text(doctor?.name ?? 'Unknown');
                      },
                    ),
-                   const SizedBox(height: 16),
-
-                  // Additional Informations
-                  TextFieldBlocBuilder(
-                    textFieldBloc: visitFormBloc.informationsFieldBloc,
-                    decoration: InputDecoration(
-                      labelText: 'Additional Information',
-                      hintText: 'Enter any additional notes...',
-                    ),
-                    maxLines: 2,
-                  ),
                 ],
               ),
             ),

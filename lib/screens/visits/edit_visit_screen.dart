@@ -81,7 +81,7 @@ class _EditVisitViewState extends State<_EditVisitView> {
           hospitalId: null,
           departmentId: null,
           doctorId: null,
-          informations: null,
+
           createdAt: DateTime.now(),
           updatedAt: DateTime.now(),
         );
@@ -200,7 +200,6 @@ class _EditVisitViewState extends State<_EditVisitView> {
                             int? hospitalId,
                             int? departmentId,
                             int? doctorId,
-                            String? informations,
                           }) async {
                             // This is handled by the save button in the AppBar
                           },

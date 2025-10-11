@@ -43,7 +43,6 @@ class VisitFormBloc extends FormBloc<String, String> {
     addFieldBloc(fieldBloc: hospitalFieldBloc);
     addFieldBloc(fieldBloc: departmentFieldBloc);
     addFieldBloc(fieldBloc: doctorFieldBloc);
-    addFieldBloc(fieldBloc: informationsFieldBloc);
     print('DEBUG: VisitFormBloc constructor completed');
   }
 
@@ -90,11 +89,7 @@ class VisitFormBloc extends FormBloc<String, String> {
     validators: [], // No validators for optional field
   );
 
-  /// Additional informations field bloc
-  late final informationsFieldBloc = TextFieldBloc(
-    name: 'informations',
-    initialValue: visitToEdit?.informations ?? '',
-  );
+
 
   @override
   void onLoading() async {
@@ -187,7 +182,6 @@ class VisitFormBloc extends FormBloc<String, String> {
       final hospitalId = hospitalFieldBloc.value;
       final departmentId = departmentFieldBloc.value;
       final doctorId = doctorFieldBloc.value;
-      final informations = informationsFieldBloc.value;
 
       if (visitToEdit != null) {
         // Update existing visit
@@ -217,7 +211,6 @@ class VisitFormBloc extends FormBloc<String, String> {
             hospitalId: hospitalId,
             departmentId: departmentId,
             doctorId: doctorId,
-            informations: informations.isEmpty ? null : informations,
           ));
           
           // Wait for the update to complete (with timeout)
@@ -243,7 +236,6 @@ class VisitFormBloc extends FormBloc<String, String> {
                 hospitalId: hospitalId,
                 departmentId: departmentId,
                 doctorId: doctorId,
-                informations: informations.isEmpty ? null : informations,
                 createdAt: visitToEdit!.createdAt,
                 updatedAt: DateTime.now(),
               );
@@ -264,7 +256,6 @@ class VisitFormBloc extends FormBloc<String, String> {
             hospitalId: hospitalId,
             departmentId: departmentId,
             doctorId: doctorId,
-            informations: informations.isEmpty ? null : informations,
             createdAt: visitToEdit!.createdAt,
             updatedAt: DateTime.now(),
           );
@@ -468,7 +459,6 @@ class VisitFormBloc extends FormBloc<String, String> {
     categoryFieldBloc.updateValue(category);
     dateFieldBloc.updateValue(visit.date);
     detailsFieldBloc.updateValue(visit.details);
-    informationsFieldBloc.updateValue(visit.informations ?? '');
     
     // For cascading fields, validate values exist before setting them
     if (visit.hospitalId != null && availableHospitals.any((h) => h.id == visit.hospitalId)) {
@@ -516,7 +506,6 @@ class VisitFormBloc extends FormBloc<String, String> {
     hospitalFieldBloc.updateValue(visit.hospitalId);
     departmentFieldBloc.updateValue(visit.departmentId);
     doctorFieldBloc.updateValue(visit.doctorId);
-    informationsFieldBloc.updateValue(visit.informations ?? '');
   }
 
   /// Public method to set up field dependencies after UI is stable
@@ -538,7 +527,6 @@ class VisitFormBloc extends FormBloc<String, String> {
     hospitalFieldBloc.updateValue(null);
     departmentFieldBloc.updateValue(null);
     doctorFieldBloc.updateValue(null);
-    informationsFieldBloc.updateValue('');
     visitToEdit = null;
   }
 

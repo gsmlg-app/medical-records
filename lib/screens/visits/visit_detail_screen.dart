@@ -60,8 +60,7 @@ class _VisitDetailScreenState extends State<VisitDetailScreen> {
             _visit!.date != updatedVisit.date ||
             _visit!.hospitalId != updatedVisit.hospitalId ||
             _visit!.departmentId != updatedVisit.departmentId ||
-            _visit!.doctorId != updatedVisit.doctorId ||
-            _visit!.informations != updatedVisit.informations) {
+            _visit!.doctorId != updatedVisit.doctorId) {
           
           _visit = updatedVisit;
           
