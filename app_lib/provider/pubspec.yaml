@@ -16,6 +16,8 @@ dependencies:
 
   theme_bloc: any
   app_database: any
+  treatment_bloc: any
+  visit_bloc: any
 
 dev_dependencies:
   flutter_test:

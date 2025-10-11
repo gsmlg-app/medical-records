@@ -1,6 +1,5 @@
 import 'package:app_database/app_database.dart';
 import 'package:equatable/equatable.dart';
-import 'package:app_database/src/enums.dart';
 
 abstract class VisitEvent extends Equatable {
   const VisitEvent();

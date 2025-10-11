@@ -2,7 +2,6 @@ import 'package:app_database/app_database.dart';
 import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:app_database/src/enums.dart';
 
 import 'package:visit_bloc/visit_bloc.dart';
 

@@ -11,6 +11,8 @@ dependencies:
     sdk: flutter
   bloc: ^9.0.0
   equatable: ^2.0.7
+  app_database: any
+  drift: ^2.26.2
 
 dev_dependencies:
   flutter_test:
