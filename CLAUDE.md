@@ -135,7 +135,55 @@ Tests are co-located with their respective packages:
 
 ## Package Dependencies
 
-The workspace uses path-based dependencies for internal packages (marked as `any` in pubspec.yaml). All packages are managed through Melos workspace configuration.
+### Melos Mono Repository Setup
+
+This project uses **Melos** to manage a Flutter monorepo with multiple packages. Melos handles workspace management, dependency resolution, and provides unified commands for development workflows.
+
+### Adding Internal Package Dependencies
+
+When including internal packages in this project, **do not use path dependencies**. Instead:
+
+1. **Use workspace dependencies**: Add internal packages with `<package_name>: any` in `pubspec.yaml`
+2. **Include resolution**: Add `resolution: workspace` to the environment section
+3. **Let Melos handle path resolution**: Melos automatically resolves these dependencies to the correct local package paths
+
+**Example pubspec.yaml:**
+```yaml
+name: my_feature_package
+environment:
+  sdk: ">=3.6.0 <4.0.0"
+  resolution: workspace  # Required for Melos workspace
+
+dependencies:
+  flutter:
+    sdk: flutter
+  bloc: ^9.0.0
+
+  # Internal packages - use 'any' version, not paths
+  app_database: any
+  app_theme: any
+  app_provider: any
+  visit_bloc: any
+```
+
+**❌ Wrong:**
+```yaml
+dependencies:
+  app_database:
+    path: ../../app_lib/database  # DON'T DO THIS
+```
+
+**✅ Correct:**
+```yaml
+dependencies:
+  app_database: any  # This is correct
+```
+
+This approach allows:
+- Cleaner dependency management
+- Automatic path resolution by Melos
+- Consistent dependency handling across the workspace
+- Easier package publishing and maintenance
 
 ## Key Architecture Patterns
 
