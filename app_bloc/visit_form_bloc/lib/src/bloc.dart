@@ -250,11 +250,20 @@ class VisitFormBloc extends FormBloc<String, String> {
       // CRITICAL: Update items FIRST, then ensure values are valid
       // This prevents dropdown assertion errors by ensuring value always exists in items
 
-      // Update hospital field
+      // Update hospital field with safe pattern
+      final currentHospitalValue = hospitalFieldBloc.value;
+      var newHospitalValue = currentHospitalValue;
+
+      if (!hospitalItems.contains(currentHospitalValue)) {
+        AppLogger().d('Hospital value $currentHospitalValue not in items, setting to null');
+        newHospitalValue = null;
+      }
+
       hospitalFieldBloc.updateItems(hospitalItems);
-      // Ensure value is valid (null is always in items)
-      if (!hospitalItems.contains(hospitalFieldBloc.value)) {
-        hospitalFieldBloc.updateValue(null);
+
+      if (newHospitalValue != currentHospitalValue) {
+        hospitalFieldBloc.updateValue(newHospitalValue);
+        AppLogger().d('Updated hospital value from $currentHospitalValue to $newHospitalValue');
       }
 
       // Update department field (filtered by hospital)
@@ -590,8 +599,23 @@ class VisitFormBloc extends FormBloc<String, String> {
       'Updating doctor field with ${doctorItems.length} items, current doctor value: ${doctorFieldBloc.value}',
     );
 
-    // Update doctor items (value is already cleared by calling methods)
+    // Ensure current value is valid BEFORE updating items to prevent assertion errors
+    final currentValue = doctorFieldBloc.value;
+    var newValue = currentValue;
+
+    if (!doctorItems.contains(currentValue)) {
+      AppLogger().d('Doctor value $currentValue not in new items, setting to null');
+      newValue = null;
+    }
+
+    // Update items first
     doctorFieldBloc.updateItems(doctorItems);
+
+    // Then update value if needed
+    if (newValue != currentValue) {
+      doctorFieldBloc.updateValue(newValue);
+      AppLogger().d('Updated doctor value from $currentValue to $newValue');
+    }
   }
 
   /// Updates department options based on current hospital filter
@@ -638,8 +662,23 @@ class VisitFormBloc extends FormBloc<String, String> {
       'Updating department field with ${departmentItems.length} items, current department value: ${departmentFieldBloc.value}',
     );
 
-    // Update department items (value is already cleared by calling methods)
+    // Ensure current value is valid BEFORE updating items to prevent assertion errors
+    final currentValue = departmentFieldBloc.value;
+    var newValue = currentValue;
+
+    if (!departmentItems.contains(currentValue)) {
+      AppLogger().d('Department value $currentValue not in new items, setting to null');
+      newValue = null;
+    }
+
+    // Update items first
     departmentFieldBloc.updateItems(departmentItems);
+
+    // Then update value if needed
+    if (newValue != currentValue) {
+      departmentFieldBloc.updateValue(newValue);
+      AppLogger().d('Updated department value from $currentValue to $newValue');
+    }
   }
 
   /// Internal method to populate form after items are loaded
