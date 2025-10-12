@@ -83,11 +83,11 @@ class VisitFormBloc extends FormBloc<String, String> {
       AppLogger().d('Refreshed hospitals with ${availableHospitals.length} items');
 
       // Update department options since hospital list changed
-      _updateDepartmentOptions();
+      await _updateDepartmentOptions();
 
-      // No need to manually emit state changes here
-      // The BlocBuilder wrapper around the dropdown will automatically rebuild
-      // when the VisitFormBloc state changes through normal form interactions
+      // Emit a state change to trigger UI rebuild
+      // This ensures the dropdown updates when hospitals are refreshed
+      emitLoaded();
 
     } catch (e) {
       AppLogger().e('Failed to refresh hospitals: $e');
@@ -144,7 +144,7 @@ class VisitFormBloc extends FormBloc<String, String> {
       availableHospitals = await _database.getAllHospitals();
 
       // Update department options to include the new department
-      _updateDepartmentOptions();
+      await _updateDepartmentOptions();
 
       // Select the newly created department
       departmentFieldBloc.updateValue(departmentId);
@@ -152,6 +152,60 @@ class VisitFormBloc extends FormBloc<String, String> {
       return true;
     } catch (e) {
       AppLogger().e('Failed to add department: $e');
+      return false;
+    }
+  }
+
+  /// Quick add a new doctor for the selected hospital and department
+  Future<bool> quickAddDoctor(String name, {String? title, String? specialty}) async {
+    try {
+      final hospitalId = hospitalFieldBloc.value;
+      final departmentId = departmentFieldBloc.value;
+
+      if (hospitalId == null) {
+        AppLogger().w('Cannot add doctor - no hospital selected');
+        return false;
+      }
+
+      if (departmentId == null) {
+        AppLogger().w('Cannot add doctor - no department selected');
+        return false;
+      }
+
+      // Create the doctor
+      // Combine title and specialty into a level string
+      String? doctorLevel;
+      if (title != null && specialty != null) {
+        doctorLevel = '$title - $specialty';
+      } else if (title != null) {
+        doctorLevel = title;
+      } else if (specialty != null) {
+        doctorLevel = specialty;
+      }
+
+      final doctorId = await _database.createDoctor(
+        DoctorsCompanion(
+          name: Value(name),
+          hospitalId: Value(hospitalId),
+          departmentId: Value(departmentId),
+          level: Value(doctorLevel),
+        ),
+      );
+
+      AppLogger().d('Created new doctor with ID: $doctorId');
+
+      // Refresh the available doctors list
+      availableDoctors = await _database.getAllDoctors();
+
+      // Update doctor options to include the new doctor
+      _updateDoctorOptions();
+
+      // Select the newly created doctor
+      doctorFieldBloc.updateValue(doctorId);
+
+      return true;
+    } catch (e) {
+      AppLogger().e('Failed to add doctor: $e');
       return false;
     }
   }
@@ -271,7 +325,7 @@ class VisitFormBloc extends FormBloc<String, String> {
       }
 
       // Update department field (filtered by hospital)
-      _updateDepartmentOptions();
+      await _updateDepartmentOptions();
       // Ensure value is valid (null is always in items)
       final departmentItems = departmentFieldBloc.state.items;
       if (!departmentItems.contains(departmentFieldBloc.value)) {
@@ -436,9 +490,9 @@ class VisitFormBloc extends FormBloc<String, String> {
       );
 
       // Use a microtask to delay the updates and avoid dropdown assertion errors
-      Future.microtask(() {
+      Future.microtask(() async {
         // Update department options filtered by hospital
-        _updateDepartmentOptions();
+        await _updateDepartmentOptions();
 
         // Clear dependent field values AFTER updating items to ensure valid state
         departmentFieldBloc.updateValue(null);
@@ -495,9 +549,9 @@ class VisitFormBloc extends FormBloc<String, String> {
       );
 
       // Use a microtask to delay the updates and avoid dropdown assertion errors
-      Future.microtask(() {
+      Future.microtask(() async {
         // Update department options filtered by hospital
-        _updateDepartmentOptions();
+        await _updateDepartmentOptions();
 
         // Clear dependent field values AFTER updating items to ensure valid state
         departmentFieldBloc.updateValue(null);
@@ -623,12 +677,14 @@ class VisitFormBloc extends FormBloc<String, String> {
   }
 
   /// Updates department options based on current hospital filter
-  void _updateDepartmentOptions() {
+  /// Validates department IDs and cleans up invalid references
+  Future<void> _updateDepartmentOptions() async {
     final hospitalId = hospitalFieldBloc.value;
 
     AppLogger().d('Updating department options with hospitalId: $hospitalId');
 
     List<Department> filteredDepartments = availableDepartments;
+    bool hospitalUpdated = false;
 
     // Filter by hospital if selected
     if (hospitalId != null) {
@@ -636,6 +692,7 @@ class VisitFormBloc extends FormBloc<String, String> {
       final hospital = availableHospitals
           .where((h) => h.id == hospitalId)
           .firstOrNull;
+
       if (hospital != null && hospital.departmentIds.isNotEmpty) {
         try {
           // Parse JSON array of department IDs
@@ -643,16 +700,63 @@ class VisitFormBloc extends FormBloc<String, String> {
               .map((e) => int.parse(e.toString()))
               .toList();
 
+          // Validate department IDs and filter out invalid ones
+          final validDepartmentIds = <int>[];
+          for (final deptId in departmentIds) {
+            if (availableDepartments.any((d) => d.id == deptId)) {
+              validDepartmentIds.add(deptId);
+            } else {
+              AppLogger().w('Department ID $deptId not found in available departments, marking for removal');
+            }
+          }
+
+          // If we found invalid department IDs, update the hospital
+          if (validDepartmentIds.length != departmentIds.length) {
+            AppLogger().d('Cleaning up ${departmentIds.length - validDepartmentIds.length} invalid department IDs from hospital');
+
+            // Update hospital with cleaned department IDs
+            final updatedHospital = hospital.copyWith(
+              departmentIds: json.encode(validDepartmentIds),
+            );
+            await _database.updateHospital(updatedHospital);
+
+            // Update local hospital list
+            final hospitalIndex = availableHospitals.indexWhere((h) => h.id == hospitalId);
+            if (hospitalIndex != -1) {
+              availableHospitals[hospitalIndex] = updatedHospital;
+              hospitalUpdated = true;
+            }
+          }
+
+          // Filter departments by valid department IDs
           filteredDepartments = availableDepartments
-              .where((d) => departmentIds.contains(d.id))
+              .where((d) => validDepartmentIds.contains(d.id))
               .toList();
+
           AppLogger().d(
-            'Filtered departments by hospital: ${filteredDepartments.length} remaining',
+            'Filtered departments by hospital: ${filteredDepartments.length} remaining from ${validDepartmentIds.length} valid department IDs',
           );
         } catch (e) {
           AppLogger().e('Error parsing hospital departmentIds: $e');
-          // If parsing fails, show no departments
+          // If parsing fails, show no departments and clear the invalid data
           filteredDepartments = [];
+
+          // Clear invalid departmentIds from hospital
+          try {
+            final updatedHospital = hospital.copyWith(departmentIds: '');
+            await _database.updateHospital(updatedHospital);
+
+            // Update local hospital list
+            final hospitalIndex = availableHospitals.indexWhere((h) => h.id == hospitalId);
+            if (hospitalIndex != -1) {
+              availableHospitals[hospitalIndex] = updatedHospital;
+              hospitalUpdated = true;
+            }
+
+            AppLogger().d('Cleared invalid departmentIds from hospital due to parsing error');
+          } catch (updateError) {
+            AppLogger().e('Failed to clear invalid departmentIds: $updateError');
+          }
         }
       } else {
         // Hospital has no departments
@@ -682,6 +786,12 @@ class VisitFormBloc extends FormBloc<String, String> {
     if (newValue != currentValue) {
       departmentFieldBloc.updateValue(newValue);
       AppLogger().d('Updated department value from $currentValue to $newValue');
+    }
+
+    // If we updated the hospital, emit a state change to refresh the UI
+    if (hospitalUpdated) {
+      AppLogger().d('Hospital department IDs were cleaned up, emitting state change');
+      emitLoaded();
     }
   }
 

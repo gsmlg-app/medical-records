@@ -128,37 +128,8 @@ class _VisitFormState extends State<VisitForm> {
                   _DepartmentDropdown(visitFormBloc: visitFormBloc),
                   const SizedBox(height: 16),
 
-                  // Doctor
-                  BlocBuilder<VisitFormBloc, FormBlocState<String, String>>(
-                    builder: (context, state) {
-                      return SafeDropdownFieldBlocBuilder<int?>(
-                        key: ValueKey('doctor_dropdown_${visitFormBloc.hospitalFieldBloc.value}_${visitFormBloc.departmentFieldBloc.value}'),
-                        selectFieldBloc: visitFormBloc.doctorFieldBloc,
-                        decoration: InputDecoration(
-                          labelText: 'Doctor',
-                          hintText: 'Select a doctor',
-                        ),
-                        itemBuilder: (context, value) {
-                          if (value == null) {
-                            return FieldItem(
-                              child: Text(
-                                'None',
-                                style: TextStyle(color: Colors.grey[600]),
-                              ),
-                            );
-                          }
-                          final doctors = visitFormBloc.availableDoctors;
-                          final doctor = doctors.cast<Doctor?>().firstWhere(
-                            (d) => d?.id == value,
-                            orElse: () => null,
-                          );
-                          return FieldItem(
-                            child: Text(doctor?.name ?? 'Unknown'),
-                          );
-                        },
-                      );
-                    },
-                  ),
+                  // Doctor with quick add
+                  _DoctorDropdown(visitFormBloc: visitFormBloc),
                   const SizedBox(height: 16),
 
                   // Visit Details (optional)
@@ -383,36 +354,9 @@ class _DepartmentDropdown extends StatelessWidget {
                     );
                   }
 
-                  // Filter departments by selected hospital
-                  List<Department> filteredDepartments =
-                      visitFormBloc.availableDepartments;
-                  if (hospitalId != null) {
-                    // Find the hospital and get its department IDs
-                    final hospital = visitFormBloc.availableHospitals
-                        .where((h) => h.id == hospitalId)
-                        .firstOrNull;
-                    if (hospital != null && hospital.departmentIds.isNotEmpty) {
-                      try {
-                        // Parse JSON array of department IDs
-                        final departmentIds =
-                            (json.decode(hospital.departmentIds) as List)
-                                .map((e) => int.parse(e.toString()))
-                                .toList();
-
-                        filteredDepartments = filteredDepartments
-                            .where((d) => departmentIds.contains(d.id))
-                            .toList();
-                      } catch (e) {
-                        // If parsing fails, show no departments
-                        filteredDepartments = [];
-                      }
-                    } else {
-                      // Hospital has no departments
-                      filteredDepartments = [];
-                    }
-                  }
-
-                  final department = filteredDepartments
+                  // The department filtering is now handled in the VisitFormBloc
+                  // The field items only contain departments valid for the selected hospital
+                  final department = visitFormBloc.availableDepartments
                       .where((d) => d.id == value)
                       .firstOrNull;
                   return FieldItem(
@@ -532,6 +476,199 @@ class _DepartmentDropdown extends StatelessWidget {
                 } else {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(content: Text('Failed to add department')),
+                  );
+                }
+              } catch (e) {
+                Navigator.of(context).pop(); // Remove loading dialog
+                ScaffoldMessenger.of(
+                  context,
+                ).showSnackBar(SnackBar(content: Text('Error: $e')));
+              }
+            },
+            child: const Text('Add'),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Custom doctor dropdown with quick add functionality
+class _DoctorDropdown extends StatelessWidget {
+  const _DoctorDropdown({required this.visitFormBloc});
+
+  final VisitFormBloc visitFormBloc;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        // Doctor dropdown using SafeDropdownFieldBlocBuilder with BlocBuilder wrapper
+        Expanded(
+          child: BlocBuilder<VisitFormBloc, FormBlocState<String, String>>(
+            builder: (context, state) {
+              final hospitalId = visitFormBloc.hospitalFieldBloc.value;
+              final departmentId = visitFormBloc.departmentFieldBloc.value;
+              final canAddDoctor = hospitalId != null && departmentId != null;
+
+              return SafeDropdownFieldBlocBuilder<int?>(
+                key: ValueKey('doctor_dropdown_${hospitalId}_${departmentId}_${visitFormBloc.availableDoctors.length}'),
+                selectFieldBloc: visitFormBloc.doctorFieldBloc,
+                decoration: InputDecoration(
+                  labelText: 'Doctor',
+                  hintText: canAddDoctor
+                      ? 'Select a doctor or add new'
+                      : 'Select hospital and department first',
+                  border: const OutlineInputBorder(),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 12,
+                  ),
+                ),
+                itemBuilder: (context, value) {
+                  if (value == null) {
+                    return const FieldItem(
+                      child: Text('None', style: TextStyle(color: Colors.grey)),
+                    );
+                  }
+
+                  // The doctor filtering is now handled in the VisitFormBloc
+                  // The field items only contain doctors valid for the selected hospital and department
+                  final doctor = visitFormBloc.availableDoctors
+                      .where((d) => d.id == value)
+                      .firstOrNull;
+                  return FieldItem(
+                    child: Text(doctor?.name ?? 'Unknown Doctor'),
+                  );
+                },
+              );
+            },
+          ),
+        ),
+        const SizedBox(width: 8),
+        // Add doctor button
+        BlocBuilder<VisitFormBloc, FormBlocState<String, String>>(
+          builder: (context, state) {
+            final hospitalId = visitFormBloc.hospitalFieldBloc.value;
+            final departmentId = visitFormBloc.departmentFieldBloc.value;
+            final canAddDoctor = hospitalId != null && departmentId != null;
+
+            return IconButton(
+              icon: const Icon(Icons.add),
+              onPressed: canAddDoctor
+                  ? () => _showAddDoctorDialog(context)
+                  : null,
+              tooltip: 'Add Doctor',
+              style: IconButton.styleFrom(
+                backgroundColor: canAddDoctor
+                    ? Theme.of(context).primaryColor.withOpacity(0.1)
+                    : Colors.transparent,
+              ),
+            );
+          },
+        ),
+      ],
+    );
+  }
+
+  void _showAddDoctorDialog(BuildContext context) {
+    final nameController = TextEditingController();
+    final titleController = TextEditingController();
+    final specialtyController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Add Doctor'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: nameController,
+              decoration: const InputDecoration(
+                labelText: 'Doctor Name',
+                border: OutlineInputBorder(),
+              ),
+              autofocus: true,
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: titleController,
+              decoration: const InputDecoration(
+                labelText: 'Title (Optional)',
+                border: OutlineInputBorder(),
+                hintText: 'e.g., Dr., Prof., MD',
+              ),
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: specialtyController,
+              decoration: const InputDecoration(
+                labelText: 'Specialty (Optional)',
+                border: OutlineInputBorder(),
+                hintText: 'e.g., Cardiology, Neurology',
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              final name = nameController.text.trim();
+              if (name.isEmpty) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Please enter a doctor name'),
+                  ),
+                );
+                return;
+              }
+
+              final title = titleController.text.trim().isEmpty
+                  ? null
+                  : titleController.text.trim();
+              final specialty = specialtyController.text.trim().isEmpty
+                  ? null
+                  : specialtyController.text.trim();
+
+              Navigator.of(context).pop();
+
+              // Show loading indicator
+              showDialog(
+                context: context,
+                barrierDismissible: false,
+                builder: (context) => const AlertDialog(
+                  content: Row(
+                    children: [
+                      CircularProgressIndicator(),
+                      SizedBox(width: 16),
+                      Text('Adding doctor...'),
+                    ],
+                  ),
+                ),
+              );
+
+              try {
+                final success = await visitFormBloc.quickAddDoctor(
+                  name,
+                  title: title,
+                  specialty: specialty,
+                );
+                Navigator.of(context).pop(); // Remove loading dialog
+
+                if (success) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Doctor "$name" added successfully'),
+                    ),
+                  );
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Failed to add doctor')),
                   );
                 }
               } catch (e) {

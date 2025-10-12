@@ -10,6 +10,7 @@ import 'package:medical_records/screens/visits/add_visit_screen.dart';
 import 'package:medical_records/screens/visits/visit_detail_screen.dart';
 import 'package:treatment_bloc/treatment_bloc.dart';
 import 'package:visit_bloc/visit_bloc.dart';
+import 'package:hospital_bloc/hospital_bloc.dart';
 
 class TreatmentDetailScreen extends StatefulWidget {
   static const name = 'TreatmentDetail';
@@ -26,12 +27,15 @@ class TreatmentDetailScreen extends StatefulWidget {
 class _TreatmentDetailScreenState extends State<TreatmentDetailScreen> {
   Treatment? _treatment;
   List<Visit> _visits = [];
+  List<Hospital> _hospitals = [];
+  List<Department> _departments = [];
 
   @override
   void initState() {
     super.initState();
     _loadTreatment();
     _loadVisits();
+    _loadHospitalsAndDepartments();
   }
 
   void _loadTreatment() {
@@ -48,14 +52,48 @@ class _TreatmentDetailScreenState extends State<TreatmentDetailScreen> {
     context.read<VisitBloc>().add(LoadVisitsByTreatment(widget.treatmentId));
   }
 
+  void _loadHospitalsAndDepartments() {
+    // Load hospitals and departments for display in visit list
+    context.read<HospitalBloc>().add(LoadHospitals());
+  }
+
+  Future<void> _loadDepartmentsFromDatabase() async {
+    try {
+      final database = context.read<AppDatabase>();
+      final allDepartments = await database.getAllDepartments();
+
+      setState(() {
+        _departments = allDepartments;
+      });
+    } catch (e) {
+      // Handle error gracefully - departments will remain empty
+      print('Error loading departments: $e');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return BlocListener<TreatmentBloc, TreatmentState>(
-      listener: (context, state) {
-        if (_treatment == null && state is TreatmentLoaded) {
-          _loadTreatment();
-        }
-      },
+    return MultiBlocListener(
+      listeners: [
+        BlocListener<TreatmentBloc, TreatmentState>(
+          listener: (context, state) {
+            if (_treatment == null && state is TreatmentLoaded) {
+              _loadTreatment();
+            }
+          },
+        ),
+        BlocListener<HospitalBloc, HospitalState>(
+          listener: (context, state) {
+            if (state is HospitalLoaded) {
+              setState(() {
+                _hospitals = state.hospitals;
+              });
+              // Load departments from database
+              _loadDepartmentsFromDatabase();
+            }
+          },
+        ),
+      ],
       child: AppAdaptiveScaffold(
         destinations: Destinations.navs(context),
         selectedIndex: Destinations.indexOf(const Key('Treatments'), context),
@@ -233,6 +271,9 @@ class _TreatmentDetailScreenState extends State<TreatmentDetailScreen> {
                 itemCount: treatmentVisits.length,
                 itemBuilder: (context, index) {
                   final visit = treatmentVisits[index];
+                  final hospitalName = _getHospitalName(visit.hospitalId);
+                  final departmentName = _getDepartmentName(visit.departmentId);
+
                   return Card(
                     margin: const EdgeInsets.only(bottom: 8.0),
                     child: ListTile(
@@ -244,10 +285,53 @@ class _TreatmentDetailScreenState extends State<TreatmentDetailScreen> {
                         ),
                       ),
                       title: Text(_formatDate(visit.date)),
-                      subtitle: Text(
-                        visit.details.length > 50
-                            ? '${visit.details.substring(0, 50)}...'
-                            : visit.details,
+                      subtitle: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          if (hospitalName != null || departmentName != null) ...[
+                            Row(
+                              children: [
+                                if (hospitalName != null) ...[
+                                  Icon(Icons.local_hospital, size: 14, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                                  const SizedBox(width: 4),
+                                  Expanded(
+                                    child: Text(
+                                      hospitalName,
+                                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                      ),
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                ],
+                                if (hospitalName != null && departmentName != null)
+                                  const SizedBox(width: 8),
+                                if (departmentName != null) ...[
+                                  Icon(Icons.business, size: 14, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                                  const SizedBox(width: 4),
+                                  Expanded(
+                                    child: Text(
+                                      departmentName,
+                                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                      ),
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                ],
+                              ],
+                            ),
+                            const SizedBox(height: 4),
+                          ],
+                          Text(
+                            visit.details.length > 50
+                                ? '${visit.details.substring(0, 50)}...'
+                                : visit.details,
+                            style: Theme.of(context).textTheme.bodySmall,
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 2,
+                          ),
+                        ],
                       ),
                       trailing: const Icon(Icons.chevron_right),
                       onTap: () {
@@ -299,5 +383,17 @@ class _TreatmentDetailScreenState extends State<TreatmentDetailScreen> {
 
   String _formatDate(DateTime date) {
     return '${date.day}/${date.month}/${date.year}';
+  }
+
+  String? _getHospitalName(int? hospitalId) {
+    if (hospitalId == null) return null;
+    final hospital = _hospitals.where((h) => h.id == hospitalId).firstOrNull;
+    return hospital?.name;
+  }
+
+  String? _getDepartmentName(int? departmentId) {
+    if (departmentId == null) return null;
+    final department = _departments.where((d) => d.id == departmentId).firstOrNull;
+    return department?.name;
   }
 }
