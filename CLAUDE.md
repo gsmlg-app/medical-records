@@ -31,12 +31,16 @@ melos run analyze
 
 # Fix auto-fixable issues across all packages
 melos run fix
+melos run fix-dry-run            # Preview fixes before applying
 
 # Format code across all packages
 melos run format
+melos run format-check           # Check code formatting
 
 # Run tests across all packages
 melos run test
+melos run test:dart              # Run Dart-only tests
+melos run test:flutter           # Run Flutter-only tests
 
 # Generate code (build_runner, l10n)
 melos run build-runner
@@ -45,6 +49,10 @@ melos run gen-l10n
 # Check dependencies and versions
 melos run validate-dependencies
 melos run outdated
+melos run upgrade                # Upgrade dependencies with major versions
+
+# Test Mason bricks separately
+melos run brick-test
 ```
 
 ### Individual Package Operations
@@ -75,26 +83,40 @@ flutter run -d ios            # iOS
 - **Main App**: `lib/` - Entry point and main application code
 - **API Layer**: `app_api/` - Generated API client code (OpenAPI/Swagger based)
 - **State Management**: `app_bloc/` - BLoC pattern implementations for business logic
+  - `error_handler` - Global error handling BLoC with severity levels
 - **Shared Libraries**: `app_lib/` - Core utilities, themes, localization, database, logging
+  - `database` - Drift ORM with SQLite (Hospitals, Departments, Doctors, Treatments, Visits, Resources)
+  - `locale` - Internationalization setup with ARB files
+  - `provider` - Dependency injection setup
+  - `theme` - Theme management with persistence
 - **UI Components**: `app_widget/` - Reusable widgets and UI elements
+  - `adaptive` - Adaptive UI components for different screen sizes
+  - `feedback` - Enhanced feedback system (dialogs, toasts, bottom sheets)
+  - `web_view` - Web viewing capabilities
 - **Code Generation**: `bricks/` - Mason templates for scaffolding
 - **Third-party**: `third_party/` - Modified/custom third-party packages
+  - `form_bloc` - Custom form BLoC implementation
+  - `flutter_form_bloc` - Flutter form BLoC extensions
+  - `flutter_adaptive_scaffold` - Adaptive scaffold components
+  - `settings_ui` - Settings UI components
 
 ### Key Data Flow Architecture
 
 The application follows a **clean data flow pattern** with clear separation of concerns:
 
-1. **Database Layer** (`app_database`): Drift ORM with SQLite
+1. **Database Layer** (`app_lib/database`): Drift ORM with SQLite
    - Tables: Hospitals, Departments, Doctors, Treatments, Visits, Resources
-   - CRUD operations with companion objects
+   - Full CRUD operations with companion objects and relationship queries
+   - Testing support with `AppDatabase.forTesting()` factory
    - Supports both mobile and web platforms
 
 2. **BLoC Layer** (`app_bloc/*`): Business logic with state management
    - Each domain entity has its own BLoC (HospitalBloc, TreatmentBloc, VisitBloc, etc.)
    - Form BLoCs for complex form handling with validation
+   - **ErrorHandlerBloc**: Global error handling with severity classification
    - State classes for loading, loaded, error, and operation success states
 
-3. **Provider Layer** (`app_provider`): Dependency injection
+3. **Provider Layer** (`app_lib/provider`): Dependency injection
    - `MainProvider` sets up global dependencies (SharedPreferences, AppDatabase)
    - BLoC instances provided at root level for global state
    - Clean separation between UI and business logic
@@ -102,7 +124,14 @@ The application follows a **clean data flow pattern** with clear separation of c
 4. **UI Layer** (`lib/screens/`, `app_widget/*`): Declarative UI with GoRouter
    - Screen components organized by domain
    - Reusable form widgets with BLoC integration
+   - **Safe Widget Patterns**: Custom widgets like `SafeDropdownFieldBlocBuilder` to prevent assertion errors
    - Consistent navigation with NoTransitionPage
+
+5. **Error Handling Layer** (`app_bloc/error_handler`, `app_widget/feedback`)
+   - **CrashReportingWidget**: Wraps entire app for comprehensive error capture
+   - **Error Boundaries**: UI error handling with fallback components
+   - **Structured Logging**: AppLogger with file output to app support directory
+   - **Feedback System**: Dialogs, toasts, and bottom sheets for user notifications
 
 ### Entry Points and Key Files
 
@@ -178,11 +207,20 @@ The medical records system models these relationships:
 - **Global BLoCs**: Provided at app root for entities accessed across multiple screens
 - **Theme Management**: ThemeBloc with persistent storage using SharedPreferences
 - **Form State**: Dedicated form BLoCs for complex validation and submission workflows
+- **Error State**: ErrorHandlerBloc manages global error state with severity levels
+
+### Safe Widget Patterns
+The project implements custom safe widgets to prevent common Flutter assertion errors:
+- **SafeDropdownFieldBlocBuilder**: Prevents assertion errors in form dropdowns
+- Used consistently across forms to provide robust dropdown behavior
+- Addresses specific Flutter form validation challenges
 
 ### Logging and Error Handling
 - **Structured Logging**: AppLogger with file output to app support directory
-- **Crash Reporting**: CrashReportingWidget wraps the entire app
+- **Crash Reporting**: CrashReportingWidget wraps the entire app with comprehensive error capture
+- **Error Boundaries**: UI components handle errors gracefully with fallback states
 - **Error Screens**: Dedicated error handling in router configuration
+- **Feedback System**: User-friendly error notifications via dialogs, toasts, and bottom sheets
 
 ## Code Generation with Mason
 
@@ -202,12 +240,83 @@ mason make widget --name WidgetName --type stateless --folder components
 mason make api_client -o app_api/app_api --package_name=app_api
 ```
 
+## Localization Workflow
+
+The application supports comprehensive internationalization:
+
+### Setup and Generation
+```bash
+# Generate localization files
+melos run gen-l10n
+
+# Localization configuration is in app_lib/locale/l10n.yaml
+# ARB files are located in app_lib/locale/lib/src/l10n/
+```
+
+### Usage Pattern
+- Use `AppLocalizations` for accessing localized strings
+- All user-facing text should be externalized to ARB files
+- Supports multiple locales with automatic detection
+
+## Icon Generation
+
+Multi-platform launcher icons are configured and generated:
+
+```bash
+# Icons are configured in pubspec.yaml (flutter_launcher_icons section)
+# Generate icons for all platforms (run from root)
+flutter pub run flutter_launcher_icons:main
+```
+
+Supports: Android, iOS, Windows, macOS with appropriate sizing and formats.
+
 ## Testing Strategy
 
+### Test Types and Commands
 - **Unit Tests**: Co-located with packages in `test/` directories
 - **Widget Tests**: For UI components, especially form widgets
 - **Integration Tests**: Use `melos run test` for comprehensive testing
 - **Database Testing**: AppDatabase.forTesting() factory for in-memory tests
+
+### Running Specific Tests
+```bash
+# Run all tests across packages
+melos run test
+
+# Run only Dart tests (excludes Flutter widget tests)
+melos run test:dart
+
+# Run only Flutter tests (includes widget tests)
+melos run test:flutter
+
+# Run tests for specific package
+cd app_lib/database
+flutter test
+
+# Run tests with coverage
+flutter test --coverage
+```
+
+### Database Testing Patterns
+- Use `AppDatabase.forTesting()` for isolated test databases
+- Test CRUD operations with in-memory SQLite
+- Mock dependencies for BLoC testing
+- Test form validation with various input scenarios
+
+## Custom Third-Party Packages
+
+The project includes customized third-party packages in `third_party/`:
+
+### Form Management
+- **form_bloc**: Custom form BLoC implementation extending standard BLoC pattern
+- **flutter_form_bloc**: Flutter-specific extensions for form BLoC with validation
+- These provide robust form handling with validation, submission, and state management
+
+### UI Components
+- **flutter_adaptive_scaffold**: Adaptive scaffold components for responsive design
+- **settings_ui**: Settings UI components for consistent settings screens
+
+These packages are modified versions of open-source projects tailored specifically for the medical records application's requirements.
 
 ## Configuration Files
 
@@ -216,3 +325,4 @@ mason make api_client -o app_api/app_api --package_name=app_api
 - **Analysis**: `analysis_options.yaml` (excludes generated files, uses flutter_lints)
 - **Localization**: `app_lib/locale/l10n.yaml` (i18n configuration)
 - **Dependencies**: All internal packages use workspace resolution with `any` versions
+- **Icons**: `flutter_launcher_icons` configuration in pubspec.yaml for multi-platform icons
