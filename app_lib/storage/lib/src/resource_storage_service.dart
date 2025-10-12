@@ -3,10 +3,10 @@ import 'package:app_database/app_database.dart';
 import 'package:app_logging/app_logging.dart';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
-import 'package:uuid/uuid.dart';
+import 'package:crypto/crypto.dart';
 
 /// Service for handling resource file operations following DATA.md specifications
-/// Storage format: <app_document_directory>/resources/<visitId>/<uuid>.<suffix>
+/// Storage format: &lt;app_document_directory&gt;/resources/&lt;visitId&gt;/&lt;sha256sum&gt;.&lt;suffix&gt;
 class ResourceStorageService {
   static const String _resourcesDirName = 'resources';
 
@@ -46,16 +46,20 @@ class ResourceStorageService {
     try {
       final visitDir = await _getVisitResourceDir(visitId);
       final fileExtension = path.extension(sourceFile.path);
-      final uniqueFileName = '${const Uuid().v4()}$fileExtension';
-      final targetPath = path.join(visitDir.path, uniqueFileName);
+
+      // Calculate SHA256 hash of the file
+      final fileBytes = await sourceFile.readAsBytes();
+      final sha256Hash = sha256.convert(fileBytes);
+      final hashFileName = '${sha256Hash.toString()}$fileExtension';
+      final targetPath = path.join(visitDir.path, hashFileName);
 
       // Copy the file to the target location
       await sourceFile.copy(targetPath);
 
       // Return the relative path from the base resources directory
-      final relativePath = path.join(visitId.toString(), uniqueFileName);
+      final relativePath = path.join(visitId.toString(), hashFileName);
 
-      AppLogger().d('Stored resource file: $relativePath');
+      AppLogger().d('Stored resource file: $relativePath (SHA256: ${sha256Hash.toString()})');
       return relativePath;
     } catch (e) {
       AppLogger().e('Failed to store resource file: $e');

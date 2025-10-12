@@ -70,6 +70,6 @@ Stores metadata for images or other files associated with a single visit.
 * **id**: (Integer) Primary key.  
 * **visitId**: (Integer, **Foreign Key**) References Visits.  
 * **type**: (Enum ResourceType) Resource type.  
-* **filePath**: (String) The file's local storage path on the device. **Storage format is: \<basedir\>/\<visitId\>/\<uuid\>.\<suffix\>**, where \<basedir\> is the app's base storage directory, \<visitId\> is the associated visit ID, \<uuid\> is a unique identifier, and \<suffix\> is the file extension.  
+* **filePath**: (String) The file's local storage path on the device. **Storage format is: \<basedir\>/\<visitId\>/\<sha265sum\>.\<suffix\>**, where \<basedir\> is the app's base storage directory, \<visitId\> is the associated visit ID, \<sha256sum\> is the sha256sum of file, and \<suffix\> is the file extension.  
 * **notes**: (String) Notes (optional).  
 * **createdAt**, **updatedAt**: (DateTime) Timestamps.
