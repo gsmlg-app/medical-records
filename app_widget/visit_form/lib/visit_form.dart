@@ -344,96 +344,98 @@ class _DepartmentDropdown extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<VisitFormBloc, FormBlocState<String, String>>(
-      builder: (context, state) {
-        final hospitalId = visitFormBloc.hospitalFieldBloc.value;
-        final canAddDepartment = hospitalId != null;
+    return Row(
+      children: [
+        // Department dropdown using DropdownFieldBlocBuilder with BlocBuilder wrapper
+        Expanded(
+          child: BlocBuilder<VisitFormBloc, FormBlocState<String, String>>(
+            builder: (context, state) {
+              final hospitalId = visitFormBloc.hospitalFieldBloc.value;
+              final canAddDepartment = hospitalId != null;
 
-        // Filter departments by selected hospital
-        List<Department> filteredDepartments =
-            visitFormBloc.availableDepartments;
-        if (hospitalId != null) {
-          // Find the hospital and get its department IDs
-          final hospital = visitFormBloc.availableHospitals
-              .where((h) => h.id == hospitalId)
-              .firstOrNull;
-          if (hospital != null && hospital.departmentIds.isNotEmpty) {
-            try {
-              // Parse JSON array of department IDs
-              final departmentIds =
-                  (json.decode(hospital.departmentIds) as List)
-                      .map((e) => int.parse(e.toString()))
-                      .toList();
-
-              filteredDepartments = filteredDepartments
-                  .where((d) => departmentIds.contains(d.id))
-                  .toList();
-            } catch (e) {
-              // If parsing fails, show no departments
-              filteredDepartments = [];
-            }
-          } else {
-            // Hospital has no departments
-            filteredDepartments = [];
-          }
-        }
-
-        return DropdownButtonFormField<int?>(
-          value: visitFormBloc.departmentFieldBloc.value,
-          decoration: InputDecoration(
-            labelText: 'Department',
-            hintText: canAddDepartment
-                ? 'Select a department or add new'
-                : 'Select a hospital first',
-            border: const OutlineInputBorder(),
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: 16,
-              vertical: 12,
-            ),
-            suffixIcon: canAddDepartment
-                ? IconButton(
-                    icon: const Icon(Icons.add),
-                    onPressed: () => _showAddDepartmentDialog(context),
-                    tooltip: 'Add Department',
-                  )
-                : null,
-          ),
-          items: [
-            const DropdownMenuItem<int?>(
-              value: null,
-              child: Text('None', style: TextStyle(color: Colors.grey)),
-            ),
-            ...filteredDepartments.map((department) {
-              return DropdownMenuItem<int?>(
-                value: department.id,
-                child: Text(department.name),
-              );
-            }),
-            if (canAddDepartment)
-              const DropdownMenuItem<int?>(
-                value: -1, // Special value for "Add Department"
-                child: Row(
-                  children: [
-                    Icon(Icons.add, size: 16, color: Colors.blue),
-                    SizedBox(width: 8),
-                    Text(
-                      'Add Department',
-                      style: TextStyle(color: Colors.blue),
-                    ),
-                  ],
+              return DropdownFieldBlocBuilder<int?>(
+                key: ValueKey('department_dropdown_${hospitalId}_${visitFormBloc.availableDepartments.length}'),
+                selectFieldBloc: visitFormBloc.departmentFieldBloc,
+                decoration: InputDecoration(
+                  labelText: 'Department',
+                  hintText: canAddDepartment
+                      ? 'Select a department or add new'
+                      : 'Select a hospital first',
+                  border: const OutlineInputBorder(),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 12,
+                  ),
                 ),
+                itemBuilder: (context, value) {
+                  if (value == null) {
+                    return const FieldItem(
+                      child: Text('None', style: TextStyle(color: Colors.grey)),
+                    );
+                  }
+
+                  // Filter departments by selected hospital
+                  List<Department> filteredDepartments =
+                      visitFormBloc.availableDepartments;
+                  if (hospitalId != null) {
+                    // Find the hospital and get its department IDs
+                    final hospital = visitFormBloc.availableHospitals
+                        .where((h) => h.id == hospitalId)
+                        .firstOrNull;
+                    if (hospital != null && hospital.departmentIds.isNotEmpty) {
+                      try {
+                        // Parse JSON array of department IDs
+                        final departmentIds =
+                            (json.decode(hospital.departmentIds) as List)
+                                .map((e) => int.parse(e.toString()))
+                                .toList();
+
+                        filteredDepartments = filteredDepartments
+                            .where((d) => departmentIds.contains(d.id))
+                            .toList();
+                      } catch (e) {
+                        // If parsing fails, show no departments
+                        filteredDepartments = [];
+                      }
+                    } else {
+                      // Hospital has no departments
+                      filteredDepartments = [];
+                    }
+                  }
+
+                  final department = filteredDepartments
+                      .where((d) => d.id == value)
+                      .firstOrNull;
+                  return FieldItem(
+                    child: Text(department?.name ?? 'Unknown Department'),
+                  );
+                },
+              );
+            },
+          ),
+        ),
+        const SizedBox(width: 8),
+        // Add department button
+        BlocBuilder<VisitFormBloc, FormBlocState<String, String>>(
+          builder: (context, state) {
+            final hospitalId = visitFormBloc.hospitalFieldBloc.value;
+            final canAddDepartment = hospitalId != null;
+
+            return IconButton(
+              icon: const Icon(Icons.add),
+              onPressed: canAddDepartment
+                  ? () => _showAddDepartmentDialog(context)
+                  : null,
+              tooltip: 'Add Department',
+              style: IconButton.styleFrom(
+                backgroundColor: canAddDepartment
+                    ? Theme.of(context).primaryColor.withOpacity(0.1)
+                    : Colors.transparent,
               ),
-          ],
-          onChanged: (value) {
-            if (value == -1) {
-              // "Add Department" selected
-              _showAddDepartmentDialog(context);
-            } else {
-              visitFormBloc.departmentFieldBloc.updateValue(value);
-            }
+            );
           },
-        );
-      },
+        ),
+      ],
     );
   }
 
