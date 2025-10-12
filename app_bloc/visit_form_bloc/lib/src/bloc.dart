@@ -1,8 +1,10 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:app_database/app_database.dart';
 import 'package:app_logging/app_logging.dart';
+import 'package:app_storage/app_storage.dart';
 import 'package:drift/drift.dart' show Value;
 import 'package:equatable/equatable.dart';
 import 'package:form_bloc/form_bloc.dart';
@@ -21,6 +23,9 @@ class VisitFormBloc extends FormBloc<String, String> {
   /// VisitBloc for notifying state changes
   final VisitBloc? _visitBloc;
 
+  /// Resource storage service
+  final ResourceStorageService _storageService = ResourceStorageService();
+
   /// Available hospitals for selection
   List<Hospital> availableHospitals = [];
 
@@ -32,6 +37,9 @@ class VisitFormBloc extends FormBloc<String, String> {
 
   /// Visit to populate for editing
   Visit? visitToEdit;
+
+  /// Resources associated with this visit
+  List<Resource> resources = [];
 
   /// Refresh hospitals list from database and update dropdown options
   /// Optional parameter to select the most recently added hospital
@@ -343,6 +351,9 @@ class VisitFormBloc extends FormBloc<String, String> {
 
       // Now that items are loaded, populate form with existing visit data if provided
       if (visitToEdit != null) {
+        // Load resources for existing visit
+        await loadResourcesForVisit(visitToEdit!.id);
+
         // Use a small delay to ensure all field updates are processed
         await Future.delayed(const Duration(milliseconds: 100));
         _populateFormAfterItemsLoaded();
@@ -894,6 +905,82 @@ class VisitFormBloc extends FormBloc<String, String> {
     departmentFieldBloc.updateValue(null);
     doctorFieldBloc.updateValue(null);
     visitToEdit = null;
+    resources.clear();
+  }
+
+  /// Add a resource to the current visit
+  Future<bool> addResource(File sourceFile, ResourceType type, {String? notes}) async {
+    try {
+      // Create a temporary visit ID if this is a new visit
+      // In a real implementation, this should handle the case where visit doesn't exist yet
+      int tempVisitId = visitToEdit?.id ?? DateTime.now().millisecondsSinceEpoch;
+
+      // Store the file
+      final relativePath = await _storageService.storeResourceFile(
+        visitId: tempVisitId,
+        sourceFile: sourceFile,
+        type: type,
+      );
+
+      // Create resource record
+      final newResource = Resource(
+        id: DateTime.now().millisecondsSinceEpoch, // Temporary ID
+        visitId: tempVisitId,
+        type: type.value, // Convert enum to string
+        filePath: relativePath,
+        notes: notes,
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+      );
+
+      // Add to local resources list
+      resources.add(newResource);
+
+      AppLogger().d('Added resource: ${newResource.filePath}');
+      return true;
+    } catch (e) {
+      AppLogger().e('Failed to add resource: $e');
+      return false;
+    }
+  }
+
+  /// Remove a resource from the current visit
+  Future<bool> removeResource(Resource resource) async {
+    try {
+      // Delete file
+      await _storageService.deleteResourceFile(resource.filePath);
+
+      // Remove from local list
+      resources.removeWhere((r) => r.id == resource.id);
+
+      AppLogger().d('Removed resource: ${resource.filePath}');
+      return true;
+    } catch (e) {
+      AppLogger().e('Failed to remove resource: $e');
+      return false;
+    }
+  }
+
+  /// Load resources for a specific visit
+  Future<void> loadResourcesForVisit(int visitId) async {
+    try {
+      final visitResources = await _database.getResourcesByVisit(visitId);
+      resources = visitResources;
+      AppLogger().d('Loaded ${resources.length} resources for visit $visitId');
+    } catch (e) {
+      AppLogger().e('Failed to load resources for visit $visitId: $e');
+      resources = [];
+    }
+  }
+
+  /// Clear all resources (for new visits)
+  void clearResources() {
+    resources.clear();
+  }
+
+  /// Get resources for the current visit
+  List<Resource> getCurrentResources() {
+    return List.unmodifiable(resources);
   }
 
   @override

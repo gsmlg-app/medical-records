@@ -14,12 +14,16 @@ dependencies:
   flutter_bloc: ^9.0.0
   flutter_form_bloc:
     path: ../../third_party/flutter_form_bloc
+  form_bloc:
+    path: ../../third_party/form_bloc
   app_locale:
     path: ../../app_lib/locale
   app_logging:
     path: ../../app_lib/logging
   app_database:
     path: ../../app_lib/database
+  app_resources:
+    path: ../../app_widget/resources
   visit_form_bloc:
     path: ../../app_bloc/visit_form_bloc
   hospital_bloc:

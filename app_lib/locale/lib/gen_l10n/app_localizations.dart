@@ -705,6 +705,114 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Retry'**
   String get retry;
+
+  /// No description provided for @resources.
+  ///
+  /// In en, this message translates to:
+  /// **'Resources'**
+  String get resources;
+
+  /// No description provided for @addResource.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Resource'**
+  String get addResource;
+
+  /// No description provided for @selectResourceSource.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Resource Source'**
+  String get selectResourceSource;
+
+  /// No description provided for @camera.
+  ///
+  /// In en, this message translates to:
+  /// **'Camera'**
+  String get camera;
+
+  /// No description provided for @gallery.
+  ///
+  /// In en, this message translates to:
+  /// **'Gallery'**
+  String get gallery;
+
+  /// No description provided for @documents.
+  ///
+  /// In en, this message translates to:
+  /// **'Documents'**
+  String get documents;
+
+  /// No description provided for @pickPdf.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick PDF File'**
+  String get pickPdf;
+
+  /// No description provided for @resourceAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'Resource added successfully'**
+  String get resourceAdded;
+
+  /// No description provided for @resourceRemoved.
+  ///
+  /// In en, this message translates to:
+  /// **'Resource removed successfully'**
+  String get resourceRemoved;
+
+  /// No description provided for @noResources.
+  ///
+  /// In en, this message translates to:
+  /// **'No resources added yet'**
+  String get noResources;
+
+  /// No description provided for @deleteResource.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Resource'**
+  String get deleteResource;
+
+  /// No description provided for @deleteResourceConfirmation.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete this resource?'**
+  String get deleteResourceConfirmation;
+
+  /// No description provided for @resourceError.
+  ///
+  /// In en, this message translates to:
+  /// **'Resource Error'**
+  String get resourceError;
+
+  /// No description provided for @cameraPermissionDenied.
+  ///
+  /// In en, this message translates to:
+  /// **'Camera permission denied'**
+  String get cameraPermissionDenied;
+
+  /// No description provided for @storagePermissionDenied.
+  ///
+  /// In en, this message translates to:
+  /// **'Storage permission denied'**
+  String get storagePermissionDenied;
+
+  /// No description provided for @filePickerError.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to pick file'**
+  String get filePickerError;
+
+  /// No description provided for @fileTooLarge.
+  ///
+  /// In en, this message translates to:
+  /// **'File size exceeds limit'**
+  String get fileTooLarge;
+
+  /// No description provided for @unsupportedFileType.
+  ///
+  /// In en, this message translates to:
+  /// **'Unsupported file type'**
+  String get unsupportedFileType;
 }
 
 class _AppLocalizationsDelegate

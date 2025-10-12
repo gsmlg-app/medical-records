@@ -1,0 +1,29 @@
+name: app_resources
+description: Resource management widgets for medical records application
+publish_to: "none"
+
+environment:
+  sdk: ">=3.8.0 <4.0.0"
+
+resolution: workspace
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # Internal packages
+  app_database: any
+  app_storage: any
+  app_locale: any
+  app_logging: any
+
+  # External dependencies
+  flutter_bloc: ^9.0.0
+  image_picker: ^1.1.2
+  file_picker: ^8.1.6
+  permission_handler: ^11.3.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0

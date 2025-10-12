@@ -1,15 +1,13 @@
-import 'dart:convert';
-
 import 'package:app_database/app_database.dart';
 import 'package:app_locale/app_locale.dart';
 import 'package:app_logging/app_logging.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_form_bloc/flutter_form_bloc.dart';
 import 'package:visit_form_bloc/visit_form_bloc.dart';
 import 'package:hospital_bloc/hospital_bloc.dart';
 import 'package:hospital_form_bloc/hospital_form_bloc.dart';
 import 'package:hospital_form/hospital_form.dart';
+import 'resources_section_wrapper.dart';
 import 'safe_dropdown_field_bloc_builder.dart';
 
 /// {@template visit_form}
@@ -141,6 +139,10 @@ class _VisitFormState extends State<VisitForm> {
                     ),
                     maxLines: 3,
                   ),
+                  const SizedBox(height: 24),
+
+                  // Resources section
+                  ResourcesSectionWrapper(visitFormBloc: visitFormBloc),
                 ],
               ),
             ),

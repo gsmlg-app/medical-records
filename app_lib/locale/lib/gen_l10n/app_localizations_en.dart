@@ -317,4 +317,59 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get retry => 'Retry';
+
+  @override
+  String get resources => 'Resources';
+
+  @override
+  String get addResource => 'Add Resource';
+
+  @override
+  String get selectResourceSource => 'Select Resource Source';
+
+  @override
+  String get camera => 'Camera';
+
+  @override
+  String get gallery => 'Gallery';
+
+  @override
+  String get documents => 'Documents';
+
+  @override
+  String get pickPdf => 'Pick PDF File';
+
+  @override
+  String get resourceAdded => 'Resource added successfully';
+
+  @override
+  String get resourceRemoved => 'Resource removed successfully';
+
+  @override
+  String get noResources => 'No resources added yet';
+
+  @override
+  String get deleteResource => 'Delete Resource';
+
+  @override
+  String get deleteResourceConfirmation =>
+      'Are you sure you want to delete this resource?';
+
+  @override
+  String get resourceError => 'Resource Error';
+
+  @override
+  String get cameraPermissionDenied => 'Camera permission denied';
+
+  @override
+  String get storagePermissionDenied => 'Storage permission denied';
+
+  @override
+  String get filePickerError => 'Failed to pick file';
+
+  @override
+  String get fileTooLarge => 'File size exceeds limit';
+
+  @override
+  String get unsupportedFileType => 'Unsupported file type';
 }

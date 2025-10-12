@@ -1,0 +1,26 @@
+name: app_storage
+description: Storage services for medical records application
+publish_to: "none"
+
+environment:
+  sdk: ">=3.8.0 <4.0.0"
+
+resolution: workspace
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # Internal packages
+  app_database: any
+  app_logging: any
+
+  # External dependencies
+  path_provider: ^2.1.5
+  path: ^1.9.0
+  uuid: ^4.5.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
