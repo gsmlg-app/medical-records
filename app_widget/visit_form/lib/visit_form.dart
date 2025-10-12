@@ -192,30 +192,37 @@ class _HospitalDropdown extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        // Hospital dropdown using DropdownFieldBlocBuilder
+        // Hospital dropdown using DropdownFieldBlocBuilder with BlocBuilder wrapper
         Expanded(
-          child: DropdownFieldBlocBuilder<int?>(
-            selectFieldBloc: visitFormBloc.hospitalFieldBloc,
-            decoration: InputDecoration(
-              labelText: 'Hospital',
-              hintText: 'Select a hospital',
-              border: const OutlineInputBorder(),
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 12,
-              ),
-            ),
-            itemBuilder: (context, value) {
-              if (value == null) {
-                return const FieldItem(
-                  child: Text('None', style: TextStyle(color: Colors.grey)),
-                );
-              }
-              final hospital = visitFormBloc.availableHospitals
-                  .where((h) => h.id == value)
-                  .firstOrNull;
-              return FieldItem(
-                child: Text(hospital?.name ?? 'Unknown Hospital'),
+          child: BlocBuilder<VisitFormBloc, FormBlocState<String, String>>(
+            builder: (context, state) {
+              // Force rebuild when VisitFormBloc state changes
+              // This ensures the dropdown updates when hospitals are refreshed
+              return DropdownFieldBlocBuilder<int?>(
+                key: ValueKey('hospital_dropdown_${visitFormBloc.availableHospitals.length}'),
+                selectFieldBloc: visitFormBloc.hospitalFieldBloc,
+                decoration: InputDecoration(
+                  labelText: 'Hospital',
+                  hintText: 'Select a hospital',
+                  border: const OutlineInputBorder(),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 12,
+                  ),
+                ),
+                itemBuilder: (context, value) {
+                  if (value == null) {
+                    return const FieldItem(
+                      child: Text('None', style: TextStyle(color: Colors.grey)),
+                    );
+                  }
+                  final hospital = visitFormBloc.availableHospitals
+                      .where((h) => h.id == value)
+                      .firstOrNull;
+                  return FieldItem(
+                    child: Text(hospital?.name ?? 'Unknown Hospital'),
+                  );
+                },
               );
             },
           ),

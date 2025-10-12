@@ -85,6 +85,10 @@ class VisitFormBloc extends FormBloc<String, String> {
       // Update department options since hospital list changed
       _updateDepartmentOptions();
 
+      // No need to manually emit state changes here
+      // The BlocBuilder wrapper around the dropdown will automatically rebuild
+      // when the VisitFormBloc state changes through normal form interactions
+
     } catch (e) {
       AppLogger().e('Failed to refresh hospitals: $e');
     }
