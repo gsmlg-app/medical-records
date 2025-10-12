@@ -10,7 +10,6 @@ import 'package:visit_form_bloc/visit_form_bloc.dart';
 import 'package:hospital_bloc/hospital_bloc.dart';
 import 'package:hospital_form_bloc/hospital_form_bloc.dart';
 import 'package:hospital_form/hospital_form.dart';
-import 'safe_dropdown_field_bloc_builder.dart';
 
 /// {@template visit_form}
 /// A reusable form widget for creating and editing visits.
@@ -129,25 +128,30 @@ class _VisitFormState extends State<VisitForm> {
                   const SizedBox(height: 16),
 
                   // Doctor
-                  SafeDropdownFieldBlocBuilder<int?>(
-                    selectFieldBloc: visitFormBloc.doctorFieldBloc,
-                    decoration: InputDecoration(
-                      labelText: 'Doctor',
-                      hintText: 'Select a doctor',
-                    ),
-                    itemBuilder: (context, value) {
-                      if (value == null) {
-                        return Text(
-                          'None',
-                          style: TextStyle(color: Colors.grey[600]),
-                        );
-                      }
-                      final doctors = visitFormBloc.availableDoctors;
-                      final doctor = doctors.cast<Doctor?>().firstWhere(
-                        (d) => d?.id == value,
-                        orElse: () => null,
+                  BlocBuilder<VisitFormBloc, FormBlocState<String, String>>(
+                    builder: (context, state) {
+                      return DropdownFieldBlocBuilder<int?>(
+                        key: ValueKey('doctor_dropdown_${visitFormBloc.hospitalFieldBloc.value}_${visitFormBloc.departmentFieldBloc.value}'),
+                        selectFieldBloc: visitFormBloc.doctorFieldBloc,
+                        decoration: InputDecoration(
+                          labelText: 'Doctor',
+                          hintText: 'Select a doctor',
+                        ),
+                        itemBuilder: (context, value) {
+                          if (value == null) {
+                            return Text(
+                              'None',
+                              style: TextStyle(color: Colors.grey[600]),
+                            );
+                          }
+                          final doctors = visitFormBloc.availableDoctors;
+                          final doctor = doctors.cast<Doctor?>().firstWhere(
+                            (d) => d?.id == value,
+                            orElse: () => null,
+                          );
+                          return Text(doctor?.name ?? 'Unknown');
+                        },
                       );
-                      return Text(doctor?.name ?? 'Unknown');
                     },
                   ),
                   const SizedBox(height: 16),
