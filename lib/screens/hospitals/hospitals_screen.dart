@@ -121,6 +121,10 @@ class _HospitalsScreenState extends State<HospitalsScreen> {
                     );
                   },
                 ),
+                // Add bottom padding to prevent FAB from covering the last item
+                const SliverPadding(
+                  padding: EdgeInsets.only(bottom: 80),
+                ),
               ],
             ),
           ),

@@ -10,6 +10,7 @@ import 'package:visit_form_bloc/visit_form_bloc.dart';
 import 'package:hospital_bloc/hospital_bloc.dart';
 import 'package:hospital_form_bloc/hospital_form_bloc.dart';
 import 'package:hospital_form/hospital_form.dart';
+import 'safe_dropdown_field_bloc_builder.dart';
 
 /// {@template visit_form}
 /// A reusable form widget for creating and editing visits.
@@ -130,7 +131,7 @@ class _VisitFormState extends State<VisitForm> {
                   // Doctor
                   BlocBuilder<VisitFormBloc, FormBlocState<String, String>>(
                     builder: (context, state) {
-                      return DropdownFieldBlocBuilder<int?>(
+                      return SafeDropdownFieldBlocBuilder<int?>(
                         key: ValueKey('doctor_dropdown_${visitFormBloc.hospitalFieldBloc.value}_${visitFormBloc.departmentFieldBloc.value}'),
                         selectFieldBloc: visitFormBloc.doctorFieldBloc,
                         decoration: InputDecoration(
@@ -206,7 +207,7 @@ class _HospitalDropdown extends StatelessWidget {
             builder: (context, state) {
               // Force rebuild when VisitFormBloc state changes
               // This ensures the dropdown updates when hospitals are refreshed
-              return DropdownFieldBlocBuilder<int?>(
+              return SafeDropdownFieldBlocBuilder<int?>(
                 key: ValueKey('hospital_dropdown_${visitFormBloc.availableHospitals.length}'),
                 selectFieldBloc: visitFormBloc.hospitalFieldBloc,
                 decoration: InputDecoration(
@@ -361,7 +362,7 @@ class _DepartmentDropdown extends StatelessWidget {
               final hospitalId = visitFormBloc.hospitalFieldBloc.value;
               final canAddDepartment = hospitalId != null;
 
-              return DropdownFieldBlocBuilder<int?>(
+              return SafeDropdownFieldBlocBuilder<int?>(
                 key: ValueKey('department_dropdown_${hospitalId}_${visitFormBloc.availableDepartments.length}'),
                 selectFieldBloc: visitFormBloc.departmentFieldBloc,
                 decoration: InputDecoration(
