@@ -139,9 +139,11 @@ class _VisitFormState extends State<VisitForm> {
                         ),
                         itemBuilder: (context, value) {
                           if (value == null) {
-                            return Text(
-                              'None',
-                              style: TextStyle(color: Colors.grey[600]),
+                            return FieldItem(
+                              child: Text(
+                                'None',
+                                style: TextStyle(color: Colors.grey[600]),
+                              ),
                             );
                           }
                           final doctors = visitFormBloc.availableDoctors;
@@ -149,7 +151,9 @@ class _VisitFormState extends State<VisitForm> {
                             (d) => d?.id == value,
                             orElse: () => null,
                           );
-                          return Text(doctor?.name ?? 'Unknown');
+                          return FieldItem(
+                            child: Text(doctor?.name ?? 'Unknown'),
+                          );
                         },
                       );
                     },
