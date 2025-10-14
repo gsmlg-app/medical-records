@@ -25,6 +25,13 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.3.2+1"
+  app_utils:
+    dependency: transitive
+    description:
+      path: "app_lib/utils"
+      relative: true
+    source: path
+    version: "1.0.0"
   archive:
     dependency: transitive
     description:

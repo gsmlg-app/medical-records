@@ -1,4 +1,6 @@
 import 'package:app_adaptive_widgets/app_adaptive_widgets.dart';
+import 'dart:async';
+
 import 'package:app_database/app_database.dart';
 import 'package:app_locale/app_locale.dart';
 import 'package:flutter/material.dart';
@@ -76,8 +78,10 @@ class _VisitDetailScreenState extends State<VisitDetailScreen> {
           // Visit was loaded before but not found in current state, 
           // this might be due to filtering. Load all visits.
           context.read<VisitBloc>().add(LoadVisits());
-          // Try again after a brief delay
-          await Future.delayed(Duration(milliseconds: 100));
+          // Use a microtask to yield to the event loop
+          final completer = Completer<void>();
+          Timer.run(() => completer.complete());
+          await completer.future;
           _loadVisit();
         }
       }

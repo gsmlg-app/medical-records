@@ -19,6 +19,10 @@ dependencies:
     path: ../../app_lib/logging
   app_database:
     path: ../../app_lib/database
+  app_storage:
+    path: ../../app_lib/storage
+  app_utils:
+    path: ../../app_lib/utils
 
 dev_dependencies:
   flutter_test:

@@ -1,4 +1,6 @@
 import 'package:app_adaptive_widgets/app_adaptive_widgets.dart';
+import 'dart:async';
+
 import 'package:app_database/app_database.dart';
 import 'package:app_locale/app_locale.dart';
 import 'package:app_logging/app_logging.dart';
@@ -45,20 +47,19 @@ class _AddVisitViewState extends State<_AddVisitView> {
     
     // Set up field dependencies after the UI is completely stable to avoid dropdown assertion errors
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      // Use multiple delays to ensure the UI is fully rendered and stable
-      Future.delayed(const Duration(milliseconds: 100), () {
-        if (mounted) {
-          // First, ensure the form is fully loaded
-          _visitFormBloc.emitLoaded();
-        }
-      });
-      
-      Future.delayed(const Duration(milliseconds: 1000), () {
-        if (mounted) {
-          AppLogger().d('Setting up field dependencies after UI is stable');
-          _visitFormBloc.setupFieldDependencies();
-        }
-      });
+      // Use proper async pattern instead of delays
+      if (mounted) {
+        // First, ensure the form is fully loaded
+        _visitFormBloc.emitLoaded();
+        
+        // Then set up dependencies after the UI has processed the first update
+        Timer.run(() {
+          if (mounted) {
+            AppLogger().d('Setting up field dependencies after UI is stable');
+            _visitFormBloc.setupFieldDependencies();
+          }
+        });
+      }
     });
   }
 

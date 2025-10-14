@@ -1,4 +1,6 @@
 import 'package:app_database/app_database.dart';
+import 'dart:async';
+
 import 'package:app_locale/app_locale.dart';
 import 'package:app_logging/app_logging.dart';
 import 'package:flutter/material.dart';
@@ -267,8 +269,10 @@ class _HospitalDropdown extends StatelessWidget {
                     SnackBar(content: Text(state.message)),
                   );
 
-                  // Add a small delay to ensure database write is completed
-                  await Future.delayed(const Duration(milliseconds: 100));
+                  // Use a microtask to ensure database write is completed
+                  final completer = Completer<void>();
+                  Timer.run(() => completer.complete());
+                  await completer.future;
 
                   // Refresh the hospital list to include the newly added hospital
                   // and automatically select the newly created hospital

@@ -1,10 +1,12 @@
 import 'dart:async';
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
 import 'package:app_database/app_database.dart';
 import 'package:app_logging/app_logging.dart';
 import 'package:app_storage/app_storage.dart';
+import 'package:app_utils/field_dependency_helper.dart';
 import 'package:drift/drift.dart' show Value;
 import 'package:equatable/equatable.dart';
 import 'package:form_bloc/form_bloc.dart';
@@ -40,6 +42,9 @@ class VisitFormBloc extends FormBloc<String, String> {
 
   /// Resources associated with this visit
   List<Resource> resources = [];
+
+  /// Field dependency helper for managing cascading field updates
+  final _fieldHelper = FieldDependencyHelper();
 
   /// Refresh hospitals list from database and update dropdown options
   /// Optional parameter to select the most recently added hospital
@@ -354,9 +359,16 @@ class VisitFormBloc extends FormBloc<String, String> {
         // Load resources for existing visit
         await loadResourcesForVisit(visitToEdit!.id);
 
-        // Use a small delay to ensure all field updates are processed
-        await Future.delayed(const Duration(milliseconds: 100));
-        _populateFormAfterItemsLoaded();
+        // Use field helper to ensure all field updates are processed
+        await _fieldHelper.executeAfterFieldUpdate(
+          () async {
+            // Yield to event loop to ensure field updates are processed
+            final completer = Completer<void>();
+            Timer.run(() => completer.complete());
+            return completer.future;
+          },
+          () => _populateFormAfterItemsLoaded(),
+        );
       }
 
       // Use emitLoaded to indicate the form is ready for interaction
@@ -364,10 +376,15 @@ class VisitFormBloc extends FormBloc<String, String> {
 
       // Set up field dependencies differently for Add vs Edit
       if (visitToEdit != null) {
-        // For edit visits, set up dependencies immediately after a short delay
-        Future.delayed(const Duration(milliseconds: 200), () {
-          _setupFieldDependencies();
-        });
+        // For edit visits, set up dependencies using field helper
+        _fieldHelper.executeAfterFieldUpdate(
+          () async {
+            final completer = Completer<void>();
+            Timer.run(() => completer.complete());
+            return completer.future;
+          },
+          () => _setupFieldDependencies(),
+        );
       } else {
         // For add visits, DON'T set up dependencies here
         // They will be set up manually from the UI after a longer delay
@@ -421,12 +438,11 @@ class VisitFormBloc extends FormBloc<String, String> {
             ),
           );
 
-          // Wait for the update to complete (with timeout)
-          int attempts = 0;
-          while (!updateCompleted && attempts < 50) {
-            await Future.delayed(Duration(milliseconds: 100));
-            attempts++;
-          }
+          // Wait for the update to complete using field helper
+          final updateSucceeded = await _fieldHelper.waitForCondition(
+            () => updateCompleted,
+            timeout: const Duration(seconds: 5),
+          );
 
           await subscription.cancel();
 
@@ -807,7 +823,7 @@ class VisitFormBloc extends FormBloc<String, String> {
   }
 
   /// Internal method to populate form after items are loaded
-  void _populateFormAfterItemsLoaded() {
+  Future<void> _populateFormAfterItemsLoaded() async {
     if (visitToEdit == null) return;
 
     final visit = visitToEdit!;
@@ -824,44 +840,50 @@ class VisitFormBloc extends FormBloc<String, String> {
     dateFieldBloc.updateValue(visit.date);
     detailsFieldBloc.updateValue(visit.details);
 
-    // For cascading fields, validate values exist before setting them
+    // For cascading fields, use field helper to properly sequence updates
     if (visit.hospitalId != null &&
         availableHospitals.any((h) => h.id == visit.hospitalId)) {
-      hospitalFieldBloc.updateValue(visit.hospitalId);
+      await _fieldHelper.executeCascadingFieldUpdates([
+        () async {
+          hospitalFieldBloc.updateValue(visit.hospitalId);
+          final completer = Completer<void>();
+          Timer.run(() => completer.complete());
+          return completer.future;
+        },
+        () async {
+          if (visit.departmentId != null &&
+              availableDepartments.any((d) => d.id == visit.departmentId)) {
+            departmentFieldBloc.updateValue(visit.departmentId);
+          }
+          final completer = Completer<void>();
+          Timer.run(() => completer.complete());
+          return completer.future;
+        },
+        () async {
+          if (visit.doctorId != null &&
+              availableDoctors.any((d) => d.id == visit.doctorId)) {
+            // Check if doctor is valid for current hospital/department filter
+            final filteredDoctors = availableDoctors.where((d) {
+              final hospitalMatch =
+                  visit.hospitalId == null ||
+                  d.hospitalId == visit.hospitalId;
+              final departmentMatch =
+                  visit.departmentId == null ||
+                  d.departmentId == visit.departmentId;
+              return hospitalMatch && departmentMatch;
+            }).toList();
 
-      // Wait for hospital to be set, then set department if valid
-      Future.delayed(const Duration(milliseconds: 100), () {
-        if (visit.departmentId != null &&
-            availableDepartments.any((d) => d.id == visit.departmentId)) {
-          departmentFieldBloc.updateValue(visit.departmentId);
-
-          // Wait for department to be set, then set doctor if valid
-          Future.delayed(const Duration(milliseconds: 100), () {
-            if (visit.doctorId != null &&
-                availableDoctors.any((d) => d.id == visit.doctorId)) {
-              // Check if doctor is valid for current hospital/department filter
-              final filteredDoctors = availableDoctors.where((d) {
-                final hospitalMatch =
-                    visit.hospitalId == null ||
-                    d.hospitalId == visit.hospitalId;
-                final departmentMatch =
-                    visit.departmentId == null ||
-                    d.departmentId == visit.departmentId;
-                return hospitalMatch && departmentMatch;
-              }).toList();
-
-              if (filteredDoctors.any((d) => d.id == visit.doctorId)) {
-                doctorFieldBloc.updateValue(visit.doctorId);
-              } else {
-                AppLogger().w(
-                  'Doctor ${visit.doctorId} is not valid for current filters, setting to null',
-                );
-                doctorFieldBloc.updateValue(null);
-              }
+            if (filteredDoctors.any((d) => d.id == visit.doctorId)) {
+              doctorFieldBloc.updateValue(visit.doctorId);
+            } else {
+              AppLogger().w(
+                'Doctor ${visit.doctorId} is not valid for current filters, setting to null',
+              );
+              doctorFieldBloc.updateValue(null);
             }
-          });
-        }
-      });
+          }
+        },
+      ]);
     } else {
       AppLogger().w(
         'Hospital ${visit.hospitalId} not found in available hospitals',
@@ -987,6 +1009,7 @@ class VisitFormBloc extends FormBloc<String, String> {
   Future<void> close() async {
     await _hospitalSubscription?.cancel();
     await _departmentSubscription?.cancel();
+    _fieldHelper.dispose();
     return super.close();
   }
 }

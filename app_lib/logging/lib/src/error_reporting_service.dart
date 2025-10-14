@@ -151,8 +151,10 @@ class ErrorReportingService {
       // TODO: Implement actual backend integration
       _systemLogger.info('Sending error to backend: ${errorRecord['message']}');
 
-      // Simulate network delay
-      await Future.delayed(const Duration(milliseconds: 100));
+      // Use a microtask instead of artificial delay
+      final completer = Completer<void>();
+      Timer.run(() => completer.complete());
+      await completer.future;
 
       // TODO: Replace with actual HTTP call
       _systemLogger.info('Error sent to backend successfully');
