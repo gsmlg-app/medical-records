@@ -222,9 +222,9 @@ class _ResourcePickerState extends State<ResourcePicker> {
     if (widget.allowedTypes.contains(ResourceType.document)) {
       options.add(
         _PickerOption(
-          icon: Icons.picture_as_pdf_outlined,
+          icon: Icons.insert_drive_file_outlined,
           label: kIsWeb ? 'Documents (Web Demo)' : context.l10n.documents,
-          description: 'Select PDF documents from your device',
+          description: 'Select PDFs, images, and other documents',
           color: Theme.of(context).colorScheme.tertiary,
           onTap: _pickDocument,
         ),
@@ -322,7 +322,16 @@ class _ResourcePickerState extends State<ResourcePicker> {
 
       FilePickerResult? result = await FilePicker.platform.pickFiles(
         type: FileType.custom,
-        allowedExtensions: ['pdf'],
+        allowedExtensions: [
+          // Document formats
+          'pdf', 'doc', 'docx', 'txt', 'rtf', 'odt',
+          // Image formats
+          'jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'heic', 'heif',
+          // Spreadsheet formats
+          'xls', 'xlsx', 'csv',
+          // Other common formats
+          'zip', 'rar', '7z',
+        ],
         allowMultiple: false,
       );
 
@@ -352,14 +361,24 @@ class _ResourcePickerState extends State<ResourcePicker> {
             return;
           }
 
-          widget.onResourceSelected(file, ResourceType.document);
-          _showSuccess('Document added successfully');
+          // Determine resource type based on file extension
+          final extension = result.files.single.extension?.toLowerCase();
+          ResourceType resourceType;
+
+          if (extension != null && ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'heic', 'heif'].contains(extension)) {
+            resourceType = ResourceType.image;
+          } else {
+            resourceType = ResourceType.document;
+          }
+
+          widget.onResourceSelected(file, resourceType);
+          _showSuccess('File added successfully');
           Navigator.of(context).pop();
         }
       }
     } catch (e) {
       AppLogger().e('Error picking document: $e');
-      _showError('Failed to pick document: ${e.toString()}');
+      _showError('Failed to pick file: ${e.toString()}');
     } finally {
       setState(() => _isLoading = false);
     }
