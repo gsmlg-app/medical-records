@@ -13,10 +13,7 @@ class ResourcePicker extends StatefulWidget {
   const ResourcePicker({
     super.key,
     required this.onResourceSelected,
-    this.allowedTypes = const [
-      ResourceType.image,
-      ResourceType.document,
-    ],
+    this.allowedTypes = const [ResourceType.image, ResourceType.document],
   });
 
   final Function(File sourceFile, ResourceType type) onResourceSelected;
@@ -46,7 +43,7 @@ class _ResourcePickerState extends State<ResourcePicker> {
             decoration: BoxDecoration(
               border: Border(
                 bottom: BorderSide(
-                  color: Theme.of(context).dividerColor.withOpacity(0.1),
+                  color: Theme.of(context).dividerColor.withValues(alpha: 0.1),
                 ),
               ),
             ),
@@ -64,7 +61,9 @@ class _ResourcePickerState extends State<ResourcePicker> {
                 Text(
                   'Choose a source to add a resource to this visit',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.onSurface.withValues(alpha: 0.7),
                   ),
                 ),
               ],
@@ -89,12 +88,18 @@ class _ResourcePickerState extends State<ResourcePicker> {
                           shape: BoxShape.circle,
                           gradient: LinearGradient(
                             colors: [
-                              Theme.of(context).primaryColor.withOpacity(0.1),
-                              Theme.of(context).primaryColor.withOpacity(0.05),
+                              Theme.of(
+                                context,
+                              ).primaryColor.withValues(alpha: 0.1),
+                              Theme.of(
+                                context,
+                              ).primaryColor.withValues(alpha: 0.05),
                             ],
                           ),
                           border: Border.all(
-                            color: Theme.of(context).primaryColor.withOpacity(0.2),
+                            color: Theme.of(
+                              context,
+                            ).primaryColor.withValues(alpha: 0.2),
                             width: 2,
                           ),
                         ),
@@ -126,7 +131,9 @@ class _ResourcePickerState extends State<ResourcePicker> {
                   Text(
                     'Accessing your files...',
                     style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurface.withOpacity(0.8),
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.onSurface.withValues(alpha: 0.8),
                       fontWeight: FontWeight.w500,
                     ),
                   ),
@@ -134,7 +141,9 @@ class _ResourcePickerState extends State<ResourcePicker> {
                   Text(
                     'Please wait while we prepare your resources',
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.onSurface.withValues(alpha: 0.6),
                     ),
                     textAlign: TextAlign.center,
                   ),
@@ -144,9 +153,7 @@ class _ResourcePickerState extends State<ResourcePicker> {
           else
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
-              child: Column(
-                children: _buildPickerOptions(context),
-              ),
+              child: Column(children: _buildPickerOptions(context)),
             ),
 
           // Footer
@@ -155,7 +162,7 @@ class _ResourcePickerState extends State<ResourcePicker> {
             decoration: BoxDecoration(
               border: Border(
                 top: BorderSide(
-                  color: Theme.of(context).dividerColor.withOpacity(0.1),
+                  color: Theme.of(context).dividerColor.withValues(alpha: 0.1),
                 ),
               ),
             ),
@@ -165,8 +172,13 @@ class _ResourcePickerState extends State<ResourcePicker> {
                 TextButton(
                   onPressed: () => Navigator.of(context).pop(),
                   style: TextButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                    foregroundColor: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 24,
+                      vertical: 12,
+                    ),
+                    foregroundColor: Theme.of(
+                      context,
+                    ).colorScheme.onSurface.withValues(alpha: 0.7),
                   ),
                   child: Text(context.l10n.cancel.toUpperCase()),
                 ),
@@ -318,7 +330,7 @@ class _ResourcePickerState extends State<ResourcePicker> {
         // Handle web files differently (no file path)
         if (kIsWeb) {
           final bytes = result.files.single.bytes;
-          final name = result.files.single.name;
+          // final name = result.files.single.name; // Unused variable
 
           if (bytes != null && bytes.length > 10 * 1024 * 1024) {
             _showError(context.l10n.fileTooLarge);
@@ -359,11 +371,7 @@ class _ResourcePickerState extends State<ResourcePicker> {
         SnackBar(
           content: Row(
             children: [
-              Icon(
-                Icons.error_outline,
-                color: Colors.white,
-                size: 20,
-              ),
+              Icon(Icons.error_outline, color: Colors.white, size: 20),
               const SizedBox(width: 12),
               Expanded(
                 child: Text(
@@ -378,9 +386,7 @@ class _ResourcePickerState extends State<ResourcePicker> {
           ),
           backgroundColor: Theme.of(context).colorScheme.error,
           behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
-          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
           margin: const EdgeInsets.all(16),
           duration: const Duration(seconds: 4),
           action: SnackBarAction(
@@ -401,11 +407,7 @@ class _ResourcePickerState extends State<ResourcePicker> {
         SnackBar(
           content: Row(
             children: [
-              Icon(
-                Icons.check_circle_outline,
-                color: Colors.white,
-                size: 20,
-              ),
+              Icon(Icons.check_circle_outline, color: Colors.white, size: 20),
               const SizedBox(width: 12),
               Expanded(
                 child: Text(
@@ -420,9 +422,7 @@ class _ResourcePickerState extends State<ResourcePicker> {
           ),
           backgroundColor: Theme.of(context).colorScheme.primary,
           behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
-          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
           margin: const EdgeInsets.all(16),
           duration: const Duration(seconds: 3),
         ),
@@ -464,20 +464,12 @@ class _PickerOptionState extends State<_PickerOption>
       duration: const Duration(milliseconds: 200),
       vsync: this,
     );
-    _scaleAnimation = Tween<double>(
-      begin: 1.0,
-      end: 0.95,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.easeInOut,
-    ));
-    _opacityAnimation = Tween<double>(
-      begin: 1.0,
-      end: 0.8,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.easeInOut,
-    ));
+    _scaleAnimation = Tween<double>(begin: 1.0, end: 0.95).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
+    );
+    _opacityAnimation = Tween<double>(begin: 1.0, end: 0.8).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
+    );
   }
 
   @override
@@ -508,14 +500,14 @@ class _PickerOptionState extends State<_PickerOption>
                   color: Theme.of(context).cardColor,
                   boxShadow: [
                     BoxShadow(
-                      color: widget.color.withOpacity(0.15),
+                      color: widget.color.withValues(alpha: 0.15),
                       blurRadius: 12,
                       offset: const Offset(0, 4),
                       spreadRadius: 0,
                     ),
                   ],
                   border: Border.all(
-                    color: widget.color.withOpacity(0.2),
+                    color: widget.color.withValues(alpha: 0.2),
                     width: 1.5,
                   ),
                 ),
@@ -533,20 +525,16 @@ class _PickerOptionState extends State<_PickerOption>
                             begin: Alignment.topLeft,
                             end: Alignment.bottomRight,
                             colors: [
-                              widget.color.withOpacity(0.15),
-                              widget.color.withOpacity(0.05),
+                              widget.color.withValues(alpha: 0.15),
+                              widget.color.withValues(alpha: 0.05),
                             ],
                           ),
                           border: Border.all(
-                            color: widget.color.withOpacity(0.3),
+                            color: widget.color.withValues(alpha: 0.3),
                             width: 1,
                           ),
                         ),
-                        child: Icon(
-                          widget.icon,
-                          size: 28,
-                          color: widget.color,
-                        ),
+                        child: Icon(widget.icon, size: 28, color: widget.color),
                       ),
                       const SizedBox(width: 16),
                       // Text content
@@ -556,27 +544,23 @@ class _PickerOptionState extends State<_PickerOption>
                           children: [
                             Text(
                               widget.label,
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .titleMedium
+                              style: Theme.of(context).textTheme.titleMedium
                                   ?.copyWith(
                                     fontWeight: FontWeight.w600,
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .onSurface,
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.onSurface,
                                   ),
                             ),
                             const SizedBox(height: 4),
                             Text(
                               widget.description,
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .bodyMedium
+                              style: Theme.of(context).textTheme.bodyMedium
                                   ?.copyWith(
                                     color: Theme.of(context)
                                         .colorScheme
                                         .onSurface
-                                        .withOpacity(0.7),
+                                        .withValues(alpha: 0.7),
                                   ),
                             ),
                           ],
@@ -586,10 +570,9 @@ class _PickerOptionState extends State<_PickerOption>
                       Icon(
                         Icons.arrow_forward_ios,
                         size: 16,
-                        color: Theme.of(context)
-                            .colorScheme
-                            .onSurface
-                            .withOpacity(0.4),
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.onSurface.withValues(alpha: 0.4),
                       ),
                     ],
                   ),

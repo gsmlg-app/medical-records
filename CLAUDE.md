@@ -89,10 +89,14 @@ flutter run -d ios            # iOS
   - `locale` - Internationalization setup with ARB files
   - `provider` - Dependency injection setup
   - `theme` - Theme management with persistence
+  - `logging` - Structured logging with file output and CrashReportingWidget
+  - `storage` - Resource file storage with SHA256-based naming (see DATA.md)
+  - `utils` - Utilities including FieldDependencyHelper for managing field updates
 - **UI Components**: `app_widget/` - Reusable widgets and UI elements
   - `adaptive` - Adaptive UI components for different screen sizes
   - `feedback` - Enhanced feedback system (dialogs, toasts, bottom sheets)
   - `web_view` - Web viewing capabilities
+  - `resources` - Resource management widgets
 - **Code Generation**: `bricks/` - Mason templates for scaffolding
 - **Third-party**: `third_party/` - Modified/custom third-party packages
   - `form_bloc` - Custom form BLoC implementation
@@ -109,6 +113,7 @@ The application follows a **clean data flow pattern** with clear separation of c
    - Full CRUD operations with companion objects and relationship queries
    - Testing support with `AppDatabase.forTesting()` factory
    - Supports both mobile and web platforms
+   - See DATA.md for complete database schema documentation
 
 2. **BLoC Layer** (`app_bloc/*`): Business logic with state management
    - Each domain entity has its own BLoC (HospitalBloc, TreatmentBloc, VisitBloc, etc.)
@@ -202,6 +207,7 @@ The medical records system models these relationships:
 - **Treatments** represent medical procedures/therapies
 - **Visits** are appointments linked to **Treatments** and can have **Resources**
 - Proper foreign key relationships and cascade handling
+- See DATA.md for complete database schema documentation
 
 ### State Management Strategy
 - **Global BLoCs**: Provided at app root for entities accessed across multiple screens
@@ -211,9 +217,23 @@ The medical records system models these relationships:
 
 ### Safe Widget Patterns
 The project implements custom safe widgets to prevent common Flutter assertion errors:
-- **SafeDropdownFieldBlocBuilder**: Prevents assertion errors in form dropdowns
+- **SafeDropdownFieldBlocBuilder**: Prevents assertion errors in form dropdowns by validating state before rendering
 - Used consistently across forms to provide robust dropdown behavior
 - Addresses specific Flutter form validation challenges
+
+### Field Dependency Management
+The project uses **FieldDependencyHelper** (`app_lib/utils`) to manage cascading field updates without race conditions:
+- Eliminates the need for artificial `Future.delayed()` calls
+- Provides methods for sequential field updates
+- Ensures field updates are processed before dependent callbacks execute
+- Use this helper when updating form fields that have dependencies on other fields
+
+### Resource Storage
+The application stores resources (images, PDFs) using a hash-based naming system:
+- Files stored in `<app_documents_directory>/resources/<visitId>/<sha256sum>.<suffix>`
+- `ResourceStorageService` (`app_lib/storage`) handles all file operations
+- SHA256 hashing prevents duplicate files and ensures data integrity
+- See DATA.md for complete storage specifications
 
 ### Logging and Error Handling
 - **Structured Logging**: AppLogger with file output to app support directory
@@ -224,7 +244,7 @@ The project implements custom safe widgets to prevent common Flutter assertion e
 
 ## Code Generation with Mason
 
-The project uses Mason templates for consistent code generation:
+The project uses Mason templates for consistent code generation. See BRICKS.md for complete documentation.
 
 ```bash
 # Generate new BLoC package
@@ -254,7 +274,7 @@ melos run gen-l10n
 ```
 
 ### Usage Pattern
-- Use `AppLocalizations` for accessing localized strings
+- Use `AppLocalizations` or `context.l10n` for accessing localized strings
 - All user-facing text should be externalized to ARB files
 - Supports multiple locales with automatic detection
 
@@ -326,3 +346,9 @@ These packages are modified versions of open-source projects tailored specifical
 - **Localization**: `app_lib/locale/l10n.yaml` (i18n configuration)
 - **Dependencies**: All internal packages use workspace resolution with `any` versions
 - **Icons**: `flutter_launcher_icons` configuration in pubspec.yaml for multi-platform icons
+
+## Additional Documentation
+
+- **BRICKS.md**: Complete guide to Mason brick templates and code generation
+- **DATA.md**: Detailed database schema and data structure documentation
+- **README.md**: Project overview and getting started guide

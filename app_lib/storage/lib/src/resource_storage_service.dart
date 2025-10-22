@@ -59,7 +59,9 @@ class ResourceStorageService {
       // Return the relative path from the base resources directory
       final relativePath = path.join(visitId.toString(), hashFileName);
 
-      AppLogger().d('Stored resource file: $relativePath (SHA256: ${sha256Hash.toString()})');
+      AppLogger().d(
+        'Stored resource file: $relativePath (SHA256: ${sha256Hash.toString()})',
+      );
       return relativePath;
     } catch (e) {
       AppLogger().e('Failed to store resource file: $e');
@@ -136,7 +138,11 @@ class ResourceStorageService {
         return [];
       }
 
-      final files = await visitDir.list().where((entity) => entity is File).cast<File>().toList();
+      final files = await visitDir
+          .list()
+          .where((entity) => entity is File)
+          .cast<File>()
+          .toList();
       final baseDir = await _resourcesBaseDir;
       return files.map((file) {
         final relativePath = path.relative(file.path, from: baseDir.path);

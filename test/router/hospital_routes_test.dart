@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 
-import 'package:medical_records/router.dart';
+
 import 'package:medical_records/screens/hospitals/hospitals_screen.dart';
 import 'package:medical_records/screens/hospitals/add_hospital_screen.dart';
 import 'package:medical_records/screens/hospitals/edit_hospital_screen.dart';
-import 'package:medical_records/screens/app/error_screen.dart' as app_error;
+
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -82,7 +82,7 @@ void main() {
 
       // Assert
       expect(find.text('Hospitals List'), findsOneWidget);
-      expect(testRouter.routeInformationProvider.value.location, '/hospitals');
+      expect(testRouter.routeInformationProvider.value.uri.toString(), '/hospitals');
     });
 
     testWidgets('Navigate to add hospital route', (WidgetTester tester) async {
@@ -99,7 +99,7 @@ void main() {
 
       // Assert
       expect(find.text('Add Hospital'), findsOneWidget);
-      expect(testRouter.routeInformationProvider.value.location, '/hospitals/add');
+      expect(testRouter.routeInformationProvider.value.uri.toString(), '/hospitals/add');
     });
 
     testWidgets('Navigate to edit hospital route with ID', (WidgetTester tester) async {
@@ -117,7 +117,7 @@ void main() {
 
       // Assert
       expect(find.text('Edit Hospital: $hospitalId'), findsOneWidget);
-      expect(testRouter.routeInformationProvider.value.location, '/hospitals/$hospitalId/edit');
+      expect(testRouter.routeInformationProvider.value.uri.toString(), '/hospitals/$hospitalId/edit');
     });
 
     testWidgets('Edit route parses parameter correctly', (WidgetTester tester) async {
@@ -137,7 +137,7 @@ void main() {
       expect(find.text('Edit Hospital: $hospitalId'), findsOneWidget);
 
       // Verify the parameter was correctly extracted
-      expect(testRouter.routeInformationProvider.value.location, '/hospitals/$hospitalId/edit');
+      expect(testRouter.routeInformationProvider.value.uri.toString(), '/hospitals/$hospitalId/edit');
     });
 
     testWidgets('Invalid route shows error page', (WidgetTester tester) async {
@@ -191,17 +191,17 @@ void main() {
       // Navigate to hospitals
       testRouter.go('/hospitals');
       await tester.pumpAndSettle();
-      expect(testRouter.routeInformationProvider.value.location, '/hospitals');
+      expect(testRouter.routeInformationProvider.value.uri.toString(), '/hospitals');
 
       // Navigate to add hospital
       testRouter.go('/hospitals/add');
       await tester.pumpAndSettle();
-      expect(testRouter.routeInformationProvider.value.location, '/hospitals/add');
+      expect(testRouter.routeInformationProvider.value.uri.toString(), '/hospitals/add');
 
       // Navigate to edit hospital
       testRouter.go('/hospitals/999/edit');
       await tester.pumpAndSettle();
-      expect(testRouter.routeInformationProvider.value.location, '/hospitals/999/edit');
+      expect(testRouter.routeInformationProvider.value.uri.toString(), '/hospitals/999/edit');
     });
 
     testWidgets('Route replacement works', (WidgetTester tester) async {
@@ -221,7 +221,7 @@ void main() {
       testRouter.go('/hospitals/555/edit');
       await tester.pumpAndSettle();
       expect(find.text('Edit Hospital: 555'), findsOneWidget);
-      expect(testRouter.routeInformationProvider.value.location, '/hospitals/555/edit');
+      expect(testRouter.routeInformationProvider.value.uri.toString(), '/hospitals/555/edit');
     });
 
     testWidgets('Multiple edit routes with different IDs', (WidgetTester tester) async {
@@ -242,7 +242,7 @@ void main() {
 
         // Assert
         expect(find.text('Edit Hospital: $id'), findsOneWidget);
-        expect(testRouter.routeInformationProvider.value.location, '/hospitals/$id/edit');
+        expect(testRouter.routeInformationProvider.value.uri.toString(), '/hospitals/$id/edit');
       }
     });
 

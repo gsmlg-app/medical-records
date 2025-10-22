@@ -1,7 +1,6 @@
 import 'package:app_database/app_database.dart';
 import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mocktail/mocktail.dart';
 
 import 'package:treatment_form_bloc/treatment_form_bloc.dart';
 
@@ -27,10 +26,10 @@ void main() {
       act: (bloc) => bloc.add(const TreatmentFormTitleChanged('Test Title')),
       expect: () => [
         isA<TreatmentFormState>()
-          ..having((s) => s.title, 'title', equals('Test Title'))
-          ..having((s) => s.isTitleValid, 'isTitleValid', isTrue)
-          ..having((s) => s.isFormValid, 'isFormValid',
-              isFalse), // Form not valid yet
+            .having((s) => s.title, 'title', equals('Test Title'))
+            .having((s) => s.isTitleValid, 'isTitleValid', isTrue)
+            .having((s) => s.isFormValid, 'isFormValid',
+                isFalse), // Form not valid yet
       ],
     );
 
@@ -41,10 +40,10 @@ void main() {
           bloc.add(const TreatmentFormDiagnosisChanged('Test Diagnosis')),
       expect: () => [
         isA<TreatmentFormState>()
-          ..having((s) => s.diagnosis, 'diagnosis', equals('Test Diagnosis'))
-          ..having((s) => s.isDiagnosisValid, 'isDiagnosisValid', isTrue)
-          ..having((s) => s.isFormValid, 'isFormValid',
-              isFalse), // Form not valid yet
+            .having((s) => s.diagnosis, 'diagnosis', equals('Test Diagnosis'))
+            .having((s) => s.isDiagnosisValid, 'isDiagnosisValid', isTrue)
+            .having((s) => s.isFormValid, 'isFormValid',
+                isFalse), // Form not valid yet
       ],
     );
 
@@ -55,11 +54,11 @@ void main() {
           bloc.add(TreatmentFormStartDateChanged(DateTime(2023, 1, 1))),
       expect: () => [
         isA<TreatmentFormState>()
-          ..having(
-              (s) => s.startDate, 'startDate', equals(DateTime(2023, 1, 1)))
-          ..having((s) => s.isStartDateValid, 'isStartDateValid', isTrue)
-          ..having((s) => s.isFormValid, 'isFormValid',
-              isFalse), // Form not valid yet
+            .having(
+                (s) => s.startDate, 'startDate', equals(DateTime(2023, 1, 1)))
+            .having((s) => s.isStartDateValid, 'isStartDateValid', isTrue)
+            .having((s) => s.isFormValid, 'isFormValid',
+                isFalse), // Form not valid yet
       ],
     );
 
@@ -73,19 +72,19 @@ void main() {
       },
       expect: () => [
         isA<TreatmentFormState>()
-          ..having((s) => s.title, 'title', equals('Test Title'))
-          ..having((s) => s.isTitleValid, 'isTitleValid', isTrue)
-          ..having((s) => s.isFormValid, 'isFormValid', isFalse),
+            .having((s) => s.title, 'title', equals('Test Title'))
+            .having((s) => s.isTitleValid, 'isTitleValid', isTrue)
+            .having((s) => s.isFormValid, 'isFormValid', isFalse),
         isA<TreatmentFormState>()
-          ..having((s) => s.diagnosis, 'diagnosis', equals('Test Diagnosis'))
-          ..having((s) => s.isDiagnosisValid, 'isDiagnosisValid', isTrue)
-          ..having((s) => s.isFormValid, 'isFormValid', isFalse),
+            .having((s) => s.diagnosis, 'diagnosis', equals('Test Diagnosis'))
+            .having((s) => s.isDiagnosisValid, 'isDiagnosisValid', isTrue)
+            .having((s) => s.isFormValid, 'isFormValid', isFalse),
         isA<TreatmentFormState>()
-          ..having(
-              (s) => s.startDate, 'startDate', equals(DateTime(2023, 1, 1)))
-          ..having((s) => s.isStartDateValid, 'isStartDateValid', isTrue)
-          ..having(
-              (s) => s.isFormValid, 'isFormValid', isTrue), // Now form is valid
+            .having(
+                (s) => s.startDate, 'startDate', equals(DateTime(2023, 1, 1)))
+            .having((s) => s.isStartDateValid, 'isStartDateValid', isTrue)
+            .having((s) => s.isFormValid, 'isFormValid',
+                isTrue), // Now form is valid
       ],
     );
 
@@ -96,7 +95,7 @@ void main() {
           bloc.add(TreatmentFormEndDateChanged(DateTime(2023, 2, 1))),
       expect: () => [
         isA<TreatmentFormState>()
-          ..having((s) => s.endDate, 'endDate', equals(DateTime(2023, 2, 1))),
+            .having((s) => s.endDate, 'endDate', equals(DateTime(2023, 2, 1))),
       ],
     );
 
@@ -112,15 +111,15 @@ void main() {
       },
       expect: () => [
         isA<TreatmentFormState>()
-          ..having((s) => s.title, 'title', equals('Test Title')),
+            .having((s) => s.title, 'title', equals('Test Title')),
         isA<TreatmentFormState>()
-          ..having((s) => s.diagnosis, 'diagnosis', equals('Test Diagnosis')),
+            .having((s) => s.diagnosis, 'diagnosis', equals('Test Diagnosis')),
         isA<TreatmentFormState>()
-          ..having((s) => s.title, 'title', equals(''))
-          ..having((s) => s.diagnosis, 'diagnosis', equals(''))
-          ..having((s) => s.startDate, 'startDate', isNull)
-          ..having((s) => s.endDate, 'endDate', isNull)
-          ..having((s) => s.isFormValid, 'isFormValid', isFalse),
+            .having((s) => s.title, 'title', equals(''))
+            .having((s) => s.diagnosis, 'diagnosis', equals(''))
+            .having((s) => s.startDate, 'startDate', isNull)
+            .having((s) => s.endDate, 'endDate', isNull)
+            .having((s) => s.isFormValid, 'isFormValid', isFalse),
       ],
     );
 
@@ -140,13 +139,13 @@ void main() {
       )),
       expect: () => [
         isA<TreatmentFormState>()
-          ..having((s) => s.title, 'title', equals('Existing Treatment'))
-          ..having(
-              (s) => s.diagnosis, 'diagnosis', equals('Existing Diagnosis'))
-          ..having(
-              (s) => s.startDate, 'startDate', equals(DateTime(2023, 1, 1)))
-          ..having((s) => s.endDate, 'endDate', equals(DateTime(2023, 2, 1)))
-          ..having((s) => s.isFormValid, 'isFormValid', isTrue),
+            .having((s) => s.title, 'title', equals('Existing Treatment'))
+            .having(
+                (s) => s.diagnosis, 'diagnosis', equals('Existing Diagnosis'))
+            .having(
+                (s) => s.startDate, 'startDate', equals(DateTime(2023, 1, 1)))
+            .having((s) => s.endDate, 'endDate', equals(DateTime(2023, 2, 1)))
+            .having((s) => s.isFormValid, 'isFormValid', isTrue),
       ],
     );
   });

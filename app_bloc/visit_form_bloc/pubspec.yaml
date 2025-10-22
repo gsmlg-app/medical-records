@@ -23,6 +23,9 @@ dependencies:
     path: ../../app_lib/storage
   app_utils:
     path: ../../app_lib/utils
+  drift: ^2.19.0
+  visit_bloc:
+    path: ../../app_bloc/visit
 
 dev_dependencies:
   flutter_test:

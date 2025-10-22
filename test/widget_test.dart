@@ -1,9 +1,9 @@
-import 'dart:async';
+
 
 import 'package:flutter/material.dart';
 import 'package:medical_records/app.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:go_router/go_router.dart';
+
 import 'package:app_logging/app_logging.dart';
 import 'package:app_locale/gen_l10n/app_localizations.dart';
 import 'package:app_locale/app_locale.dart';
@@ -57,9 +57,9 @@ void main() {
     // Find a widget that's definitely rendered and get its context
     final BuildContext context = tester.element(find.byType(Scaffold).first);
 
-    final textOnScreen = AppLocalizations.of(context)!.welcomeHome;
+    final appName = AppLocalizations.of(context)!.appName;
 
-    // Verify that the welcome text is displayed on the home screen
-    expect(find.text(textOnScreen), findsOneWidget);
+    // Verify that the app name is displayed on the home screen
+    expect(find.text(appName), findsOneWidget);
   });
 }

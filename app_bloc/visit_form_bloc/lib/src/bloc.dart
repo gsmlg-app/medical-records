@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -60,15 +59,21 @@ class VisitFormBloc extends FormBloc<String, String> {
 
       // Update hospital field items - this is the key fix!
       final hospitalItems = [null, ...availableHospitals.map((h) => h.id)];
-      AppLogger().d('Updating hospital field items with ${hospitalItems.length} options');
-      AppLogger().d('Hospital items before update: ${hospitalFieldBloc.state.items.length}');
+      AppLogger().d(
+        'Updating hospital field items with ${hospitalItems.length} options',
+      );
+      AppLogger().d(
+        'Hospital items before update: ${hospitalFieldBloc.state.items.length}',
+      );
 
       // Ensure current value is valid BEFORE updating items to prevent assertion errors
       final currentValue = hospitalFieldBloc.value;
       var newValue = currentValue;
 
       if (!hospitalItems.contains(currentValue)) {
-        AppLogger().d('Current hospital value $currentValue not in new items, setting to null');
+        AppLogger().d(
+          'Current hospital value $currentValue not in new items, setting to null',
+        );
         newValue = null;
       }
 
@@ -85,7 +90,9 @@ class VisitFormBloc extends FormBloc<String, String> {
 
       // Update items first
       hospitalFieldBloc.updateItems(hospitalItems);
-      AppLogger().d('Hospital items after update: ${hospitalFieldBloc.state.items.length}');
+      AppLogger().d(
+        'Hospital items after update: ${hospitalFieldBloc.state.items.length}',
+      );
 
       // Then update value if needed
       if (newValue != currentValue) {
@@ -93,7 +100,9 @@ class VisitFormBloc extends FormBloc<String, String> {
         AppLogger().d('Updated hospital value from $currentValue to $newValue');
       }
 
-      AppLogger().d('Refreshed hospitals with ${availableHospitals.length} items');
+      AppLogger().d(
+        'Refreshed hospitals with ${availableHospitals.length} items',
+      );
 
       // Update department options since hospital list changed
       await _updateDepartmentOptions();
@@ -101,7 +110,6 @@ class VisitFormBloc extends FormBloc<String, String> {
       // Emit a state change to trigger UI rebuild
       // This ensures the dropdown updates when hospitals are refreshed
       emitLoaded();
-
     } catch (e) {
       AppLogger().e('Failed to refresh hospitals: $e');
     }
@@ -170,7 +178,11 @@ class VisitFormBloc extends FormBloc<String, String> {
   }
 
   /// Quick add a new doctor for the selected hospital and department
-  Future<bool> quickAddDoctor(String name, {String? title, String? specialty}) async {
+  Future<bool> quickAddDoctor(
+    String name, {
+    String? title,
+    String? specialty,
+  }) async {
     try {
       final hospitalId = hospitalFieldBloc.value;
       final departmentId = departmentFieldBloc.value;
@@ -326,7 +338,9 @@ class VisitFormBloc extends FormBloc<String, String> {
       var newHospitalValue = currentHospitalValue;
 
       if (!hospitalItems.contains(currentHospitalValue)) {
-        AppLogger().d('Hospital value $currentHospitalValue not in items, setting to null');
+        AppLogger().d(
+          'Hospital value $currentHospitalValue not in items, setting to null',
+        );
         newHospitalValue = null;
       }
 
@@ -334,7 +348,9 @@ class VisitFormBloc extends FormBloc<String, String> {
 
       if (newHospitalValue != currentHospitalValue) {
         hospitalFieldBloc.updateValue(newHospitalValue);
-        AppLogger().d('Updated hospital value from $currentHospitalValue to $newHospitalValue');
+        AppLogger().d(
+          'Updated hospital value from $currentHospitalValue to $newHospitalValue',
+        );
       }
 
       // Update department field (filtered by hospital)
@@ -360,15 +376,12 @@ class VisitFormBloc extends FormBloc<String, String> {
         await loadResourcesForVisit(visitToEdit!.id);
 
         // Use field helper to ensure all field updates are processed
-        await _fieldHelper.executeAfterFieldUpdate(
-          () async {
-            // Yield to event loop to ensure field updates are processed
-            final completer = Completer<void>();
-            Timer.run(() => completer.complete());
-            return completer.future;
-          },
-          () => _populateFormAfterItemsLoaded(),
-        );
+        await _fieldHelper.executeAfterFieldUpdate(() async {
+          // Yield to event loop to ensure field updates are processed
+          final completer = Completer<void>();
+          Timer.run(() => completer.complete());
+          return completer.future;
+        }, () => _populateFormAfterItemsLoaded());
       }
 
       // Use emitLoaded to indicate the form is ready for interaction
@@ -377,18 +390,17 @@ class VisitFormBloc extends FormBloc<String, String> {
       // Set up field dependencies differently for Add vs Edit
       if (visitToEdit != null) {
         // For edit visits, set up dependencies using field helper
-        _fieldHelper.executeAfterFieldUpdate(
-          () async {
-            final completer = Completer<void>();
-            Timer.run(() => completer.complete());
-            return completer.future;
-          },
-          () => _setupFieldDependencies(),
-        );
+        _fieldHelper.executeAfterFieldUpdate(() async {
+          final completer = Completer<void>();
+          Timer.run(() => completer.complete());
+          return completer.future;
+        }, () => _setupFieldDependencies());
       } else {
         // For add visits, DON'T set up dependencies here
         // They will be set up manually from the UI after a longer delay
-        AppLogger().d('Skipping automatic field dependency setup for Add Visit');
+        AppLogger().d(
+          'Skipping automatic field dependency setup for Add Visit',
+        );
       }
     } catch (e) {
       emitFailure(failureResponse: 'Failed to load form data: ${e.toString()}');
@@ -415,7 +427,7 @@ class VisitFormBloc extends FormBloc<String, String> {
           String? errorMessage;
 
           // Listen for the completion of the update
-          final subscription = _visitBloc!.stream.listen((state) {
+          final subscription = _visitBloc.stream.listen((state) {
             if (state is VisitOperationSuccess) {
               updateCompleted = true;
             } else if (state is VisitError) {
@@ -425,7 +437,7 @@ class VisitFormBloc extends FormBloc<String, String> {
           });
 
           // Dispatch the update event
-          _visitBloc!.add(
+          _visitBloc.add(
             UpdateVisit(
               id: visitToEdit!.id,
               treatmentId: visitToEdit!.treatmentId,
@@ -439,7 +451,7 @@ class VisitFormBloc extends FormBloc<String, String> {
           );
 
           // Wait for the update to complete using field helper
-          final updateSucceeded = await _fieldHelper.waitForCondition(
+          await _fieldHelper.waitForCondition(
             () => updateCompleted,
             timeout: const Duration(seconds: 5),
           );
@@ -566,7 +578,7 @@ class VisitFormBloc extends FormBloc<String, String> {
 
     // Listen to hospital field changes, but skip the initial value
     _hospitalSubscription = hospitalFieldBloc.stream.listen((value) {
-      if (value == initialHospitalValue) {
+      if (value.value == initialHospitalValue) {
         AppLogger().d('Skipping initial hospital field value: $value');
         return;
       }
@@ -591,7 +603,7 @@ class VisitFormBloc extends FormBloc<String, String> {
 
     // Listen to department field changes, but skip the initial value
     _departmentSubscription = departmentFieldBloc.stream.listen((value) {
-      if (value == initialDepartmentValue) {
+      if (value.value == initialDepartmentValue) {
         AppLogger().d('Skipping initial department field value: $value');
         return;
       }
@@ -609,43 +621,6 @@ class VisitFormBloc extends FormBloc<String, String> {
         doctorFieldBloc.updateValue(null);
       });
     });
-  }
-
-  /// Called when hospital field changes
-  void _onHospitalChanged() {
-    final hospitalId = hospitalFieldBloc.value;
-    AppLogger().d('Hospital changed to: $hospitalId');
-
-    // 1. Clear department value (always clear when hospital changes)
-    AppLogger().d('Clearing department selection due to hospital change');
-    departmentFieldBloc.updateValue(null);
-
-    // 2. Clear doctor value (always clear when hospital changes)
-    AppLogger().d('Clearing doctor selection due to hospital change');
-    doctorFieldBloc.updateValue(null);
-
-    // 3. Update department options (departments are not filtered by hospital)
-    final departmentItems = [null, ...availableDepartments.map((d) => d.id)];
-    AppLogger().d(
-      'Updating department options with ${departmentItems.length} items',
-    );
-    departmentFieldBloc.updateItems(departmentItems);
-
-    // 4. Update doctor options based on new hospital
-    _updateDoctorOptions();
-  }
-
-  /// Called when department field changes
-  void _onDepartmentChanged() {
-    final departmentId = departmentFieldBloc.value;
-    AppLogger().d('Department changed to: $departmentId');
-
-    // 1. Clear doctor value (always clear when department changes)
-    AppLogger().d('Clearing doctor selection due to department change');
-    doctorFieldBloc.updateValue(null);
-
-    // 2. Update doctor options based on current hospital and new department
-    _updateDoctorOptions();
   }
 
   /// Updates doctor options based on current hospital and department filters
@@ -689,7 +664,9 @@ class VisitFormBloc extends FormBloc<String, String> {
     var newValue = currentValue;
 
     if (!doctorItems.contains(currentValue)) {
-      AppLogger().d('Doctor value $currentValue not in new items, setting to null');
+      AppLogger().d(
+        'Doctor value $currentValue not in new items, setting to null',
+      );
       newValue = null;
     }
 
@@ -733,13 +710,17 @@ class VisitFormBloc extends FormBloc<String, String> {
             if (availableDepartments.any((d) => d.id == deptId)) {
               validDepartmentIds.add(deptId);
             } else {
-              AppLogger().w('Department ID $deptId not found in available departments, marking for removal');
+              AppLogger().w(
+                'Department ID $deptId not found in available departments, marking for removal',
+              );
             }
           }
 
           // If we found invalid department IDs, update the hospital
           if (validDepartmentIds.length != departmentIds.length) {
-            AppLogger().d('Cleaning up ${departmentIds.length - validDepartmentIds.length} invalid department IDs from hospital');
+            AppLogger().d(
+              'Cleaning up ${departmentIds.length - validDepartmentIds.length} invalid department IDs from hospital',
+            );
 
             // Update hospital with cleaned department IDs
             final updatedHospital = hospital.copyWith(
@@ -748,7 +729,9 @@ class VisitFormBloc extends FormBloc<String, String> {
             await _database.updateHospital(updatedHospital);
 
             // Update local hospital list
-            final hospitalIndex = availableHospitals.indexWhere((h) => h.id == hospitalId);
+            final hospitalIndex = availableHospitals.indexWhere(
+              (h) => h.id == hospitalId,
+            );
             if (hospitalIndex != -1) {
               availableHospitals[hospitalIndex] = updatedHospital;
               hospitalUpdated = true;
@@ -774,15 +757,21 @@ class VisitFormBloc extends FormBloc<String, String> {
             await _database.updateHospital(updatedHospital);
 
             // Update local hospital list
-            final hospitalIndex = availableHospitals.indexWhere((h) => h.id == hospitalId);
+            final hospitalIndex = availableHospitals.indexWhere(
+              (h) => h.id == hospitalId,
+            );
             if (hospitalIndex != -1) {
               availableHospitals[hospitalIndex] = updatedHospital;
               hospitalUpdated = true;
             }
 
-            AppLogger().d('Cleared invalid departmentIds from hospital due to parsing error');
+            AppLogger().d(
+              'Cleared invalid departmentIds from hospital due to parsing error',
+            );
           } catch (updateError) {
-            AppLogger().e('Failed to clear invalid departmentIds: $updateError');
+            AppLogger().e(
+              'Failed to clear invalid departmentIds: $updateError',
+            );
           }
         }
       } else {
@@ -802,7 +791,9 @@ class VisitFormBloc extends FormBloc<String, String> {
     var newValue = currentValue;
 
     if (!departmentItems.contains(currentValue)) {
-      AppLogger().d('Department value $currentValue not in new items, setting to null');
+      AppLogger().d(
+        'Department value $currentValue not in new items, setting to null',
+      );
       newValue = null;
     }
 
@@ -817,7 +808,9 @@ class VisitFormBloc extends FormBloc<String, String> {
 
     // If we updated the hospital, emit a state change to refresh the UI
     if (hospitalUpdated) {
-      AppLogger().d('Hospital department IDs were cleaned up, emitting state change');
+      AppLogger().d(
+        'Hospital department IDs were cleaned up, emitting state change',
+      );
       emitLoaded();
     }
   }
@@ -865,8 +858,7 @@ class VisitFormBloc extends FormBloc<String, String> {
             // Check if doctor is valid for current hospital/department filter
             final filteredDoctors = availableDoctors.where((d) {
               final hospitalMatch =
-                  visit.hospitalId == null ||
-                  d.hospitalId == visit.hospitalId;
+                  visit.hospitalId == null || d.hospitalId == visit.hospitalId;
               final departmentMatch =
                   visit.departmentId == null ||
                   d.departmentId == visit.departmentId;
@@ -931,11 +923,16 @@ class VisitFormBloc extends FormBloc<String, String> {
   }
 
   /// Add a resource to the current visit
-  Future<bool> addResource(File sourceFile, ResourceType type, {String? notes}) async {
+  Future<bool> addResource(
+    File sourceFile,
+    ResourceType type, {
+    String? notes,
+  }) async {
     try {
       // Create a temporary visit ID if this is a new visit
       // In a real implementation, this should handle the case where visit doesn't exist yet
-      int tempVisitId = visitToEdit?.id ?? DateTime.now().millisecondsSinceEpoch;
+      int tempVisitId =
+          visitToEdit?.id ?? DateTime.now().millisecondsSinceEpoch;
 
       // Store the file
       final relativePath = await _storageService.storeResourceFile(

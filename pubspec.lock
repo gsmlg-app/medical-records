@@ -25,13 +25,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.3.2+1"
-  app_utils:
-    dependency: transitive
-    description:
-      path: "app_lib/utils"
-      relative: true
-    source: path
-    version: "1.0.0"
   archive:
     dependency: transitive
     description:
@@ -65,7 +58,7 @@ packages:
     source: hosted
     version: "9.0.0"
   bloc_test:
-    dependency: transitive
+    dependency: "direct dev"
     description:
       name: bloc_test
       sha256: "1dd549e58be35148bc22a9135962106aa29334bc1e3f285994946a1057b29d7b"
@@ -305,7 +298,7 @@ packages:
     source: hosted
     version: "0.4.1"
   drift:
-    dependency: transitive
+    dependency: "direct dev"
     description:
       name: drift
       sha256: "540cf382a3bfa99b76e51514db5b0ebcd81ce3679b7c1c9cb9478ff3735e47a1"
@@ -486,7 +479,7 @@ packages:
     source: hosted
     version: "6.0.0"
   flutter_localizations:
-    dependency: transitive
+    dependency: "direct dev"
     description: flutter
     source: sdk
     version: "0.0.0"
@@ -789,7 +782,7 @@ packages:
     source: hosted
     version: "5.4.6"
   mocktail:
-    dependency: transitive
+    dependency: "direct dev"
     description:
       name: mocktail
       sha256: "890df3f9688106f25755f26b1c60589a92b3ab91a22b8b224947ad041bf172d8"

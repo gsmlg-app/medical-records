@@ -56,9 +56,9 @@ class _ResourcesSectionState extends State<ResourcesSection> {
           children: [
             Text(
               context.l10n.resources,
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
             ),
             if (!widget.isReadOnly)
               ElevatedButton.icon(
@@ -66,7 +66,10 @@ class _ResourcesSectionState extends State<ResourcesSection> {
                 icon: const Icon(Icons.add),
                 label: Text(context.l10n.addResource),
                 style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
+                  ),
                 ),
               ),
           ],
@@ -84,11 +87,7 @@ class _ResourcesSectionState extends State<ResourcesSection> {
             ),
             child: Row(
               children: [
-                Icon(
-                  Icons.folder_open,
-                  color: Colors.grey[600],
-                  size: 20,
-                ),
+                Icon(Icons.folder_open, color: Colors.grey[600], size: 20),
                 const SizedBox(width: 8),
                 Text(
                   context.l10n.noResources,
@@ -208,28 +207,19 @@ class _ResourcesSectionState extends State<ResourcesSection> {
 
   void _showError(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: Colors.red,
-      ),
+      SnackBar(content: Text(message), backgroundColor: Colors.red),
     );
   }
 
   void _showSuccess(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: Colors.green,
-      ),
+      SnackBar(content: Text(message), backgroundColor: Colors.green),
     );
   }
 
   void _showInfo(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: Colors.blue,
-      ),
+      SnackBar(content: Text(message), backgroundColor: Colors.blue),
     );
   }
 }

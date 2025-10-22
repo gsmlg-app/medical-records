@@ -48,6 +48,7 @@ class _VisitDetailScreenState extends State<VisitDetailScreen> {
 
   void _loadVisit() async {
     if (_visitId == null) return;
+    if (!context.mounted) return;
     
     final state = context.read<VisitBloc>().state;
     if (state is VisitLoaded) {

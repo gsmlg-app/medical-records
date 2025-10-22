@@ -14,40 +14,46 @@ void main() {
       helper.dispose();
     });
 
-    test('executeAfterFieldUpdate should execute callback after field update', () async {
-      var callbackExecuted = false;
-      var fieldUpdateCompleted = false;
+    test(
+      'executeAfterFieldUpdate should execute callback after field update',
+      () async {
+        var callbackExecuted = false;
+        var fieldUpdateCompleted = false;
 
-      await helper.executeAfterFieldUpdate(
-        () async {
-          fieldUpdateCompleted = true;
-        },
-        () {
-          callbackExecuted = true;
-        },
-      );
+        await helper.executeAfterFieldUpdate(
+          () async {
+            fieldUpdateCompleted = true;
+          },
+          () {
+            callbackExecuted = true;
+          },
+        );
 
-      expect(fieldUpdateCompleted, isTrue);
-      expect(callbackExecuted, isTrue);
-    });
+        expect(fieldUpdateCompleted, isTrue);
+        expect(callbackExecuted, isTrue);
+      },
+    );
 
-    test('executeCascadingFieldUpdates should execute updates in sequence', () async {
-      final executionOrder = <int>[];
+    test(
+      'executeCascadingFieldUpdates should execute updates in sequence',
+      () async {
+        final executionOrder = <int>[];
 
-      await helper.executeCascadingFieldUpdates([
-        () async {
-          executionOrder.add(1);
-        },
-        () async {
-          executionOrder.add(2);
-        },
-        () async {
-          executionOrder.add(3);
-        },
-      ]);
+        await helper.executeCascadingFieldUpdates([
+          () async {
+            executionOrder.add(1);
+          },
+          () async {
+            executionOrder.add(2);
+          },
+          () async {
+            executionOrder.add(3);
+          },
+        ]);
 
-      expect(executionOrder, equals([1, 2, 3]));
-    });
+        expect(executionOrder, equals([1, 2, 3]));
+      },
+    );
 
     test('waitForCondition should return true when condition is met', () async {
       var conditionMet = false;
@@ -65,42 +71,45 @@ void main() {
       expect(result, isTrue);
     });
 
-    test('waitForCondition should return false when timeout is reached', () async {
-      final result = await helper.waitForCondition(
-        () => false, // Condition never becomes true
-        timeout: const Duration(milliseconds: 100),
-      );
+    test(
+      'waitForCondition should return false when timeout is reached',
+      () async {
+        final result = await helper.waitForCondition(
+          () => false, // Condition never becomes true
+          timeout: const Duration(milliseconds: 100),
+        );
 
-      expect(result, isFalse);
-    });
+        expect(result, isFalse);
+      },
+    );
 
-    test('createAutoDisposeSubscription should create and manage subscription', () async {
-      final controller = StreamController<int>();
-      final receivedValues = <int>[];
+    test(
+      'createAutoDisposeSubscription should create and manage subscription',
+      () async {
+        final controller = StreamController<int>();
+        final receivedValues = <int>[];
 
-      final subscription = helper.createAutoDisposeSubscription<int>(
-        controller.stream,
-        (value) => receivedValues.add(value),
-      );
+        helper.createAutoDisposeSubscription<int>(
+          controller.stream,
+          (value) => receivedValues.add(value),
+        );
 
-      controller.add(1);
-      controller.add(2);
-      await controller.close();
+        controller.add(1);
+        controller.add(2);
+        await controller.close();
 
-      // Wait for stream processing
-      await Future.delayed(const Duration(milliseconds: 10));
+        // Wait for stream processing
+        await Future.delayed(const Duration(milliseconds: 10));
 
-      expect(receivedValues, equals([1, 2]));
-    });
+        expect(receivedValues, equals([1, 2]));
+      },
+    );
 
     test('dispose should clean up all resources', () async {
       final controller = StreamController<int>();
 
       // Create a subscription that will be disposed
-      helper.createAutoDisposeSubscription<int>(
-        controller.stream,
-        (value) {},
-      );
+      helper.createAutoDisposeSubscription<int>(controller.stream, (value) {});
 
       helper.dispose();
 

@@ -1,13 +1,13 @@
 import 'dart:convert';
 
-import 'package:app_adaptive_widgets/app_adaptive_widgets.dart';
+
 import 'package:app_database/app_database.dart';
 import 'package:app_locale/app_locale.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hospital_form/hospital_form.dart';
-import 'package:medical_records/destination.dart';
+
 import 'package:medical_records/screens/hospitals/hospitals_screen.dart';
 import 'package:drift/drift.dart' show Value;
 
@@ -49,11 +49,13 @@ class _DepartmentAndDoctorScreenState extends State<DepartmentAndDoctorScreen>
 
   Future<void> _fetchData() async {
     try {
+      if (!context.mounted) return;
       final database = context.read<AppDatabase>();
 
       // Fetch hospital
       final hospital = await database.getHospitalById(widget.hospitalId);
       if (hospital == null) {
+        if (!context.mounted) return;
         setState(() {
           _isLoading = false;
         });

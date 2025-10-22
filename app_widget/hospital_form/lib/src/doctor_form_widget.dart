@@ -112,7 +112,7 @@ class _DoctorFormWidgetState extends State<DoctorFormWidget> {
           ),
           const SizedBox(height: 16),
           DropdownButtonFormField<int>(
-            value: _selectedDepartmentId,
+            initialValue: _selectedDepartmentId,
             decoration: InputDecoration(
               labelText: context.l10n.departments,
               border: const OutlineInputBorder(),

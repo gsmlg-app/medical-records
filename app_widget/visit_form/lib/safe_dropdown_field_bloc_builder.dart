@@ -54,7 +54,7 @@ class _SafeDropdownFieldBlocBuilderState<T>
         }
 
         return DropdownButtonFormField<T>(
-          value: currentValue,
+          initialValue: currentValue,
           decoration: widget.decoration,
           items: state.items.map((item) {
             return DropdownMenuItem<T>(

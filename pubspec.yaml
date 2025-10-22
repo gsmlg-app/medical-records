@@ -14,6 +14,7 @@ workspace:
   - app_lib/provider
   - app_lib/logging
   - app_lib/storage
+  - app_lib/utils
   - app_bloc/theme
   - app_bloc/hospital
   - app_bloc/hospital_form_bloc
@@ -23,6 +24,9 @@ workspace:
   - app_bloc/visit_form_bloc
   - app_bloc/department
   - app_bloc/doctor
+  - app_bloc/visit_location_bloc
+  - app_bloc/visit_resource_bloc
+  - app_bloc/visit_data_bloc
   - app_widget/adaptive
   - app_widget/artwork
   - app_widget/feedback
@@ -93,7 +97,6 @@ dev_dependencies:
     sdk: flutter
 
   flutter_lints: ^6.0.0
-
   build_runner: ^2.4.15
 
   melos: ^7.0.0
@@ -101,6 +104,12 @@ dev_dependencies:
 
   mockito: ^5.4.4
   build_test: ^2.1.7
+  bloc_test: ^10.0.0
+  mocktail: ^1.0.4
+  drift: ^2.19.0
+  # form_bloc: ^1.11.0 # Using workspace version instead
+  flutter_localizations:
+    sdk: flutter
 
 flutter:
   uses-material-design: true

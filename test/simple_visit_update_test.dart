@@ -1,7 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:app_database/app_database.dart';
+import 'package:app_database/src/tables/tables.dart';
 import 'package:visit_form_bloc/visit_form_bloc.dart';
-import 'package:visit/visit.dart';
+import 'package:visit_bloc/visit_bloc.dart';
 import 'package:drift/drift.dart';
 
 void main() {
@@ -35,25 +36,25 @@ void main() {
         DoctorsCompanion.insert(
           name: 'Dr. Smith',
           level: Value('Senior'),
-          hospitalId: Value(1),
-          departmentId: Value(1),
+          hospitalId: 1,
+          departmentId: 1,
         ),
       );
       
       await database.createTreatment(
         TreatmentsCompanion.insert(
-          startDate: Value(DateTime.now().subtract(Duration(days: 30))),
-          diagnosis: Value('Test Diagnosis'),
-          status: Value('active'),
+          title: 'Test Treatment',
+          startDate: DateTime.now().subtract(Duration(days: 30)),
+          diagnosis: 'Test Diagnosis',
         ),
       );
       
       await database.createVisit(
         VisitsCompanion.insert(
-          treatmentId: Value(1),
-          category: Value(VisitCategory.outpatient.value),
-          date: Value(DateTime.now().subtract(Duration(days: 1))),
-          details: Value('Original visit details'),
+          treatmentId: 1,
+          category: VisitCategory.outpatient.value,
+          date: DateTime.now().subtract(Duration(days: 1)),
+          details: 'Original visit details',
           hospitalId: Value(1),
           departmentId: Value(1),
           doctorId: Value(1),

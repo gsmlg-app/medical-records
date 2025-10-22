@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:app_database/app_database.dart';
-import 'package:visit/visit.dart';
+import 'package:app_database/src/tables/tables.dart';
+import 'package:visit_bloc/visit_bloc.dart';
 import 'package:drift/drift.dart';
 
 void main() {
@@ -34,32 +35,34 @@ void main() {
         DoctorsCompanion.insert(
           name: 'Dr. Smith',
           level: Value('Senior'),
-          hospitalId: Value(1),
-          departmentId: Value(1),
+          hospitalId: 1,
+          departmentId: 1,
         ),
       );
       
       // Create two treatments
       await database.createTreatment(
         TreatmentsCompanion.insert(
-          startDate: Value(DateTime.now().subtract(Duration(days: 30))),
-          diagnosis: Value('Treatment 1 Diagnosis'),
+          title: 'Treatment 1',
+          startDate: DateTime.now().subtract(Duration(days: 30)),
+          diagnosis: 'Treatment 1 Diagnosis',
         ),
       );
       
       await database.createTreatment(
         TreatmentsCompanion.insert(
-          startDate: Value(DateTime.now().subtract(Duration(days: 30))),
-          diagnosis: Value('Treatment 2 Diagnosis'),
+          title: 'Treatment 2',
+          startDate: DateTime.now().subtract(Duration(days: 30)),
+          diagnosis: 'Treatment 2 Diagnosis',
         ),
       );
       
       // Create visits for both treatments
-      await database.createVisit(
+await database.createVisit(
         VisitsCompanion.insert(
           treatmentId: 1,
-          category: Value(VisitCategory.outpatient.value),
-          date: Value(DateTime.now().subtract(Duration(days: 1))),
+          category: VisitCategory.outpatient.value,
+          date: DateTime.now().subtract(Duration(days: 1)),
           details: 'Original visit for treatment 1',
           hospitalId: Value(1),
           departmentId: Value(1),
@@ -70,8 +73,8 @@ void main() {
       await database.createVisit(
         VisitsCompanion.insert(
           treatmentId: 2,
-          category: Value(VisitCategory.outpatient.value),
-          date: Value(DateTime.now().subtract(Duration(days: 1))),
+          category: VisitCategory.outpatient.value,
+          date: DateTime.now().subtract(Duration(days: 1)),
           details: 'Original visit for treatment 2',
           hospitalId: Value(1),
           departmentId: Value(1),
@@ -100,7 +103,7 @@ void main() {
       visitBloc.add(UpdateVisit(
         id: visitToUpdate.id,
         treatmentId: visitToUpdate.treatmentId,
-        category: visitToUpdate.category,
+        category: VisitCategory.outpatient, // Convert String to VisitCategory
         date: visitToUpdate.date,
         details: 'Updated visit for treatment 1',
         hospitalId: visitToUpdate.hospitalId,

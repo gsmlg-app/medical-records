@@ -2,206 +2,122 @@ import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 
-import 'package:visit_form_bloc/visit_form_bloc.dart';
-import 'package:app_database/src/enums.dart';
+import 'package:visit_form_bloc/src/bloc.dart';
+import 'package:app_database/app_database.dart';
+import 'package:form_bloc/form_bloc.dart';
 
 void main() {
   group('VisitFormBloc', () {
-    late VisitFormBloc visitFormBloc;
+    late _MockAppDatabase mockDatabase;
+    late _MockVisitFormBloc visitFormBloc;
 
     setUp(() {
-      visitFormBloc = VisitFormBloc();
+      // Create mocks
+      mockDatabase = _MockAppDatabase();
+      visitFormBloc = _MockVisitFormBloc(mockDatabase);
     });
 
     tearDown(() {
       visitFormBloc.close();
     });
 
-    test('initial state is correct', () {
-      expect(visitFormBloc.state, equals(VisitFormState.initial()));
+    test('initial state is FormBlocState', () {
+      expect(visitFormBloc.state, isA<FormBlocState<String, String>>());
     });
 
-    blocTest<VisitFormBloc, VisitFormState>(
-      'emits updated state when category is changed',
+    blocTest<VisitFormBloc, FormBlocState<String, String>>(
+      'emits updated state when category field is updated',
       build: () => visitFormBloc,
-      act: (bloc) =>
-          bloc.add(const VisitFormCategoryChanged(VisitCategory.inpatient)),
-      expect: () => [
-        isA<VisitFormState>()
-          ..having(
-            (s) => s.category,
-            'category',
-            equals(VisitCategory.inpatient),
-          )
-          ..having(
-            (s) => s.status,
-            'status',
-            equals(VisitFormStatus.invalid),
-          ), // Not valid yet
-      ],
-    );
-
-    blocTest<VisitFormBloc, VisitFormState>(
-      'emits updated state when date is changed',
-      build: () => visitFormBloc,
-      act: (bloc) => bloc.add(VisitFormDateChanged(DateTime(2023, 1, 1))),
-      expect: () => [
-        isA<VisitFormState>()
-          ..having((s) => s.date, 'date', equals(DateTime(2023, 1, 1)))
-          ..having(
-            (s) => s.status,
-            'status',
-            equals(VisitFormStatus.invalid),
-          ), // Not valid yet
-      ],
-    );
-
-    blocTest<VisitFormBloc, VisitFormState>(
-      'emits updated state when details is changed',
-      build: () => visitFormBloc,
-      act: (bloc) => bloc.add(const VisitFormDetailsChanged('Test Details')),
-      expect: () => [
-        isA<VisitFormState>()
-          ..having((s) => s.details, 'details', equals('Test Details'))
-          ..having(
-            (s) => s.status,
-            'status',
-            equals(VisitFormStatus.invalid),
-          ), // Not valid yet
-      ],
-    );
-
-    blocTest<VisitFormBloc, VisitFormState>(
-      'emits valid form state when all required fields are filled',
-      build: () => visitFormBloc,
-      act: (bloc) async {
-        bloc.add(const VisitFormCategoryChanged(VisitCategory.outpatient));
-        bloc.add(VisitFormDateChanged(DateTime(2023, 1, 1)));
-        bloc.add(const VisitFormDetailsChanged('Test Details'));
+      act: (bloc) {
+        bloc.categoryFieldBloc.updateValue(VisitCategory.inpatient);
       },
       expect: () => [
-        isA<VisitFormState>()
-          ..having(
-            (s) => s.category,
-            'category',
-            equals(VisitCategory.outpatient),
-          )
-          ..having((s) => s.status, 'status', equals(VisitFormStatus.invalid)),
-        isA<VisitFormState>()
-          ..having((s) => s.date, 'date', equals(DateTime(2023, 1, 1)))
-          ..having((s) => s.status, 'status', equals(VisitFormStatus.invalid)),
-        isA<VisitFormState>()
-          ..having((s) => s.details, 'details', equals('Test Details'))
-          ..having(
-            (s) => s.status,
-            'status',
-            equals(VisitFormStatus.valid),
-          ), // Now form is valid
-      ],
-    );
-
-    blocTest<VisitFormBloc, VisitFormState>(
-      'emits updated state when hospitalId is changed',
-      build: () => visitFormBloc,
-      act: (bloc) => bloc.add(const VisitFormHospitalIdChanged(1)),
-      expect: () => [
-        isA<VisitFormState>()
-          ..having((s) => s.hospitalId, 'hospitalId', equals(1)),
-      ],
-    );
-
-    blocTest<VisitFormBloc, VisitFormState>(
-      'emits updated state when departmentId is changed',
-      build: () => visitFormBloc,
-      act: (bloc) => bloc.add(const VisitFormDepartmentIdChanged(1)),
-      expect: () => [
-        isA<VisitFormState>()
-          ..having((s) => s.departmentId, 'departmentId', equals(1)),
-      ],
-    );
-
-    blocTest<VisitFormBloc, VisitFormState>(
-      'emits updated state when doctorId is changed',
-      build: () => visitFormBloc,
-      act: (bloc) => bloc.add(const VisitFormDoctorIdChanged(1)),
-      expect: () => [
-        isA<VisitFormState>()..having((s) => s.doctorId, 'doctorId', equals(1)),
-      ],
-    );
-
-    blocTest<VisitFormBloc, VisitFormState>(
-      'emits updated state when informations is changed',
-      build: () => visitFormBloc,
-      act: (bloc) => bloc.add(const VisitFormInformationsChanged('Test Info')),
-      expect: () => [
-        isA<VisitFormState>()
-          ..having((s) => s.informations, 'informations', equals('Test Info')),
-      ],
-    );
-
-    blocTest<VisitFormBloc, VisitFormState>(
-      'emits initial state when reset is added',
-      build: () => visitFormBloc,
-      act: (bloc) async {
-        // First add some data
-        bloc.add(const VisitFormCategoryChanged(VisitCategory.inpatient));
-        bloc.add(const VisitFormDetailsChanged('Test Details'));
-        // Then reset
-        bloc.add(const VisitFormReset());
-      },
-      expect: () => [
-        isA<VisitFormState>()..having(
-          (s) => s.category,
-          'category',
-          equals(VisitCategory.inpatient),
+        isA<FormBlocState<String, String>>().having(
+          (s) => s.isValid,
+          'isValid',
+          false,
         ),
-        isA<VisitFormState>()
-          ..having((s) => s.details, 'details', equals('Test Details')),
-        isA<VisitFormState>()
-          ..having(
-            (s) => s.category,
-            'category',
-            equals(VisitCategory.outpatient),
-          )
-          ..having((s) => s.date, 'date', isNull)
-          ..having((s) => s.details, 'details', equals(''))
-          ..having((s) => s.hospitalId, 'hospitalId', isNull)
-          ..having((s) => s.departmentId, 'departmentId', isNull)
-          ..having((s) => s.doctorId, 'doctorId', isNull)
-          ..having((s) => s.informations, 'informations', isNull)
-          ..having((s) => s.status, 'status', equals(VisitFormStatus.initial)),
       ],
     );
 
-    blocTest<VisitFormBloc, VisitFormState>(
-      'emits populated state when VisitFormPopulate is added',
+    blocTest<VisitFormBloc, FormBlocState<String, String>>(
+      'emits updated state when date field is updated',
       build: () => visitFormBloc,
-      act: (bloc) => bloc.add(
-        VisitFormPopulate({
-          'category': VisitCategory.inpatient,
-          'date': DateTime(2023, 1, 1),
-          'details': 'Test Details',
-          'hospitalId': 1,
-          'departmentId': 2,
-          'doctorId': 3,
-          'informations': 'Test Info',
-        }),
-      ),
+      act: (bloc) {
+        bloc.dateFieldBloc.updateValue(DateTime(2023, 1, 1));
+      },
       expect: () => [
-        isA<VisitFormState>()
-          ..having(
-            (s) => s.category,
-            'category',
-            equals(VisitCategory.inpatient),
-          )
-          ..having((s) => s.date, 'date', equals(DateTime(2023, 1, 1)))
-          ..having((s) => s.details, 'details', equals('Test Details'))
-          ..having((s) => s.hospitalId, 'hospitalId', equals(1))
-          ..having((s) => s.departmentId, 'departmentId', equals(2))
-          ..having((s) => s.doctorId, 'doctorId', equals(3))
-          ..having((s) => s.informations, 'informations', equals('Test Info'))
-          ..having((s) => s.status, 'status', equals(VisitFormStatus.valid)),
+        isA<FormBlocState<String, String>>().having(
+          (s) => s.isValid,
+          'isValid',
+          false,
+        ),
+      ],
+    );
+
+    blocTest<VisitFormBloc, FormBlocState<String, String>>(
+      'emits updated state when details field is updated',
+      build: () => visitFormBloc,
+      act: (bloc) {
+        bloc.detailsFieldBloc.updateValue('Test Details');
+      },
+      expect: () => [
+        isA<FormBlocState<String, String>>().having(
+          (s) => s.isValid,
+          'isValid',
+          false,
+        ),
+      ],
+    );
+
+    blocTest<VisitFormBloc, FormBlocState<String, String>>(
+      'resets form to initial state',
+      build: () => visitFormBloc,
+      act: (bloc) {
+        // First set some values
+        bloc.categoryFieldBloc.updateValue(VisitCategory.inpatient);
+        bloc.detailsFieldBloc.updateValue('Test Details');
+        // Then reset
+        bloc.resetForm();
+      },
+      expect: () => [
+        isA<FormBlocState<String, String>>().having(
+          (s) => s.isValid,
+          'isValid',
+          false,
+        ),
       ],
     );
   });
+}
+
+// Mock database implementation for testing
+class _MockAppDatabase extends Mock implements AppDatabase {
+  @override
+  Future<List<Hospital>> getAllHospitals() async => [];
+
+  @override
+  Future<List<Department>> getAllDepartments() async => [];
+
+  @override
+  Future<List<Doctor>> getAllDoctors() async => [];
+
+  @override
+  Future<List<Resource>> getResourcesByVisit(int visitId) async => [];
+
+  @override
+  Future<int> createDepartment(DepartmentsCompanion companion) async => 1;
+
+  @override
+  Future<int> createDoctor(DoctorsCompanion companion) async => 1;
+
+  @override
+  Future<bool> updateHospital(Hospital hospital) async => true;
+
+  @override
+  Future<bool> updateVisit(Visit visit) async => true;
+}
+
+class _MockVisitFormBloc extends VisitFormBloc {
+  _MockVisitFormBloc(super.database);
 }

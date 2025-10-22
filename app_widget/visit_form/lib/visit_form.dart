@@ -93,59 +93,61 @@ class _VisitFormState extends State<VisitForm> {
             ),
             child: Form(
               key: widget.formKey ?? GlobalKey<FormState>(),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Visit Category
-                  DropdownFieldBlocBuilder<VisitCategory>(
-                    selectFieldBloc: visitFormBloc.categoryFieldBloc,
-                    decoration: InputDecoration(
-                      labelText: context.l10n.visitCategory,
+              child: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Visit Category
+                    DropdownFieldBlocBuilder<VisitCategory>(
+                      selectFieldBloc: visitFormBloc.categoryFieldBloc,
+                      decoration: InputDecoration(
+                        labelText: context.l10n.visitCategory,
+                      ),
+                      itemBuilder: (context, value) =>
+                          FieldItem(child: Text(_formatCategoryName(value))),
                     ),
-                    itemBuilder: (context, value) =>
-                        FieldItem(child: Text(_formatCategoryName(value))),
-                  ),
-                  const SizedBox(height: 16),
+                    const SizedBox(height: 16),
 
-                  // Visit Date
-                  DateTimeFieldBlocBuilder(
-                    dateTimeFieldBloc: visitFormBloc.dateFieldBloc,
-                    format: DateFormat('yyyy-MM-dd'),
-                    initialDate: DateTime.now(),
-                    firstDate: DateTime(2000),
-                    lastDate: DateTime.now().add(const Duration(days: 365)),
-                    decoration: InputDecoration(
-                      labelText: context.l10n.visitDate,
+                    // Visit Date
+                    DateTimeFieldBlocBuilder(
+                      dateTimeFieldBloc: visitFormBloc.dateFieldBloc,
+                      format: DateFormat('yyyy-MM-dd'),
+                      initialDate: DateTime.now(),
+                      firstDate: DateTime(2000),
+                      lastDate: DateTime.now().add(const Duration(days: 365)),
+                      decoration: InputDecoration(
+                        labelText: context.l10n.visitDate,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 16),
+                    const SizedBox(height: 16),
 
-                  // Hospital with quick add
-                  _HospitalDropdown(visitFormBloc: visitFormBloc),
-                  const SizedBox(height: 16),
+                    // Hospital with quick add
+                    _HospitalDropdown(visitFormBloc: visitFormBloc),
+                    const SizedBox(height: 16),
 
-                  // Department with quick add
-                  _DepartmentDropdown(visitFormBloc: visitFormBloc),
-                  const SizedBox(height: 16),
+                    // Department with quick add
+                    _DepartmentDropdown(visitFormBloc: visitFormBloc),
+                    const SizedBox(height: 16),
 
-                  // Doctor with quick add
-                  _DoctorDropdown(visitFormBloc: visitFormBloc),
-                  const SizedBox(height: 16),
+                    // Doctor with quick add
+                    _DoctorDropdown(visitFormBloc: visitFormBloc),
+                    const SizedBox(height: 16),
 
-                  // Visit Details (optional)
-                  TextFieldBlocBuilder(
-                    textFieldBloc: visitFormBloc.detailsFieldBloc,
-                    decoration: InputDecoration(
-                      labelText: context.l10n.visitDetails,
-                      hintText: 'Enter optional visit details...',
+                    // Visit Details (optional)
+                    TextFieldBlocBuilder(
+                      textFieldBloc: visitFormBloc.detailsFieldBloc,
+                      decoration: InputDecoration(
+                        labelText: context.l10n.visitDetails,
+                        hintText: 'Enter optional visit details...',
+                      ),
+                      maxLines: 3,
                     ),
-                    maxLines: 3,
-                  ),
-                  const SizedBox(height: 24),
+                    const SizedBox(height: 24),
 
-                  // Resources section
-                  ResourcesSectionWrapper(visitFormBloc: visitFormBloc),
-                ],
+                    // Resources section
+                    ResourcesSectionWrapper(visitFormBloc: visitFormBloc),
+                  ],
+                ),
               ),
             ),
           );
@@ -183,7 +185,9 @@ class _HospitalDropdown extends StatelessWidget {
               // Force rebuild when VisitFormBloc state changes
               // This ensures the dropdown updates when hospitals are refreshed
               return SafeDropdownFieldBlocBuilder<int?>(
-                key: ValueKey('hospital_dropdown_${visitFormBloc.availableHospitals.length}'),
+                key: ValueKey(
+                  'hospital_dropdown_${visitFormBloc.availableHospitals.length}',
+                ),
                 selectFieldBloc: visitFormBloc.hospitalFieldBloc,
                 decoration: InputDecoration(
                   labelText: 'Hospital',
@@ -218,7 +222,9 @@ class _HospitalDropdown extends StatelessWidget {
           onPressed: () => _showAddHospitalDialog(context),
           tooltip: 'Add Hospital',
           style: IconButton.styleFrom(
-            backgroundColor: Theme.of(context).primaryColor.withOpacity(0.1),
+            backgroundColor: Theme.of(
+              context,
+            ).primaryColor.withValues(alpha: 0.1),
           ),
         ),
       ],
@@ -230,12 +236,8 @@ class _HospitalDropdown extends StatelessWidget {
       context: context,
       builder: (context) => MultiBlocProvider(
         providers: [
-          BlocProvider(
-            create: (context) => HospitalFormBloc(),
-          ),
-          BlocProvider.value(
-            value: context.read<HospitalBloc>(),
-          ),
+          BlocProvider(create: (context) => HospitalFormBloc()),
+          BlocProvider.value(value: context.read<HospitalBloc>()),
         ],
         child: MultiBlocListener(
           listeners: [
@@ -265,9 +267,9 @@ class _HospitalDropdown extends StatelessWidget {
                   Navigator.of(context).pop();
 
                   // Show success message
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(state.message)),
-                  );
+                  ScaffoldMessenger.of(
+                    context,
+                  ).showSnackBar(SnackBar(content: Text(state.message)));
 
                   // Use a microtask to ensure database write is completed
                   final completer = Completer<void>();
@@ -278,16 +280,28 @@ class _HospitalDropdown extends StatelessWidget {
                   // and automatically select the newly created hospital
                   final visitFormBloc = context.read<VisitFormBloc>();
                   AppLogger().d('About to refresh hospitals...');
-                  AppLogger().d('Current hospital count: ${visitFormBloc.availableHospitals.length}');
-                  AppLogger().d('Current hospital field items: ${visitFormBloc.hospitalFieldBloc.state.items.length}');
+                  AppLogger().d(
+                    'Current hospital count: ${visitFormBloc.availableHospitals.length}',
+                  );
+                  AppLogger().d(
+                    'Current hospital field items: ${visitFormBloc.hospitalFieldBloc.state.items.length}',
+                  );
                   await visitFormBloc.refreshHospitals(selectNewest: true);
                   AppLogger().d('Hospital refresh completed');
-                  AppLogger().d('New hospital count: ${visitFormBloc.availableHospitals.length}');
-                  AppLogger().d('New hospital field items: ${visitFormBloc.hospitalFieldBloc.state.items.length}');
-                  AppLogger().d('Selected hospital value: ${visitFormBloc.hospitalFieldBloc.value}');
+                  AppLogger().d(
+                    'New hospital count: ${visitFormBloc.availableHospitals.length}',
+                  );
+                  AppLogger().d(
+                    'New hospital field items: ${visitFormBloc.hospitalFieldBloc.state.items.length}',
+                  );
+                  AppLogger().d(
+                    'Selected hospital value: ${visitFormBloc.hospitalFieldBloc.value}',
+                  );
                 } else if (state is HospitalError) {
                   // Notify form bloc of failure
-                  context.read<HospitalFormBloc>().handleSubmissionFailure(state.message);
+                  context.read<HospitalFormBloc>().handleSubmissionFailure(
+                    state.message,
+                  );
 
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
@@ -340,7 +354,9 @@ class _DepartmentDropdown extends StatelessWidget {
               final canAddDepartment = hospitalId != null;
 
               return SafeDropdownFieldBlocBuilder<int?>(
-                key: ValueKey('department_dropdown_${hospitalId}_${visitFormBloc.availableDepartments.length}'),
+                key: ValueKey(
+                  'department_dropdown_${hospitalId}_${visitFormBloc.availableDepartments.length}',
+                ),
                 selectFieldBloc: visitFormBloc.departmentFieldBloc,
                 decoration: InputDecoration(
                   labelText: 'Department',
@@ -388,7 +404,7 @@ class _DepartmentDropdown extends StatelessWidget {
               tooltip: 'Add Department',
               style: IconButton.styleFrom(
                 backgroundColor: canAddDepartment
-                    ? Theme.of(context).primaryColor.withOpacity(0.1)
+                    ? Theme.of(context).primaryColor.withValues(alpha: 0.1)
                     : Colors.transparent,
               ),
             );
@@ -518,7 +534,9 @@ class _DoctorDropdown extends StatelessWidget {
               final canAddDoctor = hospitalId != null && departmentId != null;
 
               return SafeDropdownFieldBlocBuilder<int?>(
-                key: ValueKey('doctor_dropdown_${hospitalId}_${departmentId}_${visitFormBloc.availableDoctors.length}'),
+                key: ValueKey(
+                  'doctor_dropdown_${hospitalId}_${departmentId}_${visitFormBloc.availableDoctors.length}',
+                ),
                 selectFieldBloc: visitFormBloc.doctorFieldBloc,
                 decoration: InputDecoration(
                   labelText: 'Doctor',
@@ -567,7 +585,7 @@ class _DoctorDropdown extends StatelessWidget {
               tooltip: 'Add Doctor',
               style: IconButton.styleFrom(
                 backgroundColor: canAddDoctor
-                    ? Theme.of(context).primaryColor.withOpacity(0.1)
+                    ? Theme.of(context).primaryColor.withValues(alpha: 0.1)
                     : Colors.transparent,
               ),
             );
@@ -627,9 +645,7 @@ class _DoctorDropdown extends StatelessWidget {
               final name = nameController.text.trim();
               if (name.isEmpty) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Please enter a doctor name'),
-                  ),
+                  const SnackBar(content: Text('Please enter a doctor name')),
                 );
                 return;
               }

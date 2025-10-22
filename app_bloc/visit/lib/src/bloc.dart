@@ -15,6 +15,9 @@ class VisitBloc extends Bloc<VisitEvent, VisitState> {
     on<AddVisit>(_onAddVisit);
     on<UpdateVisit>(_onUpdateVisit);
     on<DeleteVisit>(_onDeleteVisit);
+    on<CreateVisitFromData>(_onCreateVisitFromData);
+    on<UpdateVisitFromData>(_onUpdateVisitFromData);
+    on<DeleteVisitFromData>(_onDeleteVisitFromData);
   }
 
   Future<void> _onLoadVisits(LoadVisits event, Emitter<VisitState> emit) async {
@@ -136,6 +139,63 @@ class VisitBloc extends Bloc<VisitEvent, VisitState> {
       emit(VisitLoaded(visits));
     } catch (e) {
       emit(VisitError('Failed to delete visit: ${e.toString()}'));
+    }
+  }
+
+  Future<void> _onCreateVisitFromData(
+      CreateVisitFromData event, Emitter<VisitState> emit) async {
+    try {
+      // Reload visits using the current filter to maintain consistency
+      List<Visit> visits;
+      if (_currentTreatmentId != null) {
+        // If we have a treatment filter, reload filtered visits
+        visits = await _database.getVisitsByTreatment(_currentTreatmentId!);
+      } else {
+        // Otherwise load all visits
+        visits = await _database.getAllVisits();
+      }
+
+      emit(VisitLoaded(visits));
+    } catch (e) {
+      emit(VisitError('Failed to refresh visits: ${e.toString()}'));
+    }
+  }
+
+  Future<void> _onUpdateVisitFromData(
+      UpdateVisitFromData event, Emitter<VisitState> emit) async {
+    try {
+      // Reload visits using the current filter to maintain consistency
+      List<Visit> visits;
+      if (_currentTreatmentId != null) {
+        // If we have a treatment filter, reload filtered visits
+        visits = await _database.getVisitsByTreatment(_currentTreatmentId!);
+      } else {
+        // Otherwise load all visits
+        visits = await _database.getAllVisits();
+      }
+
+      emit(VisitLoaded(visits));
+    } catch (e) {
+      emit(VisitError('Failed to refresh visits: ${e.toString()}'));
+    }
+  }
+
+  Future<void> _onDeleteVisitFromData(
+      DeleteVisitFromData event, Emitter<VisitState> emit) async {
+    try {
+      // Reload visits using the current filter to maintain consistency
+      List<Visit> visits;
+      if (_currentTreatmentId != null) {
+        // If we have a treatment filter, reload filtered visits
+        visits = await _database.getVisitsByTreatment(_currentTreatmentId!);
+      } else {
+        // Otherwise load all visits
+        visits = await _database.getAllVisits();
+      }
+
+      emit(VisitLoaded(visits));
+    } catch (e) {
+      emit(VisitError('Failed to refresh visits: ${e.toString()}'));
     }
   }
 }

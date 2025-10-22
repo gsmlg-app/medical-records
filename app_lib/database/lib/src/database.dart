@@ -45,6 +45,7 @@ class AppDatabase extends _$AppDatabase {
   Future<List<Hospital>> getAllHospitals() => select(hospitals).get();
   Future<Hospital?> getHospitalById(int id) =>
       (select(hospitals)..where((h) => h.id.equals(id))).getSingleOrNull();
+  Future<Hospital?> getHospital(int id) => getHospitalById(id);
   Future<bool> updateHospital(Hospital hospital) =>
       update(hospitals).replace(hospital);
   Future<int> deleteHospital(int id) =>
@@ -56,6 +57,7 @@ class AppDatabase extends _$AppDatabase {
   Future<List<Department>> getAllDepartments() => select(departments).get();
   Future<Department?> getDepartmentById(int id) =>
       (select(departments)..where((d) => d.id.equals(id))).getSingleOrNull();
+
   Future<bool> updateDepartment(Department department) =>
       update(departments).replace(department);
   Future<int> deleteDepartment(int id) =>
@@ -89,11 +91,16 @@ class AppDatabase extends _$AppDatabase {
   Future<List<Visit>> getAllVisits() => select(visits).get();
   Future<Visit?> getVisitById(int id) =>
       (select(visits)..where((v) => v.id.equals(id))).getSingleOrNull();
+  Future<Visit?> getVisit(int id) => getVisitById(id);
   Future<List<Visit>> getVisitsByTreatment(int treatmentId) =>
       (select(visits)..where((v) => v.treatmentId.equals(treatmentId))).get();
   Future<bool> updateVisit(Visit visit) => update(visits).replace(visit);
   Future<int> deleteVisit(int id) =>
       (delete(visits)..where((v) => v.id.equals(id))).go();
+  Future<int> updateVisitData(int id, VisitsCompanion companion) =>
+      (update(visits)..where((v) => v.id.equals(id))).write(companion);
+  Future<int> deleteResourcesByVisitId(int visitId) =>
+      (delete(resources)..where((r) => r.visitId.equals(visitId))).go();
 
   // CRUD Methods for Resources
   Future<int> createResource(ResourcesCompanion resource) =>
@@ -103,6 +110,8 @@ class AppDatabase extends _$AppDatabase {
       (select(resources)..where((r) => r.id.equals(id))).getSingleOrNull();
   Future<List<Resource>> getResourcesByVisit(int visitId) =>
       (select(resources)..where((r) => r.visitId.equals(visitId))).get();
+  Future<List<Resource>> getResourcesByVisitId(int visitId) =>
+      getResourcesByVisit(visitId);
   Future<bool> updateResource(Resource resource) =>
       update(resources).replace(resource);
   Future<int> deleteResource(int id) =>

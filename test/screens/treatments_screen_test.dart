@@ -1,14 +1,14 @@
-import 'package:app_database/app_database.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:bloc_test/bloc_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:app_locale/gen_l10n/app_localizations.dart';
 import 'package:app_locale/app_locale.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:app_lib/locale/gen_l10n/app_localizations.dart';
-import 'package:medical_records/screens/treatments/treatments_screen.dart';
 import 'package:treatment_bloc/treatment_bloc.dart';
+import 'package:app_database/app_database.dart';
+import 'package:medical_records/screens/treatments/treatments_screen.dart';
 
 class MockTreatmentBloc extends MockBloc<TreatmentEvent, TreatmentState>
     implements TreatmentBloc {}
@@ -37,7 +37,7 @@ void main() {
     });
 
     testWidgets('renders empty state when no treatments', (tester) async {
-      when(() => mockTreatmentBloc.state).thenReturn(TreatmentInitial());
+      when(() => mockTreatmentBloc.state).thenReturn(TreatmentLoaded([]));
 
       await tester.pumpWidget(
         createTestWidget(
@@ -68,7 +68,7 @@ void main() {
     });
 
     testWidgets('renders treatments list when treatments are loaded', (tester) async {
-      final mockTreatments = [
+      final List<Treatment> mockTreatments = [
         Treatment(
           id: 1,
           title: 'Test Treatment',

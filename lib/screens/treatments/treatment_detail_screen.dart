@@ -27,7 +27,7 @@ class TreatmentDetailScreen extends StatefulWidget {
 
 class _TreatmentDetailScreenState extends State<TreatmentDetailScreen> {
   Treatment? _treatment;
-  List<Visit> _visits = [];
+  // List<Visit> _visits = []; // Unused field
   List<Hospital> _hospitals = [];
   List<Department> _departments = [];
 
@@ -40,6 +40,7 @@ class _TreatmentDetailScreenState extends State<TreatmentDetailScreen> {
   }
 
   void _loadTreatment() {
+    if (!context.mounted) return;
     final state = context.read<TreatmentBloc>().state;
     if (state is TreatmentLoaded) {
       _treatment = state.treatments.firstWhere(

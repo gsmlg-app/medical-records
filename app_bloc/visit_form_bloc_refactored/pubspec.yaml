@@ -1,0 +1,39 @@
+name: visit_form_bloc_refactored
+description: Refactored VisitFormBloc that coordinates smaller, focused BLoCs in the medical records app.
+version: 0.1.0
+publish_to: none
+resolution: workspace
+
+environment:
+  sdk: '^3.9.2'
+  flutter: ">=3.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  bloc: ^9.0.0
+  equatable: ^2.0.5
+  form_bloc:
+    path: ../../third_party/form_bloc
+  app_logging:
+    path: ../../app_lib/logging
+  app_database:
+    path: ../../app_lib/database
+  app_utils:
+    path: ../../app_lib/utils
+  visit_location_bloc:
+    path: ../visit_location_bloc
+  visit_resource_bloc:
+    path: ../visit_resource_bloc
+  visit_data_bloc:
+    path: ../visit_data_bloc
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+  bloc_test: ^10.0.0
+  mocktail: ^1.0.4
+
+flutter:
+  uses-material-design: false

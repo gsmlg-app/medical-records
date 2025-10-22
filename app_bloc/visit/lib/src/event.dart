@@ -98,3 +98,31 @@ class DeleteVisit extends VisitEvent {
   @override
   List<Object?> get props => [id];
 }
+
+// Events for integration with VisitDataBloc
+class CreateVisitFromData extends VisitEvent {
+  final Visit visit;
+
+  const CreateVisitFromData(this.visit);
+
+  @override
+  List<Object?> get props => [visit];
+}
+
+class UpdateVisitFromData extends VisitEvent {
+  final Visit visit;
+
+  const UpdateVisitFromData(this.visit);
+
+  @override
+  List<Object?> get props => [visit];
+}
+
+class DeleteVisitFromData extends VisitEvent {
+  final int visitId;
+
+  const DeleteVisitFromData(this.visitId);
+
+  @override
+  List<Object?> get props => [visitId];
+}

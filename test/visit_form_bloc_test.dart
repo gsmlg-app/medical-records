@@ -2,7 +2,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:app_locale/app_locale.dart';
 import 'package:app_locale/gen_l10n/app_localizations.dart';
 import 'package:app_database/app_database.dart';
 import 'package:visit_form_bloc/visit_form_bloc.dart';

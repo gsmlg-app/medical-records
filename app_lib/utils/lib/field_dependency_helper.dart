@@ -15,7 +15,7 @@ class FieldDependencyHelper {
 
     try {
       await fieldUpdate();
-      
+
       // Use a microtask to ensure the field update is processed
       Timer.run(() {
         try {
@@ -51,11 +51,11 @@ class FieldDependencyHelper {
     Duration interval = const Duration(milliseconds: 10),
   }) async {
     final stopwatch = Stopwatch()..start();
-    
+
     while (!condition() && stopwatch.elapsed < timeout) {
       await Future.delayed(interval);
     }
-    
+
     stopwatch.stop();
     return condition();
   }
@@ -74,7 +74,7 @@ class FieldDependencyHelper {
       onDone: onDone,
       cancelOnError: cancelOnError,
     );
-    
+
     _subscriptions.add(subscription);
     return subscription;
   }

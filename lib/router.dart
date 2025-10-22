@@ -1,7 +1,4 @@
-import 'package:app_database/app_database.dart';
-import 'package:app_provider/app_provider.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:medical_records/screens/app/error_screen.dart';
 import 'package:medical_records/screens/app/splash_screen.dart';
 import 'package:medical_records/screens/home/home_screen.dart';

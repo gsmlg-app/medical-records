@@ -145,7 +145,7 @@ class _DepartmentFormWidgetState extends State<DepartmentFormWidget> {
           ),
           const SizedBox(height: 16),
           DropdownButtonFormField<String>(
-            value: _selectedCategory,
+            initialValue: _selectedCategory,
             decoration: InputDecoration(
               labelText: context.l10n.departmentCategory,
               border: const OutlineInputBorder(),
