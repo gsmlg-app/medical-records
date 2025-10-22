@@ -51,34 +51,27 @@ class _VisitDetailScreenState extends State<VisitDetailScreen> {
   void _loadVisit() async {
     if (_visitId == null) return;
     if (!context.mounted) return;
-    
+
     final state = context.read<VisitBloc>().state;
     if (state is VisitLoaded) {
       try {
         final updatedVisit = state.visits.firstWhere(
           (v) => v.id == _visitId,
         );
-        
-        // Only update if the visit data has actually changed
-        if (_visit == null || 
-            _visit!.details != updatedVisit.details ||
-            _visit!.date != updatedVisit.date ||
-            _visit!.hospitalId != updatedVisit.hospitalId ||
-            _visit!.departmentId != updatedVisit.departmentId ||
-            _visit!.doctorId != updatedVisit.doctorId) {
-          
-          _visit = updatedVisit;
-          
-          // Load related data
-          await _loadRelatedData();
-        }
+
+        // Always reload related data when VisitBloc state changes
+        // This ensures resources are refreshed even if the visit itself hasn't changed
+        _visit = updatedVisit;
+
+        // Load related data including resources
+        await _loadRelatedData();
       } catch (e) {
         // Visit not found in current VisitBloc state, load all visits and try again
         if (_visit == null) {
           // First time loading, fetch directly from database
           await _loadVisitFromDatabase();
         } else {
-          // Visit was loaded before but not found in current state, 
+          // Visit was loaded before but not found in current state,
           // this might be due to filtering. Load all visits.
           context.read<VisitBloc>().add(LoadVisits());
           // Use a microtask to yield to the event loop

@@ -80,6 +80,9 @@ class _AddVisitViewState extends State<_AddVisitView> {
         final departmentId = _visitFormBloc.departmentFieldBloc.value;
         final doctorId = _visitFormBloc.doctorFieldBloc.value;
 
+        AppLogger().d('Saving new visit with ${_visitFormBloc.resources.length} resources');
+
+        // Add visit through VisitBloc
         context.read<VisitBloc>().add(
               AddVisit(
                 treatmentId: treatmentId,
@@ -91,10 +94,64 @@ class _AddVisitViewState extends State<_AddVisitView> {
                 doctorId: doctorId,
               ),
             );
-        context.pop();
+
+        // Wait for the visit to be created so we can get its ID
+        final visitBloc = context.read<VisitBloc>();
+        await for (final state in visitBloc.stream) {
+          if (state is VisitOperationSuccess) {
+            AppLogger().d('Visit created successfully, now saving resources');
+
+            // Get the newly created visit ID
+            // The VisitBloc should have the new visit in its loaded state
+            if (visitBloc.state is VisitLoaded) {
+              final visits = (visitBloc.state as VisitLoaded).visits;
+              if (visits.isNotEmpty) {
+                // Get the most recently created visit (should be the last one)
+                final newVisit = visits.last;
+                AppLogger().d('New visit ID: ${newVisit.id}');
+
+                // Save resources if any were added
+                if (_visitFormBloc.resources.isNotEmpty) {
+                  try {
+                    await _visitFormBloc.saveResourcesForVisit(newVisit.id);
+                    AppLogger().d('Resources saved successfully for visit ${newVisit.id}');
+                  } catch (e) {
+                    AppLogger().e('Failed to save resources: $e');
+                    if (mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('Visit saved but failed to save resources: $e'),
+                          backgroundColor: Colors.orange,
+                        ),
+                      );
+                    }
+                  }
+                }
+              }
+            }
+
+            if (mounted) {
+              context.pop();
+            }
+            break;
+          } else if (state is VisitError) {
+            AppLogger().e('Failed to create visit: ${state.message}');
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('Failed to create visit: ${state.message}'),
+                  backgroundColor: Colors.red,
+                ),
+              );
+            }
+            break;
+          }
+        }
       }
     } finally {
-      setState(() => _isSaving = false);
+      if (mounted) {
+        setState(() => _isSaving = false);
+      }
     }
   }
 

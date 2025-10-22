@@ -245,8 +245,29 @@ class _ResourcePickerState extends State<ResourcePicker> {
       }
 
       // Check camera permission
-      final cameraStatus = await Permission.camera.request();
-      if (!cameraStatus.isGranted) {
+      final cameraStatus = await Permission.camera.status;
+
+      if (cameraStatus.isDenied) {
+        // Request permission if it was denied
+        final result = await Permission.camera.request();
+        if (!result.isGranted) {
+          if (result.isPermanentlyDenied) {
+            _showPermissionDeniedDialog(
+              'Camera Permission Required',
+              'Camera access is required to take photos. Please enable it in app settings.',
+            );
+          } else {
+            _showError(context.l10n.cameraPermissionDenied);
+          }
+          return;
+        }
+      } else if (cameraStatus.isPermanentlyDenied) {
+        _showPermissionDeniedDialog(
+          'Camera Permission Required',
+          'Camera access is required to take photos. Please enable it in app settings.',
+        );
+        return;
+      } else if (!cameraStatus.isGranted && !cameraStatus.isLimited) {
         _showError(context.l10n.cameraPermissionDenied);
         return;
       }
@@ -279,18 +300,31 @@ class _ResourcePickerState extends State<ResourcePicker> {
 
       // Check storage permission for mobile platforms
       if (!kIsWeb) {
-        if (Platform.isAndroid) {
-          final storageStatus = await Permission.photos.request();
-          if (!storageStatus.isGranted) {
-            _showError(context.l10n.storagePermissionDenied);
+        final photosStatus = await Permission.photos.status;
+
+        if (photosStatus.isDenied) {
+          // Request permission if it was denied
+          final result = await Permission.photos.request();
+          if (!result.isGranted && !result.isLimited) {
+            if (result.isPermanentlyDenied) {
+              _showPermissionDeniedDialog(
+                'Photos Permission Required',
+                'Photo library access is required to select images. Please enable it in app settings.',
+              );
+            } else {
+              _showError(context.l10n.storagePermissionDenied);
+            }
             return;
           }
-        } else if (Platform.isIOS) {
-          final photosStatus = await Permission.photos.request();
-          if (!photosStatus.isGranted) {
-            _showError('Photos permission denied');
-            return;
-          }
+        } else if (photosStatus.isPermanentlyDenied) {
+          _showPermissionDeniedDialog(
+            'Photos Permission Required',
+            'Photo library access is required to select images. Please enable it in app settings.',
+          );
+          return;
+        } else if (!photosStatus.isGranted && !photosStatus.isLimited) {
+          _showError(context.l10n.storagePermissionDenied);
+          return;
         }
       }
 
@@ -458,6 +492,68 @@ class _ResourcePickerState extends State<ResourcePicker> {
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
               margin: const EdgeInsets.all(16),
               duration: const Duration(seconds: 3),
+            ),
+          );
+        }
+      });
+    }
+  }
+
+  void _showPermissionDeniedDialog(String title, String message) {
+    if (mounted) {
+      // Close the picker dialog first
+      Navigator.of(context).pop();
+
+      // Use a post-frame callback to ensure the picker dialog is fully closed
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          showDialog(
+            context: context,
+            builder: (context) => AlertDialog(
+              title: Row(
+                children: [
+                  Icon(
+                    Icons.warning_amber_rounded,
+                    color: Theme.of(context).colorScheme.error,
+                    size: 28,
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      title,
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              content: Text(message),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: const Text('Cancel'),
+                ),
+                ElevatedButton.icon(
+                  onPressed: () async {
+                    Navigator.of(context).pop();
+                    // Open app settings
+                    final opened = await openAppSettings();
+                    if (!opened) {
+                      if (mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Could not open app settings'),
+                            backgroundColor: Colors.red,
+                          ),
+                        );
+                      }
+                    }
+                  },
+                  icon: const Icon(Icons.settings),
+                  label: const Text('Open Settings'),
+                ),
+              ],
             ),
           );
         }

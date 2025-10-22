@@ -1120,6 +1120,11 @@ class VisitFormBloc extends FormBloc<String, String> {
     return List.unmodifiable(resources);
   }
 
+  /// Save resources for a specific visit (public method for AddVisitScreen)
+  Future<void> saveResourcesForVisit(int visitId) async {
+    await _saveResources(visitId);
+  }
+
   @override
   Future<void> close() async {
     await _hospitalSubscription?.cancel();
