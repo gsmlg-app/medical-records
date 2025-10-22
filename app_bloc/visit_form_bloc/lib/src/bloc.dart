@@ -461,6 +461,9 @@ class VisitFormBloc extends FormBloc<String, String> {
           if (errorMessage != null) {
             emitFailure(failureResponse: errorMessage);
           } else if (updateCompleted) {
+            // Save resources for the visit
+            await _saveResources(visitToEdit!.id);
+
             // Update the visitToEdit reference to reflect the changes
             if (visitToEdit != null) {
               visitToEdit = Visit(
@@ -497,6 +500,9 @@ class VisitFormBloc extends FormBloc<String, String> {
           );
 
           await _database.updateVisit(updatedVisit);
+
+          // Save resources for the visit
+          await _saveResources(updatedVisit.id);
 
           // Update the visitToEdit reference to reflect the changes
           visitToEdit = updatedVisit;
@@ -977,6 +983,118 @@ class VisitFormBloc extends FormBloc<String, String> {
     } catch (e) {
       AppLogger().e('Failed to remove resource: $e');
       return false;
+    }
+  }
+
+  /// Save resources to the database for a specific visit
+  Future<void> _saveResources(int visitId) async {
+    try {
+      AppLogger().d('Saving ${resources.length} resources for visit $visitId');
+
+      // Get existing resources from database
+      final existingResources = await _database.getResourcesByVisit(visitId);
+      final existingResourceIds = existingResources.map((r) => r.id).toSet();
+
+      // Track which resources to keep
+      final currentResourceIds = resources.map((r) => r.id).toSet();
+
+      // Delete resources that were removed
+      for (final existing in existingResources) {
+        if (!currentResourceIds.contains(existing.id)) {
+          AppLogger().d('Deleting removed resource: ${existing.filePath}');
+          await _database.deleteResource(existing.id);
+          // Also delete the file
+          await _storageService.deleteResourceFile(existing.filePath);
+        }
+      }
+
+      // Add or update resources
+      for (final resource in resources) {
+        // Update visitId if it was temporary (-1)
+        final actualVisitId = resource.visitId == -1 ? visitId : resource.visitId;
+
+        if (existingResourceIds.contains(resource.id)) {
+          // Update existing resource
+          AppLogger().d('Updating existing resource: ${resource.filePath}');
+          await _database.updateResource(
+            resource.copyWith(
+              visitId: actualVisitId,
+              updatedAt: DateTime.now(),
+            ),
+          );
+        } else {
+          // Create new resource
+          AppLogger().d('Creating new resource: ${resource.filePath}');
+
+          // If the resource was created with temporary visit ID, move the file
+          if (resource.visitId == -1 && visitId != -1) {
+            // Move file from temporary directory to actual visit directory
+            final oldFile = await _storageService.getResourceFile(resource.filePath);
+            if (await oldFile.exists()) {
+              // Store with correct visit ID
+              // Determine resource type from the stored type string
+              ResourceType resourceType;
+              switch (resource.type) {
+                case 'image':
+                  resourceType = ResourceType.image;
+                  break;
+                case 'video':
+                  resourceType = ResourceType.video;
+                  break;
+                case 'audio':
+                  resourceType = ResourceType.audio;
+                  break;
+                case 'other':
+                  resourceType = ResourceType.other;
+                  break;
+                default:
+                  resourceType = ResourceType.document;
+              }
+
+              final newRelativePath = await _storageService.storeResourceFile(
+                visitId: visitId,
+                sourceFile: oldFile,
+                type: resourceType,
+              );
+
+              // Delete old temporary file
+              await _storageService.deleteResourceFile(resource.filePath);
+
+              // Create resource with new path
+              await _database.createResource(
+                ResourcesCompanion.insert(
+                  visitId: visitId,
+                  type: resource.type,
+                  filePath: newRelativePath,
+                  notes: Value(resource.notes),
+                  createdAt: Value(resource.createdAt),
+                  updatedAt: Value(DateTime.now()),
+                ),
+              );
+            }
+          } else {
+            // Resource already has correct visit ID, just save to database
+            await _database.createResource(
+              ResourcesCompanion.insert(
+                visitId: actualVisitId,
+                type: resource.type,
+                filePath: resource.filePath,
+                notes: Value(resource.notes),
+                createdAt: Value(resource.createdAt),
+                updatedAt: Value(DateTime.now()),
+              ),
+            );
+          }
+        }
+      }
+
+      AppLogger().d('Successfully saved ${resources.length} resources');
+
+      // Reload resources to get correct IDs from database
+      await loadResourcesForVisit(visitId);
+    } catch (e, stackTrace) {
+      AppLogger().e('Failed to save resources: $e', e, stackTrace);
+      throw Exception('Failed to save resources: $e');
     }
   }
 
