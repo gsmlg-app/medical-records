@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:app_locale/app_locale.dart';
 import 'package:app_database/app_database.dart';
 import 'package:app_storage/app_storage.dart';
+import 'package:app_logging/app_logging.dart';
 import 'resource_picker.dart';
 import 'resource_list_item.dart';
 
@@ -133,16 +134,27 @@ class _ResourcesSectionState extends State<ResourcesSection> {
     setState(() => _isLoading = true);
 
     try {
+      AppLogger().d('Starting resource addition - File: ${sourceFile.path}, Type: ${type.value}');
+
       // For new visits (visitId == null), we use a temporary visit ID of -1
       // The actual file will be moved/renamed when the visit is saved
       final temporaryVisitId = widget.visitId ?? -1;
+      AppLogger().d('Using visit ID: $temporaryVisitId');
+
+      // Verify source file exists
+      if (!await sourceFile.exists()) {
+        throw Exception('Source file does not exist: ${sourceFile.path}');
+      }
+      AppLogger().d('Source file exists, size: ${await sourceFile.length()} bytes');
 
       // Store the file
+      AppLogger().d('Calling storeResourceFile...');
       final relativePath = await _storageService.storeResourceFile(
         visitId: temporaryVisitId,
         sourceFile: sourceFile,
         type: type,
       );
+      AppLogger().d('File stored successfully at: $relativePath');
 
       // Create resource record with temporary IDs
       final newResource = Resource(
@@ -154,16 +166,20 @@ class _ResourcesSectionState extends State<ResourcesSection> {
         createdAt: DateTime.now(),
         updatedAt: DateTime.now(),
       );
+      AppLogger().d('Created resource record: ${newResource.id}');
 
       setState(() {
         _resources.add(newResource);
       });
+      AppLogger().d('Resource added to list, total: ${_resources.length}');
 
       // Notify parent so it can update the form bloc's resource list
       widget.onResourcesChanged?.call(_resources);
+      AppLogger().d('Parent notified of resource change');
 
       _showSuccess(context.l10n.resourceAdded);
-    } catch (e) {
+    } catch (e, stackTrace) {
+      AppLogger().e('Failed to add resource: $e', e, stackTrace);
       _showError('Failed to add resource: $e');
     } finally {
       setState(() => _isLoading = false);
