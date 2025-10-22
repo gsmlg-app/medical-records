@@ -13,8 +13,9 @@ import 'package:medical_records/screens/treatments/treatment_detail_screen.dart'
 import 'package:medical_records/screens/visits/add_visit_screen.dart';
 import 'package:medical_records/screens/visits/edit_visit_screen.dart';
 import 'package:medical_records/screens/visits/visit_detail_screen.dart';
-import 'package:medical_records/screens/settings/app_settings_screen.dart';
 import 'package:medical_records/screens/settings/settings_screen.dart';
+import 'package:medical_records/screens/settings/data_export_screen.dart';
+import 'package:medical_records/screens/settings/data_import_screen.dart';
 import 'package:go_router/go_router.dart';
 
 class AppRouter {
@@ -201,13 +202,24 @@ class AppRouter {
       },
       routes: [
         GoRoute(
-          name: AppSettingsScreen.name,
-          path: AppSettingsScreen.path,
+          name: DataExportScreen.name,
+          path: DataExportScreen.path,
           pageBuilder: (context, state) {
             return NoTransitionPage<void>(
               key: state.pageKey,
               restorationId: state.pageKey.value,
-              child: const AppSettingsScreen(),
+              child: const DataExportScreen(),
+            );
+          },
+        ),
+        GoRoute(
+          name: DataImportScreen.name,
+          path: DataImportScreen.path,
+          pageBuilder: (context, state) {
+            return NoTransitionPage<void>(
+              key: state.pageKey,
+              restorationId: state.pageKey.value,
+              child: const DataImportScreen(),
             );
           },
         ),

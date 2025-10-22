@@ -61,6 +61,9 @@ dependencies:
   permission_handler: ^11.3.1
   uuid: ^4.5.1
 
+  # Archive for data export/import
+  archive: ^4.0.0
+
   cupertino_icons: ^1.0.8
   flutter_svg: ^2.0.16
   lottie: ^3.3.1

@@ -4,7 +4,8 @@ import 'package:app_locale/app_locale.dart';
 import 'package:app_theme/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:medical_records/destination.dart';
-import 'package:medical_records/screens/settings/app_settings_screen.dart';
+import 'package:medical_records/screens/settings/data_export_screen.dart';
+import 'package:medical_records/screens/settings/data_import_screen.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:settings_ui/settings_ui.dart';
@@ -43,13 +44,22 @@ class SettingsScreen extends StatelessWidget {
                     return SettingsList(
                       sections: [
                         SettingsSection(
-                          title: Text('App Setting'),
+                          title: const Text('Data Management'),
                           tiles: <SettingsTile>[
                             SettingsTile.navigation(
-                              leading: const Icon(Icons.api),
-                              title: Text('App Setting'),
+                              leading: const Icon(Icons.download),
+                              title: const Text('Export Data'),
+                              description: const Text('Export treatments to a zip file'),
                               onPressed: (context) {
-                                context.goNamed(AppSettingsScreen.name);
+                                context.goNamed(DataExportScreen.name);
+                              },
+                            ),
+                            SettingsTile.navigation(
+                              leading: const Icon(Icons.upload),
+                              title: const Text('Import Data'),
+                              description: const Text('Import treatments from a zip file'),
+                              onPressed: (context) {
+                                context.goNamed(DataImportScreen.name);
                               },
                             ),
                           ],
