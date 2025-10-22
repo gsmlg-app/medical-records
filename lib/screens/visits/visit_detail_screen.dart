@@ -3,6 +3,7 @@ import 'dart:async';
 
 import 'package:app_database/app_database.dart';
 import 'package:app_locale/app_locale.dart';
+import 'package:app_resources/app_resources.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -25,6 +26,7 @@ class _VisitDetailScreenState extends State<VisitDetailScreen> {
   Hospital? _hospital;
   Department? _department;
   Doctor? _doctor;
+  List<Resource> _resources = [];
   bool _isLoading = false;
 
   @override
@@ -108,30 +110,33 @@ class _VisitDetailScreenState extends State<VisitDetailScreen> {
 
   Future<void> _loadRelatedData() async {
     if (_visit == null) return;
-    
+
     setState(() {
       _isLoading = true;
     });
 
     final database = context.read<AppDatabase>();
-    
+
     // Load related data in parallel
     final futures = <Future>[];
-    
+
     if (_visit!.hospitalId != null) {
       futures.add(database.getHospitalById(_visit!.hospitalId!).then((h) => _hospital = h));
     }
-    
+
     if (_visit!.departmentId != null) {
       futures.add(database.getDepartmentById(_visit!.departmentId!).then((d) => _department = d));
     }
-    
+
     if (_visit!.doctorId != null) {
       futures.add(database.getDoctorById(_visit!.doctorId!).then((d) => _doctor = d));
     }
-    
+
+    // Load resources for this visit
+    futures.add(database.getResourcesByVisit(_visit!.id).then((r) => _resources = r));
+
     await Future.wait(futures);
-    
+
     setState(() {
       _isLoading = false;
     });
@@ -188,6 +193,8 @@ class _VisitDetailScreenState extends State<VisitDetailScreen> {
                   sliver: SliverList(
                     delegate: SliverChildListDelegate([
                       _buildInfoCard(),
+                      const SizedBox(height: 16),
+                      _buildResourcesSection(),
                     ]),
                   ),
                 ),
@@ -195,6 +202,45 @@ class _VisitDetailScreenState extends State<VisitDetailScreen> {
           ),
         ),
         smallSecondaryBody: AdaptiveScaffold.emptyBuilder,
+      ),
+    );
+  }
+
+  Widget _buildResourcesSection() {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Resources',
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
+            const SizedBox(height: 16),
+            if (_isLoading)
+              const Center(child: CircularProgressIndicator())
+            else if (_resources.isEmpty)
+              Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(32.0),
+                  child: Text(
+                    'No resources attached',
+                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+                    ),
+                  ),
+                ),
+              )
+            else
+              ResourcesSection(
+                visitId: _visit?.id,
+                resources: _resources,
+                isReadOnly: true, // Read-only view in detail screen
+                onResourcesChanged: null, // No changes allowed
+              ),
+          ],
+        ),
       ),
     );
   }

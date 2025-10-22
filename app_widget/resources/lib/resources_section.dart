@@ -207,17 +207,85 @@ class _ResourcesSectionState extends State<ResourcesSection> {
 
   Future<void> _openResource(Resource resource) async {
     try {
+      AppLogger().d('Opening resource: ${resource.filePath}');
       final file = await _storageService.getResourceFile(resource.filePath);
-      if (file.existsSync()) {
-        // In a real implementation, you would open the file
-        // For now, just show a message
-        _showInfo('File path: ${file.path}');
-      } else {
-        _showError('File not found');
+
+      if (!await file.exists()) {
+        _showError('File not found: ${resource.filePath}');
+        AppLogger().e('File not found: ${file.path}');
+        return;
       }
-    } catch (e) {
+
+      AppLogger().d('File exists, attempting to open: ${file.path}');
+
+      // Get file size before showing dialog
+      final fileSize = await file.length();
+
+      // Try to open the file with the default system application
+      // For now, we'll show a dialog with file information and path
+      // In a production app, you would use packages like:
+      // - open_file package for mobile
+      // - url_launcher for web
+      // - platform-specific file opening APIs
+
+      if (mounted) {
+        await showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('Resource Preview'),
+            content: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text('Type: ${resource.type}'),
+                  const SizedBox(height: 8),
+                  Text('Path: ${file.path}'),
+                  const SizedBox(height: 8),
+                  Text('Size: ${_formatFileSize(fileSize)}'),
+                  const SizedBox(height: 16),
+                  if (resource.type == 'image')
+                    Container(
+                      constraints: const BoxConstraints(maxHeight: 400),
+                      child: Image.file(
+                        file,
+                        fit: BoxFit.contain,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Text('Failed to load image: $error');
+                        },
+                      ),
+                    ),
+                  if (resource.type != 'image')
+                    Text(
+                      'Preview not available for ${resource.type} files. '
+                      'The file is stored at the path shown above.',
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('Close'),
+              ),
+            ],
+          ),
+        );
+      }
+    } catch (e, stackTrace) {
+      AppLogger().e('Failed to open resource: $e', e, stackTrace);
       _showError('Failed to open resource: $e');
     }
+  }
+
+  String _formatFileSize(int bytes) {
+    if (bytes < 1024) return '$bytes B';
+    if (bytes < 1024 * 1024) return '${(bytes / 1024).toStringAsFixed(1)} KB';
+    if (bytes < 1024 * 1024 * 1024) return '${(bytes / (1024 * 1024)).toStringAsFixed(1)} MB';
+    return '${(bytes / (1024 * 1024 * 1024)).toStringAsFixed(1)} GB';
   }
 
   void _showError(String message) {
