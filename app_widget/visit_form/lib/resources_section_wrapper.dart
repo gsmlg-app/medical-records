@@ -16,7 +16,9 @@ class ResourcesSectionWrapper extends StatelessWidget {
       builder: (context, state) {
         return ResourcesSection(
           visitId: visitFormBloc.visitToEdit?.id,
-          resources: visitFormBloc.getCurrentResources(),
+          // Pass a modifiable copy of the resources list to avoid
+          // "unsupported operation: cannot add to an unmodifiable list" error
+          resources: List.from(visitFormBloc.getCurrentResources()),
           onResourcesChanged: (resources) {
             // Update the VisitFormBloc's resource list when resources change
             visitFormBloc.resources.clear();
