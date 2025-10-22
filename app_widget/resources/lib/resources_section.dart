@@ -119,11 +119,8 @@ class _ResourcesSectionState extends State<ResourcesSection> {
   }
 
   void _showResourcePicker() {
-    if (widget.visitId == null) {
-      _showError('Visit ID is required to add resources');
-      return;
-    }
-
+    // Allow adding resources even without visitId (for new visits)
+    // Resources will be stored with a temporary ID and saved when visit is created
     showResourcePicker(
       context,
       onResourceSelected: (sourceFile, type) async {
@@ -133,22 +130,24 @@ class _ResourcesSectionState extends State<ResourcesSection> {
   }
 
   Future<void> _addResource(File sourceFile, ResourceType type) async {
-    if (widget.visitId == null) return;
-
     setState(() => _isLoading = true);
 
     try {
+      // For new visits (visitId == null), we use a temporary visit ID of -1
+      // The actual file will be moved/renamed when the visit is saved
+      final temporaryVisitId = widget.visitId ?? -1;
+
       // Store the file
       final relativePath = await _storageService.storeResourceFile(
-        visitId: widget.visitId!,
+        visitId: temporaryVisitId,
         sourceFile: sourceFile,
         type: type,
       );
 
-      // Create resource record (in a real app, this would be saved to database)
+      // Create resource record with temporary IDs
       final newResource = Resource(
         id: DateTime.now().millisecondsSinceEpoch, // Temporary ID
-        visitId: widget.visitId!,
+        visitId: temporaryVisitId, // Will be updated when visit is created
         type: type.value,
         filePath: relativePath,
         notes: null,
@@ -160,7 +159,7 @@ class _ResourcesSectionState extends State<ResourcesSection> {
         _resources.add(newResource);
       });
 
-      // Notify parent
+      // Notify parent so it can update the form bloc's resource list
       widget.onResourcesChanged?.call(_resources);
 
       _showSuccess(context.l10n.resourceAdded);

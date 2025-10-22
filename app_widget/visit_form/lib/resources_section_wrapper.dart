@@ -18,8 +18,11 @@ class ResourcesSectionWrapper extends StatelessWidget {
           visitId: visitFormBloc.visitToEdit?.id,
           resources: visitFormBloc.getCurrentResources(),
           onResourcesChanged: (resources) {
-            // Resources are managed locally in the bloc
-            // The form submission will handle saving them to the database
+            // Update the VisitFormBloc's resource list when resources change
+            visitFormBloc.resources.clear();
+            visitFormBloc.resources.addAll(resources);
+            // Trigger a rebuild to reflect the updated resource count
+            visitFormBloc.emitLoaded();
           },
           isReadOnly: false, // Allow adding/removing resources
         );
