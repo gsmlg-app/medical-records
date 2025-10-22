@@ -232,9 +232,13 @@ class _HospitalDropdown extends StatelessWidget {
   }
 
   void _showAddHospitalDialog(BuildContext context) {
+    // Capture the VisitFormBloc reference from the parent context BEFORE showing the dialog
+    // This is critical because the dialog creates a new context that doesn't include VisitFormBloc
+    final capturedVisitFormBloc = visitFormBloc;
+
     showDialog(
       context: context,
-      builder: (context) => MultiBlocProvider(
+      builder: (dialogContext) => MultiBlocProvider(
         providers: [
           BlocProvider(create: (context) => HospitalFormBloc()),
           BlocProvider.value(value: context.read<HospitalBloc>()),
@@ -264,11 +268,11 @@ class _HospitalDropdown extends StatelessWidget {
                   context.read<HospitalFormBloc>().handleSubmissionSuccess();
 
                   // Close the dialog
-                  Navigator.of(context).pop();
+                  Navigator.of(dialogContext).pop();
 
                   // Show success message
                   ScaffoldMessenger.of(
-                    context,
+                    dialogContext,
                   ).showSnackBar(SnackBar(content: Text(state.message)));
 
                   // Use a microtask to ensure database write is completed
@@ -278,24 +282,24 @@ class _HospitalDropdown extends StatelessWidget {
 
                   // Refresh the hospital list to include the newly added hospital
                   // and automatically select the newly created hospital
-                  final visitFormBloc = context.read<VisitFormBloc>();
+                  // Use the captured VisitFormBloc reference instead of trying to read from dialog context
                   AppLogger().d('About to refresh hospitals...');
                   AppLogger().d(
-                    'Current hospital count: ${visitFormBloc.availableHospitals.length}',
+                    'Current hospital count: ${capturedVisitFormBloc.availableHospitals.length}',
                   );
                   AppLogger().d(
-                    'Current hospital field items: ${visitFormBloc.hospitalFieldBloc.state.items.length}',
+                    'Current hospital field items: ${capturedVisitFormBloc.hospitalFieldBloc.state.items.length}',
                   );
-                  await visitFormBloc.refreshHospitals(selectNewest: true);
+                  await capturedVisitFormBloc.refreshHospitals(selectNewest: true);
                   AppLogger().d('Hospital refresh completed');
                   AppLogger().d(
-                    'New hospital count: ${visitFormBloc.availableHospitals.length}',
+                    'New hospital count: ${capturedVisitFormBloc.availableHospitals.length}',
                   );
                   AppLogger().d(
-                    'New hospital field items: ${visitFormBloc.hospitalFieldBloc.state.items.length}',
+                    'New hospital field items: ${capturedVisitFormBloc.hospitalFieldBloc.state.items.length}',
                   );
                   AppLogger().d(
-                    'Selected hospital value: ${visitFormBloc.hospitalFieldBloc.value}',
+                    'Selected hospital value: ${capturedVisitFormBloc.hospitalFieldBloc.value}',
                   );
                 } else if (state is HospitalError) {
                   // Notify form bloc of failure
@@ -303,7 +307,7 @@ class _HospitalDropdown extends StatelessWidget {
                     state.message,
                   );
 
-                  ScaffoldMessenger.of(context).showSnackBar(
+                  ScaffoldMessenger.of(dialogContext).showSnackBar(
                     SnackBar(
                       content: Text(state.message),
                       backgroundColor: Colors.red,
@@ -324,7 +328,7 @@ class _HospitalDropdown extends StatelessWidget {
                     // Save is triggered by the BlocListener above
                   },
                   onCancel: () {
-                    Navigator.of(context).pop();
+                    Navigator.of(dialogContext).pop();
                   },
                 ),
               ),
