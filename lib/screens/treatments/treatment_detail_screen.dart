@@ -236,7 +236,10 @@ class _TreatmentDetailScreenState extends State<TreatmentDetailScreen> {
                 ),
               );
             } else if (state is VisitLoaded) {
-              final treatmentVisits = state.visits.where((v) => v.treatmentId == widget.treatmentId).toList();
+              final treatmentVisits = state.visits
+                  .where((v) => v.treatmentId == widget.treatmentId)
+                  .toList()
+                ..sort((a, b) => b.date.compareTo(a.date)); // Sort by date descending (most recent first)
 
               if (treatmentVisits.isEmpty) {
                 return Card(
