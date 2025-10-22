@@ -394,10 +394,11 @@ class _DepartmentDropdown extends StatelessWidget {
           ),
         ),
         const SizedBox(width: 8),
-        // Add department button
-        BlocBuilder<VisitFormBloc, FormBlocState<String, String>>(
-          builder: (context, state) {
-            final hospitalId = visitFormBloc.hospitalFieldBloc.value;
+        // Add department button - listen to hospital field changes
+        BlocBuilder<SelectFieldBloc<int?, dynamic>, SelectFieldBlocState<int?, dynamic>>(
+          bloc: visitFormBloc.hospitalFieldBloc,
+          builder: (context, hospitalState) {
+            final hospitalId = hospitalState.value;
             final canAddDepartment = hospitalId != null;
 
             return IconButton(
@@ -574,24 +575,30 @@ class _DoctorDropdown extends StatelessWidget {
           ),
         ),
         const SizedBox(width: 8),
-        // Add doctor button
-        BlocBuilder<VisitFormBloc, FormBlocState<String, String>>(
-          builder: (context, state) {
-            final hospitalId = visitFormBloc.hospitalFieldBloc.value;
-            final departmentId = visitFormBloc.departmentFieldBloc.value;
-            final canAddDoctor = hospitalId != null && departmentId != null;
+        // Add doctor button - listen to both hospital and department field changes
+        BlocBuilder<SelectFieldBloc<int?, dynamic>, SelectFieldBlocState<int?, dynamic>>(
+          bloc: visitFormBloc.hospitalFieldBloc,
+          builder: (context, hospitalState) {
+            return BlocBuilder<SelectFieldBloc<int?, dynamic>, SelectFieldBlocState<int?, dynamic>>(
+              bloc: visitFormBloc.departmentFieldBloc,
+              builder: (context, departmentState) {
+                final hospitalId = hospitalState.value;
+                final departmentId = departmentState.value;
+                final canAddDoctor = hospitalId != null && departmentId != null;
 
-            return IconButton(
-              icon: const Icon(Icons.add),
-              onPressed: canAddDoctor
-                  ? () => _showAddDoctorDialog(context)
-                  : null,
-              tooltip: 'Add Doctor',
-              style: IconButton.styleFrom(
-                backgroundColor: canAddDoctor
-                    ? Theme.of(context).primaryColor.withValues(alpha: 0.1)
-                    : Colors.transparent,
-              ),
+                return IconButton(
+                  icon: const Icon(Icons.add),
+                  onPressed: canAddDoctor
+                      ? () => _showAddDoctorDialog(context)
+                      : null,
+                  tooltip: 'Add Doctor',
+                  style: IconButton.styleFrom(
+                    backgroundColor: canAddDoctor
+                        ? Theme.of(context).primaryColor.withValues(alpha: 0.1)
+                        : Colors.transparent,
+                  ),
+                );
+              },
             );
           },
         ),
