@@ -7,7 +7,7 @@ import 'package:app_storage/app_storage.dart';
 import 'package:drift/drift.dart' as drift;
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
-import 'data_validation.dart';
+import 'package:app_backup/src/data_validation.dart';
 
 /// Represents a conflict when importing data
 class ImportConflict {
