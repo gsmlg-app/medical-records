@@ -67,9 +67,75 @@ Stores doctor information and acts as the link between hospitals and departments
 
 Stores metadata for images or other files associated with a single visit.
 
-* **id**: (Integer) Primary key.  
-* **visitId**: (Integer, **Foreign Key**) References Visits.  
-* **type**: (Enum ResourceType) Resource type.  
-* **filePath**: (String) The file's local storage path on the device. **Storage format is: \<basedir\>/\<visitId\>/\<sha265sum\>.\<suffix\>**, where \<basedir\> is the app's base storage directory, \<visitId\> is the associated visit ID, \<sha256sum\> is the sha256sum of file, and \<suffix\> is the file extension.  
-* **notes**: (String) Notes (optional).  
+* **id**: (Integer) Primary key.
+* **visitId**: (Integer, **Foreign Key**) References Visits.
+* **type**: (Enum ResourceType) Resource type.
+* **filePath**: (String) The file's local storage path on the device. **Storage format is: \<basedir\>/\<visitId\>/\<sha265sum\>.\<suffix\>**, where \<basedir\> is the app's base storage directory, \<visitId\> is the associated visit ID, \<sha256sum\> is the sha256sum of file, and \<suffix\> is the file extension.
+* **notes**: (String) Notes (optional).
 * **createdAt**, **updatedAt**: (DateTime) Timestamps.
+
+### **Part 4: Data Backup and Restore**
+
+#### **4.1 Backup Package (`app_backup`)**
+
+The application provides comprehensive data export and import functionality through the dedicated `app_backup` package. This enables users to backup their medical records to portable ZIP files and restore them later.
+
+**Key Features:**
+
+* **Multiple Export Modes:**
+  * Export specific treatments by ID
+  * Export treatments within a date range
+  * Export all treatments
+
+* **ZIP Archive Format:**
+  * Standard ZIP files with `manifest.json` containing all data in JSON format
+  * `resources/` directory with SHA256-named resource files
+  * ISO8601 datetime format for maximum portability
+  * Cross-platform compatibility (Web, Android, iOS, macOS, Windows, Linux)
+
+* **Conflict Detection and Resolution:**
+  * Detects existing treatments by title and date range
+  * Three conflict resolution strategies:
+    - **Skip**: Keep existing data, ignore import
+    - **Override**: Replace existing data with imported data
+    - **Create New**: Import as new treatment (new IDs assigned)
+
+* **Data Safety:**
+  * Transaction-based imports with automatic rollback on failure
+  * Comprehensive validation before database insertion
+  * Cascade delete handling when overriding data
+  * Structured logging for audit trails
+
+* **Data Validation:**
+  * Required field verification
+  * Data type checking
+  * String length enforcement (1-255 characters)
+  * ISO8601 datetime validation
+  * Enum value validation (visit categories, resource types)
+  * Business rule validation (e.g., endDate > startDate)
+
+#### **4.2 Export File Structure**
+
+```
+medical_records_export_YYYYMMDD_HHMMSS.zip
+├── manifest.json          # All data in JSON format
+└── resources/             # Resource files
+    ├── {sha256hash}.jpg
+    ├── {sha256hash}.pdf
+    └── ...
+```
+
+#### **4.3 Manifest Format (Version 1.0)**
+
+The manifest.json file contains:
+* **version**: Format version (currently "1.0")
+* **exportDate**: ISO8601 timestamp of export
+* **treatments**: Array of treatment objects, each containing:
+  - **treatment**: Treatment data with all fields
+  - **visits**: Array of visit records for this treatment
+  - **resources**: Array of resource metadata for all visits
+  - **hospital**: Hospital information (if associated)
+  - **department**: Department information (if associated)
+  - **doctor**: Doctor information (if associated)
+
+All relationships are preserved during export/import, including hospital-department-doctor associations.

@@ -91,6 +91,7 @@ flutter run -d ios            # iOS
   - `theme` - Theme management with persistence
   - `logging` - Structured logging with file output and CrashReportingWidget
   - `storage` - Resource file storage with SHA256-based naming (see DATA.md)
+  - `backup` - Data export/import with ZIP archives, conflict resolution, and validation
   - `utils` - Utilities including FieldDependencyHelper for managing field updates
 - **UI Components**: `app_widget/` - Reusable widgets and UI elements
   - `adaptive` - Adaptive UI components for different screen sizes
