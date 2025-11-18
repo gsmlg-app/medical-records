@@ -1,5 +1,6 @@
 import 'package:app_database/app_database.dart';
 import 'package:bloc_test/bloc_test.dart';
+import 'package:drift/drift.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:visit_data_bloc/visit_data_bloc.dart';
@@ -11,6 +12,17 @@ class MockAppDatabase extends Mock implements AppDatabase {}
 class MockVisit extends Mock implements Visit {}
 
 void main() {
+  setUpAll(() {
+    // Register fallback value for VisitsCompanion
+    registerFallbackValue(
+      const VisitsCompanion(
+        treatmentId: Value(1),
+        category: Value('outpatient'),
+        date: Value.absent(),
+      ),
+    );
+  });
+
   group('VisitDataBloc', () {
     late MockAppDatabase mockDatabase;
     late VisitDataBloc dataBloc;
