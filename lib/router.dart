@@ -14,6 +14,8 @@ import 'package:medical_records/screens/visits/add_visit_screen.dart';
 import 'package:medical_records/screens/visits/edit_visit_screen.dart';
 import 'package:medical_records/screens/visits/visit_detail_screen.dart';
 import 'package:medical_records/screens/settings/settings_screen.dart';
+import 'package:medical_records/screens/settings/appearance_settings_screen.dart';
+import 'package:medical_records/screens/settings/accent_color_settings_screen.dart';
 import 'package:medical_records/screens/settings/data_export_screen.dart';
 import 'package:medical_records/screens/settings/data_import_screen.dart';
 import 'package:go_router/go_router.dart';
@@ -201,6 +203,28 @@ class AppRouter {
         );
       },
       routes: [
+        GoRoute(
+          name: AppearanceSettingsScreen.name,
+          path: AppearanceSettingsScreen.path,
+          pageBuilder: (context, state) {
+            return NoTransitionPage<void>(
+              key: state.pageKey,
+              restorationId: state.pageKey.value,
+              child: const AppearanceSettingsScreen(),
+            );
+          },
+        ),
+        GoRoute(
+          name: AccentColorSettingsScreen.name,
+          path: AccentColorSettingsScreen.path,
+          pageBuilder: (context, state) {
+            return NoTransitionPage<void>(
+              key: state.pageKey,
+              restorationId: state.pageKey.value,
+              child: const AccentColorSettingsScreen(),
+            );
+          },
+        ),
         GoRoute(
           name: DataExportScreen.name,
           path: DataExportScreen.path,

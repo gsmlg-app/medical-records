@@ -1978,11 +1978,24 @@ class $ResourcesTable extends Resources
           GeneratedColumn.checkTextLength(minTextLength: 1, maxTextLength: 500),
       type: DriftSqlType.string,
       requiredDuringInsert: true);
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+      'name', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
   static const VerificationMeta _notesMeta = const VerificationMeta('notes');
   @override
   late final GeneratedColumn<String> notes = GeneratedColumn<String>(
       'notes', aliasedName, true,
       type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _rotationMeta =
+      const VerificationMeta('rotation');
+  @override
+  late final GeneratedColumn<int> rotation = GeneratedColumn<int>(
+      'rotation', aliasedName, false,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      defaultValue: const Constant(0));
   static const VerificationMeta _createdAtMeta =
       const VerificationMeta('createdAt');
   @override
@@ -2000,8 +2013,17 @@ class $ResourcesTable extends Resources
       requiredDuringInsert: false,
       defaultValue: currentDateAndTime);
   @override
-  List<GeneratedColumn> get $columns =>
-      [id, visitId, type, filePath, notes, createdAt, updatedAt];
+  List<GeneratedColumn> get $columns => [
+        id,
+        visitId,
+        type,
+        filePath,
+        name,
+        notes,
+        rotation,
+        createdAt,
+        updatedAt
+      ];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -2033,9 +2055,17 @@ class $ResourcesTable extends Resources
     } else if (isInserting) {
       context.missing(_filePathMeta);
     }
+    if (data.containsKey('name')) {
+      context.handle(
+          _nameMeta, name.isAcceptableOrUnknown(data['name']!, _nameMeta));
+    }
     if (data.containsKey('notes')) {
       context.handle(
           _notesMeta, notes.isAcceptableOrUnknown(data['notes']!, _notesMeta));
+    }
+    if (data.containsKey('rotation')) {
+      context.handle(_rotationMeta,
+          rotation.isAcceptableOrUnknown(data['rotation']!, _rotationMeta));
     }
     if (data.containsKey('created_at')) {
       context.handle(_createdAtMeta,
@@ -2062,8 +2092,12 @@ class $ResourcesTable extends Resources
           .read(DriftSqlType.string, data['${effectivePrefix}type'])!,
       filePath: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}file_path'])!,
+      name: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}name']),
       notes: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}notes']),
+      rotation: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}rotation'])!,
       createdAt: attachedDatabase.typeMapping
           .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
       updatedAt: attachedDatabase.typeMapping
@@ -2082,7 +2116,9 @@ class Resource extends DataClass implements Insertable<Resource> {
   final int visitId;
   final String type;
   final String filePath;
+  final String? name;
   final String? notes;
+  final int rotation;
   final DateTime createdAt;
   final DateTime updatedAt;
   const Resource(
@@ -2090,7 +2126,9 @@ class Resource extends DataClass implements Insertable<Resource> {
       required this.visitId,
       required this.type,
       required this.filePath,
+      this.name,
       this.notes,
+      required this.rotation,
       required this.createdAt,
       required this.updatedAt});
   @override
@@ -2100,9 +2138,13 @@ class Resource extends DataClass implements Insertable<Resource> {
     map['visit_id'] = Variable<int>(visitId);
     map['type'] = Variable<String>(type);
     map['file_path'] = Variable<String>(filePath);
+    if (!nullToAbsent || name != null) {
+      map['name'] = Variable<String>(name);
+    }
     if (!nullToAbsent || notes != null) {
       map['notes'] = Variable<String>(notes);
     }
+    map['rotation'] = Variable<int>(rotation);
     map['created_at'] = Variable<DateTime>(createdAt);
     map['updated_at'] = Variable<DateTime>(updatedAt);
     return map;
@@ -2114,8 +2156,10 @@ class Resource extends DataClass implements Insertable<Resource> {
       visitId: Value(visitId),
       type: Value(type),
       filePath: Value(filePath),
+      name: name == null && nullToAbsent ? const Value.absent() : Value(name),
       notes:
           notes == null && nullToAbsent ? const Value.absent() : Value(notes),
+      rotation: Value(rotation),
       createdAt: Value(createdAt),
       updatedAt: Value(updatedAt),
     );
@@ -2129,7 +2173,9 @@ class Resource extends DataClass implements Insertable<Resource> {
       visitId: serializer.fromJson<int>(json['visitId']),
       type: serializer.fromJson<String>(json['type']),
       filePath: serializer.fromJson<String>(json['filePath']),
+      name: serializer.fromJson<String?>(json['name']),
       notes: serializer.fromJson<String?>(json['notes']),
+      rotation: serializer.fromJson<int>(json['rotation']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
     );
@@ -2142,7 +2188,9 @@ class Resource extends DataClass implements Insertable<Resource> {
       'visitId': serializer.toJson<int>(visitId),
       'type': serializer.toJson<String>(type),
       'filePath': serializer.toJson<String>(filePath),
+      'name': serializer.toJson<String?>(name),
       'notes': serializer.toJson<String?>(notes),
+      'rotation': serializer.toJson<int>(rotation),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
     };
@@ -2153,7 +2201,9 @@ class Resource extends DataClass implements Insertable<Resource> {
           int? visitId,
           String? type,
           String? filePath,
+          Value<String?> name = const Value.absent(),
           Value<String?> notes = const Value.absent(),
+          int? rotation,
           DateTime? createdAt,
           DateTime? updatedAt}) =>
       Resource(
@@ -2161,7 +2211,9 @@ class Resource extends DataClass implements Insertable<Resource> {
         visitId: visitId ?? this.visitId,
         type: type ?? this.type,
         filePath: filePath ?? this.filePath,
+        name: name.present ? name.value : this.name,
         notes: notes.present ? notes.value : this.notes,
+        rotation: rotation ?? this.rotation,
         createdAt: createdAt ?? this.createdAt,
         updatedAt: updatedAt ?? this.updatedAt,
       );
@@ -2171,7 +2223,9 @@ class Resource extends DataClass implements Insertable<Resource> {
       visitId: data.visitId.present ? data.visitId.value : this.visitId,
       type: data.type.present ? data.type.value : this.type,
       filePath: data.filePath.present ? data.filePath.value : this.filePath,
+      name: data.name.present ? data.name.value : this.name,
       notes: data.notes.present ? data.notes.value : this.notes,
+      rotation: data.rotation.present ? data.rotation.value : this.rotation,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
     );
@@ -2184,7 +2238,9 @@ class Resource extends DataClass implements Insertable<Resource> {
           ..write('visitId: $visitId, ')
           ..write('type: $type, ')
           ..write('filePath: $filePath, ')
+          ..write('name: $name, ')
           ..write('notes: $notes, ')
+          ..write('rotation: $rotation, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt')
           ..write(')'))
@@ -2192,8 +2248,8 @@ class Resource extends DataClass implements Insertable<Resource> {
   }
 
   @override
-  int get hashCode =>
-      Object.hash(id, visitId, type, filePath, notes, createdAt, updatedAt);
+  int get hashCode => Object.hash(
+      id, visitId, type, filePath, name, notes, rotation, createdAt, updatedAt);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -2202,7 +2258,9 @@ class Resource extends DataClass implements Insertable<Resource> {
           other.visitId == this.visitId &&
           other.type == this.type &&
           other.filePath == this.filePath &&
+          other.name == this.name &&
           other.notes == this.notes &&
+          other.rotation == this.rotation &&
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt);
 }
@@ -2212,7 +2270,9 @@ class ResourcesCompanion extends UpdateCompanion<Resource> {
   final Value<int> visitId;
   final Value<String> type;
   final Value<String> filePath;
+  final Value<String?> name;
   final Value<String?> notes;
+  final Value<int> rotation;
   final Value<DateTime> createdAt;
   final Value<DateTime> updatedAt;
   const ResourcesCompanion({
@@ -2220,7 +2280,9 @@ class ResourcesCompanion extends UpdateCompanion<Resource> {
     this.visitId = const Value.absent(),
     this.type = const Value.absent(),
     this.filePath = const Value.absent(),
+    this.name = const Value.absent(),
     this.notes = const Value.absent(),
+    this.rotation = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
   });
@@ -2229,7 +2291,9 @@ class ResourcesCompanion extends UpdateCompanion<Resource> {
     required int visitId,
     required String type,
     required String filePath,
+    this.name = const Value.absent(),
     this.notes = const Value.absent(),
+    this.rotation = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
   })  : visitId = Value(visitId),
@@ -2240,7 +2304,9 @@ class ResourcesCompanion extends UpdateCompanion<Resource> {
     Expression<int>? visitId,
     Expression<String>? type,
     Expression<String>? filePath,
+    Expression<String>? name,
     Expression<String>? notes,
+    Expression<int>? rotation,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? updatedAt,
   }) {
@@ -2249,7 +2315,9 @@ class ResourcesCompanion extends UpdateCompanion<Resource> {
       if (visitId != null) 'visit_id': visitId,
       if (type != null) 'type': type,
       if (filePath != null) 'file_path': filePath,
+      if (name != null) 'name': name,
       if (notes != null) 'notes': notes,
+      if (rotation != null) 'rotation': rotation,
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
     });
@@ -2260,7 +2328,9 @@ class ResourcesCompanion extends UpdateCompanion<Resource> {
       Value<int>? visitId,
       Value<String>? type,
       Value<String>? filePath,
+      Value<String?>? name,
       Value<String?>? notes,
+      Value<int>? rotation,
       Value<DateTime>? createdAt,
       Value<DateTime>? updatedAt}) {
     return ResourcesCompanion(
@@ -2268,7 +2338,9 @@ class ResourcesCompanion extends UpdateCompanion<Resource> {
       visitId: visitId ?? this.visitId,
       type: type ?? this.type,
       filePath: filePath ?? this.filePath,
+      name: name ?? this.name,
       notes: notes ?? this.notes,
+      rotation: rotation ?? this.rotation,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );
@@ -2289,8 +2361,14 @@ class ResourcesCompanion extends UpdateCompanion<Resource> {
     if (filePath.present) {
       map['file_path'] = Variable<String>(filePath.value);
     }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
     if (notes.present) {
       map['notes'] = Variable<String>(notes.value);
+    }
+    if (rotation.present) {
+      map['rotation'] = Variable<int>(rotation.value);
     }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
@@ -2308,7 +2386,9 @@ class ResourcesCompanion extends UpdateCompanion<Resource> {
           ..write('visitId: $visitId, ')
           ..write('type: $type, ')
           ..write('filePath: $filePath, ')
+          ..write('name: $name, ')
           ..write('notes: $notes, ')
+          ..write('rotation: $rotation, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt')
           ..write(')'))
@@ -3304,7 +3384,9 @@ typedef $$ResourcesTableCreateCompanionBuilder = ResourcesCompanion Function({
   required int visitId,
   required String type,
   required String filePath,
+  Value<String?> name,
   Value<String?> notes,
+  Value<int> rotation,
   Value<DateTime> createdAt,
   Value<DateTime> updatedAt,
 });
@@ -3313,7 +3395,9 @@ typedef $$ResourcesTableUpdateCompanionBuilder = ResourcesCompanion Function({
   Value<int> visitId,
   Value<String> type,
   Value<String> filePath,
+  Value<String?> name,
   Value<String?> notes,
+  Value<int> rotation,
   Value<DateTime> createdAt,
   Value<DateTime> updatedAt,
 });
@@ -3339,8 +3423,14 @@ class $$ResourcesTableFilterComposer
   ColumnFilters<String> get filePath => $composableBuilder(
       column: $table.filePath, builder: (column) => ColumnFilters(column));
 
+  ColumnFilters<String> get name => $composableBuilder(
+      column: $table.name, builder: (column) => ColumnFilters(column));
+
   ColumnFilters<String> get notes => $composableBuilder(
       column: $table.notes, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get rotation => $composableBuilder(
+      column: $table.rotation, builder: (column) => ColumnFilters(column));
 
   ColumnFilters<DateTime> get createdAt => $composableBuilder(
       column: $table.createdAt, builder: (column) => ColumnFilters(column));
@@ -3370,8 +3460,14 @@ class $$ResourcesTableOrderingComposer
   ColumnOrderings<String> get filePath => $composableBuilder(
       column: $table.filePath, builder: (column) => ColumnOrderings(column));
 
+  ColumnOrderings<String> get name => $composableBuilder(
+      column: $table.name, builder: (column) => ColumnOrderings(column));
+
   ColumnOrderings<String> get notes => $composableBuilder(
       column: $table.notes, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get rotation => $composableBuilder(
+      column: $table.rotation, builder: (column) => ColumnOrderings(column));
 
   ColumnOrderings<DateTime> get createdAt => $composableBuilder(
       column: $table.createdAt, builder: (column) => ColumnOrderings(column));
@@ -3401,8 +3497,14 @@ class $$ResourcesTableAnnotationComposer
   GeneratedColumn<String> get filePath =>
       $composableBuilder(column: $table.filePath, builder: (column) => column);
 
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
   GeneratedColumn<String> get notes =>
       $composableBuilder(column: $table.notes, builder: (column) => column);
+
+  GeneratedColumn<int> get rotation =>
+      $composableBuilder(column: $table.rotation, builder: (column) => column);
 
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
@@ -3438,7 +3540,9 @@ class $$ResourcesTableTableManager extends RootTableManager<
             Value<int> visitId = const Value.absent(),
             Value<String> type = const Value.absent(),
             Value<String> filePath = const Value.absent(),
+            Value<String?> name = const Value.absent(),
             Value<String?> notes = const Value.absent(),
+            Value<int> rotation = const Value.absent(),
             Value<DateTime> createdAt = const Value.absent(),
             Value<DateTime> updatedAt = const Value.absent(),
           }) =>
@@ -3447,7 +3551,9 @@ class $$ResourcesTableTableManager extends RootTableManager<
             visitId: visitId,
             type: type,
             filePath: filePath,
+            name: name,
             notes: notes,
+            rotation: rotation,
             createdAt: createdAt,
             updatedAt: updatedAt,
           ),
@@ -3456,7 +3562,9 @@ class $$ResourcesTableTableManager extends RootTableManager<
             required int visitId,
             required String type,
             required String filePath,
+            Value<String?> name = const Value.absent(),
             Value<String?> notes = const Value.absent(),
+            Value<int> rotation = const Value.absent(),
             Value<DateTime> createdAt = const Value.absent(),
             Value<DateTime> updatedAt = const Value.absent(),
           }) =>
@@ -3465,7 +3573,9 @@ class $$ResourcesTableTableManager extends RootTableManager<
             visitId: visitId,
             type: type,
             filePath: filePath,
+            name: name,
             notes: notes,
+            rotation: rotation,
             createdAt: createdAt,
             updatedAt: updatedAt,
           ),

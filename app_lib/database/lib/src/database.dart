@@ -25,7 +25,18 @@ class AppDatabase extends _$AppDatabase {
   }
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
+
+  @override
+  MigrationStrategy get migration => MigrationStrategy(
+        onUpgrade: (migrator, from, to) async {
+          if (from < 2) {
+            // Add name and rotation columns to resources table
+            await migrator.addColumn(resources, resources.name);
+            await migrator.addColumn(resources, resources.rotation);
+          }
+        },
+      );
 
   static QueryExecutor _openConnection() {
     return driftDatabase(

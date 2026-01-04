@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_form_bloc/flutter_form_bloc.dart';
-import 'package:form_bloc/form_bloc.dart';
 
 /// A safe dropdown field bloc builder that avoids assertion errors
 /// by ensuring valid state during widget initialization
@@ -54,6 +53,7 @@ class _SafeDropdownFieldBlocBuilderState<T>
         }
 
         return DropdownButtonFormField<T>(
+          isExpanded: true,
           initialValue: currentValue,
           decoration: widget.decoration,
           items: state.items.map((item) {

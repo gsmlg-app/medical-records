@@ -68,6 +68,8 @@ class VisitResourceBloc extends Bloc<VisitResourceEvent, VisitResourceState> {
         visitId: event.visitId,
         type: _getFileType(event.file.path),
         filePath: storedPath,
+        name: const Value(null),
+        rotation: const Value(0),
         createdAt: Value(DateTime.now()),
         updatedAt: Value(DateTime.now()),
       );
@@ -80,6 +82,9 @@ class VisitResourceBloc extends Bloc<VisitResourceEvent, VisitResourceState> {
         visitId: event.visitId,
         type: _getFileType(event.file.path),
         filePath: storedPath,
+        name: null,
+        notes: null,
+        rotation: 0,
         createdAt: DateTime.now(),
         updatedAt: DateTime.now(),
       );

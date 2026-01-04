@@ -96,6 +96,8 @@ dependencies:
   settings_ui: any
   app_logging: any
   app_web_view: any
+  saver_gallery: ^4.1.0
+  pdf_to_image_converter: ^0.0.3
 
 dev_dependencies:
   flutter_test:

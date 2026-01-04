@@ -63,6 +63,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get accentColor => 'Accent Color';
 
   @override
+  String get lightTheme => 'Light';
+
+  @override
+  String get darkTheme => 'Dark';
+
+  @override
+  String get systemTheme => 'System';
+
+  @override
   String get language => 'Language';
 
   @override
@@ -357,6 +366,43 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get resourceError => 'Resource Error';
+
+  @override
+  String get editResourceName => 'Edit Resource Name';
+
+  @override
+  String get resourceName => 'Name';
+
+  @override
+  String get resourceNameHint => 'Enter a name for this resource';
+
+  @override
+  String get resourceNameUpdated => 'Resource name updated';
+
+  @override
+  String get rotateImage => 'Rotate';
+
+  @override
+  String get imageRotated => 'Image rotated';
+
+  @override
+  String get exportToGallery => 'Export to Gallery';
+
+  @override
+  String get noImagesToExport => 'No images to export';
+
+  @override
+  String exportSuccess(int count) {
+    return '$count image(s) exported to gallery';
+  }
+
+  @override
+  String exportPartialSuccess(int success, int failed) {
+    return '$success image(s) exported, $failed failed';
+  }
+
+  @override
+  String get exportFailed => 'Failed to export images';
 
   @override
   String get cameraPermissionDenied => 'Camera permission denied';

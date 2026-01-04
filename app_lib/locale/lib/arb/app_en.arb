@@ -18,6 +18,9 @@
   "smenuTheme": "Theme",
   "appearance": "Appearance",
   "accentColor": "Accent Color",
+  "lightTheme": "Light",
+  "darkTheme": "Dark",
+  "systemTheme": "System",
   "language": "Language",
   "appDescription": "Manage your medical records, treatments, and hospital information in one place.",
   "treatmentsTitle": "Treatments",
@@ -115,6 +118,34 @@
   "deleteResource": "Delete Resource",
   "deleteResourceConfirmation": "Are you sure you want to delete this resource?",
   "resourceError": "Resource Error",
+  "editResourceName": "Edit Resource Name",
+  "resourceName": "Name",
+  "resourceNameHint": "Enter a name for this resource",
+  "resourceNameUpdated": "Resource name updated",
+  "rotateImage": "Rotate",
+  "imageRotated": "Image rotated",
+  "exportToGallery": "Export to Gallery",
+  "noImagesToExport": "No images to export",
+  "exportSuccess": "{count} image(s) exported to gallery",
+  "@exportSuccess": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "exportPartialSuccess": "{success} image(s) exported, {failed} failed",
+  "@exportPartialSuccess": {
+    "placeholders": {
+      "success": {
+        "type": "int"
+      },
+      "failed": {
+        "type": "int"
+      }
+    }
+  },
+  "exportFailed": "Failed to export images",
   "cameraPermissionDenied": "Camera permission denied",
   "storagePermissionDenied": "Storage permission denied",
   "filePickerError": "Failed to pick file",

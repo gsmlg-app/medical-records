@@ -50,11 +50,14 @@ class _TreatmentsScreenState extends State<TreatmentsScreen> {
       builder: (context, state) {
         return Scaffold(
           floatingActionButton: state is TreatmentLoaded && state.treatments.isNotEmpty
-              ? FloatingActionButton(
-                  onPressed: () {
-                    context.pushNamed(AddTreatmentScreen.name);
-                  },
-                  child: const Icon(Icons.add),
+              ? Padding(
+                  padding: const EdgeInsets.only(bottom: 80),
+                  child: FloatingActionButton(
+                    onPressed: () {
+                      context.pushNamed(AddTreatmentScreen.name);
+                    },
+                    child: const Icon(Icons.add),
+                  ),
                 )
               : null,
           body: AppAdaptiveScaffold(

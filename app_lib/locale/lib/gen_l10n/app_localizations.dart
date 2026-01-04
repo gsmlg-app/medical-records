@@ -202,6 +202,24 @@ abstract class AppLocalizations {
   /// **'Accent Color'**
   String get accentColor;
 
+  /// No description provided for @lightTheme.
+  ///
+  /// In en, this message translates to:
+  /// **'Light'**
+  String get lightTheme;
+
+  /// No description provided for @darkTheme.
+  ///
+  /// In en, this message translates to:
+  /// **'Dark'**
+  String get darkTheme;
+
+  /// No description provided for @systemTheme.
+  ///
+  /// In en, this message translates to:
+  /// **'System'**
+  String get systemTheme;
+
   /// No description provided for @language.
   ///
   /// In en, this message translates to:
@@ -783,6 +801,72 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Resource Error'**
   String get resourceError;
+
+  /// No description provided for @editResourceName.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Resource Name'**
+  String get editResourceName;
+
+  /// No description provided for @resourceName.
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get resourceName;
+
+  /// No description provided for @resourceNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a name for this resource'**
+  String get resourceNameHint;
+
+  /// No description provided for @resourceNameUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Resource name updated'**
+  String get resourceNameUpdated;
+
+  /// No description provided for @rotateImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Rotate'**
+  String get rotateImage;
+
+  /// No description provided for @imageRotated.
+  ///
+  /// In en, this message translates to:
+  /// **'Image rotated'**
+  String get imageRotated;
+
+  /// No description provided for @exportToGallery.
+  ///
+  /// In en, this message translates to:
+  /// **'Export to Gallery'**
+  String get exportToGallery;
+
+  /// No description provided for @noImagesToExport.
+  ///
+  /// In en, this message translates to:
+  /// **'No images to export'**
+  String get noImagesToExport;
+
+  /// No description provided for @exportSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} image(s) exported to gallery'**
+  String exportSuccess(int count);
+
+  /// No description provided for @exportPartialSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'{success} image(s) exported, {failed} failed'**
+  String exportPartialSuccess(int success, int failed);
+
+  /// No description provided for @exportFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to export images'**
+  String get exportFailed;
 
   /// No description provided for @cameraPermissionDenied.
   ///

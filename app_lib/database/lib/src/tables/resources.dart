@@ -13,7 +13,13 @@ class Resources extends Table {
   TextColumn get filePath =>
       text().withLength(min: 1, max: 500)(); // Local storage path
 
+  // User-defined name for the resource
+  TextColumn get name => text().nullable()();
+
   TextColumn get notes => text().nullable()();
+
+  // Rotation in degrees (0, 90, 180, 270) for image orientation
+  IntColumn get rotation => integer().withDefault(const Constant(0))();
 
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
 

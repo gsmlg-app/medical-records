@@ -10,11 +10,13 @@ class ResourceListItem extends StatefulWidget {
     required this.resource,
     required this.onDelete,
     this.onTap,
+    this.isReadOnly = false,
   });
 
   final Resource resource;
   final VoidCallback onDelete;
   final VoidCallback? onTap;
+  final bool isReadOnly;
 
   @override
   State<ResourceListItem> createState() => _ResourceListItemState();
@@ -152,6 +154,11 @@ class _ResourceListItemState extends State<ResourceListItem> {
   }
 
   String _getDisplayName() {
+    // Use custom name if set
+    if (widget.resource.name != null && widget.resource.name!.isNotEmpty) {
+      return widget.resource.name!;
+    }
+
     final fileName = widget.resource.filePath.split('/').last;
     if (fileName.isNotEmpty) {
       return fileName;
@@ -195,27 +202,14 @@ class _ResourceListItemState extends State<ResourceListItem> {
   }
 
   Widget _buildTrailingWidget() {
-    return PopupMenuButton<String>(
-      icon: const Icon(Icons.more_vert),
-      onSelected: (value) {
-        switch (value) {
-          case 'delete':
-            _showDeleteConfirmation();
-            break;
-        }
-      },
-      itemBuilder: (context) => [
-        PopupMenuItem(
-          value: 'delete',
-          child: Row(
-            children: [
-              const Icon(Icons.delete, color: Colors.red, size: 20),
-              const SizedBox(width: 8),
-              Text(context.l10n.delete),
-            ],
-          ),
-        ),
-      ],
+    if (widget.isReadOnly) {
+      return const SizedBox.shrink();
+    }
+
+    return IconButton(
+      icon: const Icon(Icons.delete, color: Colors.red),
+      onPressed: _showDeleteConfirmation,
+      tooltip: context.l10n.delete,
     );
   }
 

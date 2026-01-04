@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show PlatformException;
 import 'package:image_picker/image_picker.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -151,8 +152,8 @@ class _ResourcePickerState extends State<ResourcePicker> {
               ),
             )
           else
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8),
               child: Column(children: _buildPickerOptions(context)),
             ),
 
@@ -202,7 +203,7 @@ class _ResourcePickerState extends State<ResourcePicker> {
             icon: Icons.camera_alt_outlined,
             label: context.l10n.camera,
             description: 'Take a new photo with your camera',
-            color: Theme.of(context).primaryColor,
+            color: Theme.of(context).colorScheme.primary,
             onTap: _pickFromCamera,
           ),
         );
@@ -244,32 +245,31 @@ class _ResourcePickerState extends State<ResourcePicker> {
         return;
       }
 
-      // Check camera permission
-      final cameraStatus = await Permission.camera.status;
+      // On iOS, image_picker handles permissions internally
+      // On Android, we need to check/request camera permission
+      if (Platform.isAndroid) {
+        final cameraStatus = await Permission.camera.status;
 
-      if (cameraStatus.isDenied) {
-        // Request permission if it was denied
-        final result = await Permission.camera.request();
-        if (!result.isGranted) {
-          if (result.isPermanentlyDenied) {
-            _showPermissionDeniedDialog(
-              'Camera Permission Required',
-              'Camera access is required to take photos. Please enable it in app settings.',
-            );
-          } else {
-            _showError(context.l10n.cameraPermissionDenied);
+        if (cameraStatus.isDenied) {
+          final result = await Permission.camera.request();
+          if (!result.isGranted) {
+            if (result.isPermanentlyDenied) {
+              _showPermissionDeniedDialog(
+                'Camera Permission Required',
+                'Camera access is required to take photos. Please enable it in app settings.',
+              );
+            } else {
+              _showError(context.l10n.cameraPermissionDenied);
+            }
+            return;
           }
+        } else if (cameraStatus.isPermanentlyDenied) {
+          _showPermissionDeniedDialog(
+            'Camera Permission Required',
+            'Camera access is required to take photos. Please enable it in app settings.',
+          );
           return;
         }
-      } else if (cameraStatus.isPermanentlyDenied) {
-        _showPermissionDeniedDialog(
-          'Camera Permission Required',
-          'Camera access is required to take photos. Please enable it in app settings.',
-        );
-        return;
-      } else if (!cameraStatus.isGranted && !cameraStatus.isLimited) {
-        _showError(context.l10n.cameraPermissionDenied);
-        return;
       }
 
       final picker = ImagePicker();
@@ -284,13 +284,24 @@ class _ResourcePickerState extends State<ResourcePicker> {
         final file = File(image.path);
         widget.onResourceSelected(file, ResourceType.image);
         _showSuccess('Photo captured successfully');
-        // Dialog is closed in _showSuccess
+      }
+    } on PlatformException catch (e) {
+      AppLogger().e('Platform error picking from camera: $e');
+      if (e.code == 'camera_access_denied') {
+        _showPermissionDeniedDialog(
+          'Camera Permission Required',
+          'Camera access is required to take photos. Please enable it in app settings.',
+        );
+      } else {
+        _showError('Failed to access camera: ${e.message}');
       }
     } catch (e) {
       AppLogger().e('Error picking from camera: $e');
       _showError('Failed to access camera: ${e.toString()}');
     } finally {
-      setState(() => _isLoading = false);
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
     }
   }
 
@@ -298,12 +309,12 @@ class _ResourcePickerState extends State<ResourcePicker> {
     try {
       setState(() => _isLoading = true);
 
-      // Check storage permission for mobile platforms
-      if (!kIsWeb) {
+      // On iOS, image_picker handles permissions internally
+      // On Android, we need to check/request photos permission
+      if (!kIsWeb && Platform.isAndroid) {
         final photosStatus = await Permission.photos.status;
 
         if (photosStatus.isDenied) {
-          // Request permission if it was denied
           final result = await Permission.photos.request();
           if (!result.isGranted && !result.isLimited) {
             if (result.isPermanentlyDenied) {
@@ -322,9 +333,6 @@ class _ResourcePickerState extends State<ResourcePicker> {
             'Photo library access is required to select images. Please enable it in app settings.',
           );
           return;
-        } else if (!photosStatus.isGranted && !photosStatus.isLimited) {
-          _showError(context.l10n.storagePermissionDenied);
-          return;
         }
       }
 
@@ -340,13 +348,24 @@ class _ResourcePickerState extends State<ResourcePicker> {
         final file = File(image.path);
         widget.onResourceSelected(file, ResourceType.image);
         _showSuccess('Photo selected successfully');
-        // Dialog is closed in _showSuccess
+      }
+    } on PlatformException catch (e) {
+      AppLogger().e('Platform error picking from gallery: $e');
+      if (e.code == 'photo_access_denied') {
+        _showPermissionDeniedDialog(
+          'Photos Permission Required',
+          'Photo library access is required to select images. Please enable it in app settings.',
+        );
+      } else {
+        _showError('Failed to access gallery: ${e.message}');
       }
     } catch (e) {
       AppLogger().e('Error picking from gallery: $e');
       _showError('Failed to access gallery: ${e.toString()}');
     } finally {
-      setState(() => _isLoading = false);
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
     }
   }
 
@@ -625,7 +644,7 @@ class _PickerOptionState extends State<_PickerOption>
               opacity: _opacityAnimation.value,
               child: Container(
                 width: double.infinity,
-                margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+                margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(16),
                   color: Theme.of(context).cardColor,
@@ -650,6 +669,7 @@ class _PickerOptionState extends State<_PickerOption>
                       Container(
                         width: 60,
                         height: 60,
+                        alignment: Alignment.center,
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(14),
                           gradient: LinearGradient(

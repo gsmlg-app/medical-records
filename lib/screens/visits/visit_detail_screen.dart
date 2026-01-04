@@ -1,13 +1,18 @@
 import 'package:app_adaptive_widgets/app_adaptive_widgets.dart';
 import 'dart:async';
+import 'dart:io';
 
 import 'package:app_database/app_database.dart';
 import 'package:app_locale/app_locale.dart';
 import 'package:app_resources/app_resources.dart';
+import 'package:app_storage/app_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:medical_records/destination.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:pdf_to_image_converter/pdf_to_image_converter.dart';
+import 'package:saver_gallery/saver_gallery.dart';
 import 'package:visit_bloc/visit_bloc.dart';
 
 class VisitDetailScreen extends StatefulWidget {
@@ -39,11 +44,12 @@ class _VisitDetailScreenState extends State<VisitDetailScreen> {
     super.didChangeDependencies();
     if (_visitId == null) {
       // Extract visitId from route parameters
-      _visitId = int.tryParse(GoRouterState.of(context).uri.pathSegments.last) ?? 0;
-      
+      _visitId =
+          int.tryParse(GoRouterState.of(context).uri.pathSegments.last) ?? 0;
+
       // Ensure VisitBloc has all visits loaded (not filtered)
       context.read<VisitBloc>().add(LoadVisits());
-      
+
       _loadVisit();
     }
   }
@@ -55,9 +61,7 @@ class _VisitDetailScreenState extends State<VisitDetailScreen> {
     final state = context.read<VisitBloc>().state;
     if (state is VisitLoaded) {
       try {
-        final updatedVisit = state.visits.firstWhere(
-          (v) => v.id == _visitId,
-        );
+        final updatedVisit = state.visits.firstWhere((v) => v.id == _visitId);
 
         // Always reload related data when VisitBloc state changes
         // This ensures resources are refreshed even if the visit itself hasn't changed
@@ -86,7 +90,7 @@ class _VisitDetailScreenState extends State<VisitDetailScreen> {
 
   Future<void> _loadVisitFromDatabase() async {
     if (_visitId == null) return;
-    
+
     try {
       final database = context.read<AppDatabase>();
       final visit = await database.getVisitById(_visitId!);
@@ -114,19 +118,31 @@ class _VisitDetailScreenState extends State<VisitDetailScreen> {
     final futures = <Future>[];
 
     if (_visit!.hospitalId != null) {
-      futures.add(database.getHospitalById(_visit!.hospitalId!).then((h) => _hospital = h));
+      futures.add(
+        database
+            .getHospitalById(_visit!.hospitalId!)
+            .then((h) => _hospital = h),
+      );
     }
 
     if (_visit!.departmentId != null) {
-      futures.add(database.getDepartmentById(_visit!.departmentId!).then((d) => _department = d));
+      futures.add(
+        database
+            .getDepartmentById(_visit!.departmentId!)
+            .then((d) => _department = d),
+      );
     }
 
     if (_visit!.doctorId != null) {
-      futures.add(database.getDoctorById(_visit!.doctorId!).then((d) => _doctor = d));
+      futures.add(
+        database.getDoctorById(_visit!.doctorId!).then((d) => _doctor = d),
+      );
     }
 
     // Load resources for this visit
-    futures.add(database.getResourcesByVisit(_visit!.id).then((r) => _resources = r));
+    futures.add(
+      database.getResourcesByVisit(_visit!.id).then((r) => _resources = r),
+    );
 
     await Future.wait(futures);
 
@@ -148,7 +164,8 @@ class _VisitDetailScreenState extends State<VisitDetailScreen> {
       child: AppAdaptiveScaffold(
         destinations: Destinations.navs(context),
         selectedIndex: Destinations.indexOf(const Key('Treatments'), context),
-        onSelectedIndexChange: (idx) => Destinations.changeHandler(idx, context),
+        onSelectedIndexChange: (idx) =>
+            Destinations.changeHandler(idx, context),
         body: (context) => SafeArea(
           child: CustomScrollView(
             slivers: [
@@ -161,18 +178,25 @@ class _VisitDetailScreenState extends State<VisitDetailScreen> {
                 actions: [
                   IconButton(
                     icon: const Icon(Icons.edit),
-                    onPressed: () {
+                    onPressed: () async {
                       if (_visit != null) {
-                        context.pushNamed(
+                        await context.pushNamed(
                           'EditVisit',
                           pathParameters: {'id': _visit!.id.toString()},
                         );
+                        // Reload data after returning from edit screen
+                        // to ensure resources are up to date
+                        if (mounted) {
+                          await _loadRelatedData();
+                        }
                       }
                     },
                   ),
                   IconButton(
                     icon: const Icon(Icons.delete),
-                    onPressed: _visit != null ? () => _showDeleteDialog(context) : null,
+                    onPressed: _visit != null
+                        ? () => _showDeleteDialog(context)
+                        : null,
                   ),
                 ],
               ),
@@ -200,15 +224,30 @@ class _VisitDetailScreenState extends State<VisitDetailScreen> {
   }
 
   Widget _buildResourcesSection() {
+    final hasExportableResources = _resources.any(
+      (r) => r.type == 'image' || r.type == 'document',
+    );
+
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'Resources',
-              style: Theme.of(context).textTheme.titleLarge,
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Resources',
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
+                if (hasExportableResources && !_isLoading)
+                  TextButton.icon(
+                    onPressed: _exportResourcesToGallery,
+                    icon: const Icon(Icons.save_alt),
+                    label: Text(context.l10n.exportToGallery),
+                  ),
+              ],
             ),
             const SizedBox(height: 16),
             if (_isLoading)
@@ -220,7 +259,9 @@ class _VisitDetailScreenState extends State<VisitDetailScreen> {
                   child: Text(
                     'No resources attached',
                     style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.onSurface.withValues(alpha: 0.6),
                     ),
                   ),
                 ),
@@ -234,6 +275,161 @@ class _VisitDetailScreenState extends State<VisitDetailScreen> {
               ),
           ],
         ),
+      ),
+    );
+  }
+
+  Future<void> _exportResourcesToGallery() async {
+    final exportableResources = _resources
+        .where((r) => r.type == 'image' || r.type == 'document')
+        .toList();
+
+    if (exportableResources.isEmpty) {
+      _showSnackBar(context.l10n.noImagesToExport, isError: true);
+      return;
+    }
+
+    setState(() => _isLoading = true);
+
+    try {
+      final storageService = ResourceStorageService();
+      int successCount = 0;
+      int failCount = 0;
+
+      for (final resource in exportableResources) {
+        try {
+          final file = await storageService.getResourceFile(resource.filePath);
+
+          if (await file.exists()) {
+            if (resource.type == 'image') {
+              // Export image directly
+              final result = await SaverGallery.saveFile(
+                filePath: file.path,
+                fileName:
+                    resource.name ??
+                    'medical_record_${DateTime.now().millisecondsSinceEpoch}',
+                androidRelativePath: 'Pictures/MedicalRecords',
+                skipIfExists: false,
+              );
+
+              if (result.isSuccess) {
+                successCount++;
+              } else {
+                failCount++;
+              }
+            } else if (resource.type == 'document') {
+              // Convert PDF to images and export each page
+              final pdfExportResult = await _exportPdfToGallery(
+                file,
+                resource.name,
+              );
+              successCount += pdfExportResult['success'] as int;
+              failCount += pdfExportResult['failed'] as int;
+            }
+          } else {
+            failCount++;
+          }
+        } catch (e) {
+          failCount++;
+        }
+      }
+
+      if (mounted) {
+        if (failCount == 0) {
+          _showSnackBar(context.l10n.exportSuccess(successCount));
+        } else if (successCount > 0) {
+          _showSnackBar(
+            context.l10n.exportPartialSuccess(successCount, failCount),
+          );
+        } else {
+          _showSnackBar(context.l10n.exportFailed, isError: true);
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        _showSnackBar(context.l10n.exportFailed, isError: true);
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
+  }
+
+  Future<Map<String, int>> _exportPdfToGallery(
+    File pdfFile,
+    String? resourceName,
+  ) async {
+    int successCount = 0;
+    int failCount = 0;
+
+    final converter = PdfImageConverter();
+
+    try {
+      // Get temporary directory for converted images
+      final tempDir = await getTemporaryDirectory();
+      final timestamp = DateTime.now().millisecondsSinceEpoch;
+      final baseName = resourceName ?? 'pdf_export_$timestamp';
+
+      // Open PDF file
+      await converter.openPdf(pdfFile.path);
+
+      // Get total page count
+      final pageCount = converter.pageCount;
+
+      // Render and save each page
+      for (int i = 0; i < pageCount; i++) {
+        try {
+          // Render the page to image bytes
+          final imageBytes = await converter.renderPage(i);
+
+          if (imageBytes == null) {
+            failCount++;
+            continue;
+          }
+
+          final tempImagePath =
+              '${tempDir.path}/${baseName}_page_${i + 1}_$timestamp.png';
+          final tempImageFile = File(tempImagePath);
+          await tempImageFile.writeAsBytes(imageBytes);
+
+          final result = await SaverGallery.saveFile(
+            filePath: tempImagePath,
+            fileName: '${baseName}_page_${i + 1}',
+            androidRelativePath: 'Pictures/MedicalRecords',
+            skipIfExists: false,
+          );
+
+          // Clean up temp file
+          if (await tempImageFile.exists()) {
+            await tempImageFile.delete();
+          }
+
+          if (result.isSuccess) {
+            successCount++;
+          } else {
+            failCount++;
+          }
+        } catch (e) {
+          failCount++;
+        }
+      }
+    } catch (e) {
+      // If conversion fails entirely, count as one failure
+      failCount++;
+    } finally {
+      // Always close the PDF
+      await converter.closePdf();
+    }
+
+    return {'success': successCount, 'failed': failCount};
+  }
+
+  void _showSnackBar(String message, {bool isError = false}) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: isError ? Colors.red : Colors.green,
       ),
     );
   }
@@ -254,8 +450,14 @@ class _VisitDetailScreenState extends State<VisitDetailScreen> {
                 ),
                 const SizedBox(width: 8),
                 Chip(
-                  label: Text(_formatCategoryName(_getCategoryFromValue(_visit!.category))),
-                  backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+                  label: Text(
+                    _formatCategoryName(
+                      _getCategoryFromValue(_visit!.category),
+                    ),
+                  ),
+                  backgroundColor: Theme.of(
+                    context,
+                  ).colorScheme.primaryContainer,
                 ),
               ],
             ),
@@ -355,16 +557,10 @@ class _VisitDetailScreenState extends State<VisitDetailScreen> {
             const SizedBox(height: 16),
 
             // Timestamps
-            Text(
-              'Created:',
-              style: Theme.of(context).textTheme.bodySmall,
-            ),
+            Text('Created:', style: Theme.of(context).textTheme.bodySmall),
             Text(_formatDateTime(_visit!.createdAt)),
             const SizedBox(height: 8),
-            Text(
-              'Updated:',
-              style: Theme.of(context).textTheme.bodySmall,
-            ),
+            Text('Updated:', style: Theme.of(context).textTheme.bodySmall),
             Text(_formatDateTime(_visit!.updatedAt)),
           ],
         ),

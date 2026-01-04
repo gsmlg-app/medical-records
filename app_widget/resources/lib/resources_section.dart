@@ -112,6 +112,7 @@ class _ResourcesSectionState extends State<ResourcesSection> {
                 resource: resource,
                 onDelete: () => _deleteResource(resource),
                 onTap: () => _openResource(resource),
+                isReadOnly: widget.isReadOnly,
               );
             },
           ),
@@ -162,7 +163,9 @@ class _ResourcesSectionState extends State<ResourcesSection> {
         visitId: temporaryVisitId, // Will be updated when visit is created
         type: type.value,
         filePath: relativePath,
+        name: null,
         notes: null,
+        rotation: 0,
         createdAt: DateTime.now(),
         updatedAt: DateTime.now(),
       );
@@ -205,6 +208,59 @@ class _ResourcesSectionState extends State<ResourcesSection> {
     }
   }
 
+  Future<String?> _showEditNameDialog(BuildContext dialogContext, String? currentName) async {
+    final nameController = TextEditingController(text: currentName ?? '');
+
+    return showDialog<String>(
+      context: dialogContext,
+      builder: (context) => AlertDialog(
+        title: Text(context.l10n.editResourceName),
+        content: TextField(
+          controller: nameController,
+          decoration: InputDecoration(
+            labelText: context.l10n.resourceName,
+            hintText: context.l10n.resourceNameHint,
+          ),
+          autofocus: true,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text(context.l10n.cancel),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.of(context).pop(nameController.text),
+            child: Text(context.l10n.ok),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _saveResourceChanges(Resource resource, String? name, int rotation) {
+    final updatedResource = Resource(
+      id: resource.id,
+      visitId: resource.visitId,
+      type: resource.type,
+      filePath: resource.filePath,
+      name: name,
+      notes: resource.notes,
+      rotation: rotation,
+      createdAt: resource.createdAt,
+      updatedAt: DateTime.now(),
+    );
+
+    setState(() {
+      final index = _resources.indexWhere((r) => r.id == resource.id);
+      if (index != -1) {
+        _resources[index] = updatedResource;
+      }
+    });
+
+    widget.onResourcesChanged?.call(_resources);
+    _showSuccess(context.l10n.resourceNameUpdated);
+  }
+
   Future<void> _openResource(Resource resource) async {
     try {
       AppLogger().d('Opening resource: ${resource.filePath}');
@@ -221,59 +277,117 @@ class _ResourcesSectionState extends State<ResourcesSection> {
       // Get file size before showing dialog
       final fileSize = await file.length();
 
-      // Try to open the file with the default system application
-      // For now, we'll show a dialog with file information and path
-      // In a production app, you would use packages like:
-      // - open_file package for mobile
-      // - url_launcher for web
-      // - platform-specific file opening APIs
-
       if (mounted) {
-        await showDialog(
+        // Find the current resource in the list to get latest state
+        final originalResource = _resources.firstWhere(
+          (r) => r.id == resource.id,
+          orElse: () => resource,
+        );
+
+        // Track pending changes locally
+        String? pendingName = originalResource.name;
+        int pendingRotation = originalResource.rotation;
+        bool hasChanges = false;
+
+        final result = await showDialog<bool>(
           context: context,
-          builder: (context) => AlertDialog(
-            title: const Text('Resource Preview'),
-            content: SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text('Type: ${resource.type}'),
-                  const SizedBox(height: 8),
-                  Text('Path: ${file.path}'),
-                  const SizedBox(height: 8),
-                  Text('Size: ${_formatFileSize(fileSize)}'),
-                  const SizedBox(height: 16),
-                  if (resource.type == 'image')
-                    Container(
-                      constraints: const BoxConstraints(maxHeight: 400),
-                      child: Image.file(
-                        file,
-                        fit: BoxFit.contain,
-                        errorBuilder: (context, error, stackTrace) {
-                          return Text('Failed to load image: $error');
+          builder: (dialogContext) => StatefulBuilder(
+            builder: (context, setDialogState) {
+              return AlertDialog(
+                title: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        pendingName ?? 'Resource Preview',
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    if (!widget.isReadOnly) ...[
+                      IconButton(
+                        icon: const Icon(Icons.edit, size: 20),
+                        tooltip: 'Edit Name',
+                        onPressed: () async {
+                          final newName = await _showEditNameDialog(
+                            dialogContext,
+                            pendingName,
+                          );
+                          if (newName != null) {
+                            setDialogState(() {
+                              pendingName = newName.isEmpty ? null : newName;
+                              hasChanges = true;
+                            });
+                          }
                         },
                       ),
-                    ),
-                  if (resource.type != 'image')
-                    Text(
-                      'Preview not available for ${resource.type} files. '
-                      'The file is stored at the path shown above.',
-                      style: TextStyle(
-                        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
-                      ),
+                      if (originalResource.type == 'image')
+                        IconButton(
+                          icon: const Icon(Icons.rotate_right, size: 20),
+                          tooltip: 'Rotate',
+                          onPressed: () {
+                            setDialogState(() {
+                              pendingRotation = (pendingRotation + 90) % 360;
+                              hasChanges = true;
+                            });
+                          },
+                        ),
+                    ],
+                  ],
+                ),
+                content: SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text('Type: ${originalResource.type}'),
+                      const SizedBox(height: 8),
+                      Text('Size: ${_formatFileSize(fileSize)}'),
+                      const SizedBox(height: 16),
+                      if (originalResource.type == 'image')
+                        Container(
+                          constraints: const BoxConstraints(maxHeight: 400),
+                          child: Transform.rotate(
+                            angle: pendingRotation * 3.14159265359 / 180,
+                            child: Image.file(
+                              file,
+                              fit: BoxFit.contain,
+                              errorBuilder: (context, error, stackTrace) {
+                                return Text('Failed to load image: $error');
+                              },
+                            ),
+                          ),
+                        ),
+                      if (originalResource.type != 'image')
+                        Text(
+                          'Preview not available for ${originalResource.type} files.',
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.of(dialogContext).pop(false),
+                    child: Text(context.l10n.cancel),
+                  ),
+                  if (!widget.isReadOnly)
+                    ElevatedButton(
+                      onPressed: hasChanges
+                          ? () => Navigator.of(dialogContext).pop(true)
+                          : null,
+                      child: Text(context.l10n.save),
                     ),
                 ],
-              ),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: const Text('Close'),
-              ),
-            ],
+              );
+            },
           ),
         );
+
+        // Save changes if user clicked Save
+        if (result == true && hasChanges) {
+          _saveResourceChanges(originalResource, pendingName, pendingRotation);
+        }
       }
     } catch (e, stackTrace) {
       AppLogger().e('Failed to open resource: $e', e, stackTrace);
