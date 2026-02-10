@@ -6,7 +6,7 @@ import 'package:app_resources/app_resources.dart';
 
 /// Resources section widget that wraps the ResourcesSection component
 class ResourcesSectionWrapper extends StatelessWidget {
-  const ResourcesSectionWrapper({required this.visitFormBloc});
+  const ResourcesSectionWrapper({super.key, required this.visitFormBloc});
 
   final VisitFormBloc visitFormBloc;
 

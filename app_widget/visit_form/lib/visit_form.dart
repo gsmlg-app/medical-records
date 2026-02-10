@@ -470,7 +470,11 @@ class _DepartmentDropdown extends StatelessWidget {
                   ? null
                   : categoryController.text.trim();
 
-              Navigator.of(context).pop();
+              // Capture navigator and scaffold messenger before async gap
+              final navigator = Navigator.of(context);
+              final scaffoldMessenger = ScaffoldMessenger.of(context);
+
+              navigator.pop();
 
               // Show loading indicator
               showDialog(
@@ -492,24 +496,24 @@ class _DepartmentDropdown extends StatelessWidget {
                   name,
                   category: category,
                 );
-                Navigator.of(context).pop(); // Remove loading dialog
+                navigator.pop(); // Remove loading dialog
 
                 if (success) {
-                  ScaffoldMessenger.of(context).showSnackBar(
+                  scaffoldMessenger.showSnackBar(
                     SnackBar(
                       content: Text('Department "$name" added successfully'),
                     ),
                   );
                 } else {
-                  ScaffoldMessenger.of(context).showSnackBar(
+                  scaffoldMessenger.showSnackBar(
                     const SnackBar(content: Text('Failed to add department')),
                   );
                 }
               } catch (e) {
-                Navigator.of(context).pop(); // Remove loading dialog
-                ScaffoldMessenger.of(
-                  context,
-                ).showSnackBar(SnackBar(content: Text('Error: $e')));
+                navigator.pop(); // Remove loading dialog
+                scaffoldMessenger.showSnackBar(
+                  SnackBar(content: Text('Error: $e')),
+                );
               }
             },
             child: const Text('Add'),
@@ -668,7 +672,11 @@ class _DoctorDropdown extends StatelessWidget {
                   ? null
                   : specialtyController.text.trim();
 
-              Navigator.of(context).pop();
+              // Capture navigator and scaffold messenger before async gap
+              final navigator = Navigator.of(context);
+              final scaffoldMessenger = ScaffoldMessenger.of(context);
+
+              navigator.pop();
 
               // Show loading indicator
               showDialog(
@@ -691,24 +699,24 @@ class _DoctorDropdown extends StatelessWidget {
                   title: title,
                   specialty: specialty,
                 );
-                Navigator.of(context).pop(); // Remove loading dialog
+                navigator.pop(); // Remove loading dialog
 
                 if (success) {
-                  ScaffoldMessenger.of(context).showSnackBar(
+                  scaffoldMessenger.showSnackBar(
                     SnackBar(
                       content: Text('Doctor "$name" added successfully'),
                     ),
                   );
                 } else {
-                  ScaffoldMessenger.of(context).showSnackBar(
+                  scaffoldMessenger.showSnackBar(
                     const SnackBar(content: Text('Failed to add doctor')),
                   );
                 }
               } catch (e) {
-                Navigator.of(context).pop(); // Remove loading dialog
-                ScaffoldMessenger.of(
-                  context,
-                ).showSnackBar(SnackBar(content: Text('Error: $e')));
+                navigator.pop(); // Remove loading dialog
+                scaffoldMessenger.showSnackBar(
+                  SnackBar(content: Text('Error: $e')),
+                );
               }
             },
             child: const Text('Add'),
