@@ -180,7 +180,7 @@ class _ResourcesSectionState extends State<ResourcesSection> {
       widget.onResourcesChanged?.call(_resources);
       AppLogger().d('Parent notified of resource change');
 
-      _showSuccess(context.l10n.resourceAdded);
+      if (mounted) _showSuccess(context.l10n.resourceAdded);
     } catch (e, stackTrace) {
       AppLogger().e('Failed to add resource: $e', e, stackTrace);
       _showError('Failed to add resource: $e');
@@ -202,7 +202,7 @@ class _ResourcesSectionState extends State<ResourcesSection> {
       // Notify parent
       widget.onResourcesChanged?.call(_resources);
 
-      _showSuccess(context.l10n.resourceRemoved);
+      if (mounted) _showSuccess(context.l10n.resourceRemoved);
     } catch (e) {
       _showError('Failed to delete resource: $e');
     }
@@ -411,12 +411,6 @@ class _ResourcesSectionState extends State<ResourcesSection> {
   void _showSuccess(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(message), backgroundColor: Colors.green),
-    );
-  }
-
-  void _showInfo(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message), backgroundColor: Colors.blue),
     );
   }
 }

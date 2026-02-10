@@ -258,7 +258,7 @@ class _ResourcePickerState extends State<ResourcePicker> {
                 'Camera Permission Required',
                 'Camera access is required to take photos. Please enable it in app settings.',
               );
-            } else {
+            } else if (mounted) {
               _showError(context.l10n.cameraPermissionDenied);
             }
             return;
@@ -322,7 +322,7 @@ class _ResourcePickerState extends State<ResourcePicker> {
                 'Photos Permission Required',
                 'Photo library access is required to select images. Please enable it in app settings.',
               );
-            } else {
+            } else if (mounted) {
               _showError(context.l10n.storagePermissionDenied);
             }
             return;
@@ -395,7 +395,7 @@ class _ResourcePickerState extends State<ResourcePicker> {
           // final name = result.files.single.name; // Unused variable
 
           if (bytes != null && bytes.length > 10 * 1024 * 1024) {
-            _showError(context.l10n.fileTooLarge);
+            if (mounted) _showError(context.l10n.fileTooLarge);
             return;
           }
 
@@ -410,7 +410,7 @@ class _ResourcePickerState extends State<ResourcePicker> {
           // Check file size (10MB limit)
           final fileSize = await file.length();
           if (fileSize > 10 * 1024 * 1024) {
-            _showError(context.l10n.fileTooLarge);
+            if (mounted) _showError(context.l10n.fileTooLarge);
             return;
           }
 
@@ -555,18 +555,18 @@ class _ResourcePickerState extends State<ResourcePicker> {
                 ),
                 ElevatedButton.icon(
                   onPressed: () async {
+                    // Capture ScaffoldMessenger before popping the dialog
+                    final scaffoldMessenger = ScaffoldMessenger.of(context);
                     Navigator.of(context).pop();
                     // Open app settings
                     final opened = await openAppSettings();
                     if (!opened) {
-                      if (mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Could not open app settings'),
-                            backgroundColor: Colors.red,
-                          ),
-                        );
-                      }
+                      scaffoldMessenger.showSnackBar(
+                        const SnackBar(
+                          content: Text('Could not open app settings'),
+                          backgroundColor: Colors.red,
+                        ),
+                      );
                     }
                   },
                   icon: const Icon(Icons.settings),
