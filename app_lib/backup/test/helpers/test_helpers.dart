@@ -131,7 +131,7 @@ startxref
 
     final zipData = ZipEncoder().encode(archive);
     final zipFile = File(p.join(dir.path, 'no_manifest.zip'));
-    await zipFile.writeAsBytes(zipData!);
+    await zipFile.writeAsBytes(zipData);
     return zipFile;
   }
 
@@ -148,7 +148,7 @@ startxref
 
     final zipData = ZipEncoder().encode(archive);
     final zipFile = File(p.join(dir.path, 'invalid_manifest.zip'));
-    await zipFile.writeAsBytes(zipData!);
+    await zipFile.writeAsBytes(zipData);
     return zipFile;
   }
 
@@ -167,7 +167,7 @@ startxref
 
     final zipData = ZipEncoder().encode(archive);
     final zipFile = File(p.join(dir.path, 'missing_resources.zip'));
-    await zipFile.writeAsBytes(zipData!);
+    await zipFile.writeAsBytes(zipData);
     return zipFile;
   }
 
