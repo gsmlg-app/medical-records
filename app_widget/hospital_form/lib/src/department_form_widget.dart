@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:app_locale/app_locale.dart';
-import 'package:app_database/app_database.dart';
 
 class DepartmentFormWidget extends StatefulWidget {
   final String? initialName;

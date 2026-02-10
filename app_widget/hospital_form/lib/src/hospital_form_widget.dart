@@ -103,7 +103,6 @@ class _HospitalFormWidgetState extends State<HospitalFormWidget> {
       child: BlocBuilder<HospitalFormBloc, HospitalFormState>(
         builder: (context, state) {
           bool isSubmitting = false;
-          String? errorText;
 
           if (state is HospitalFormLoaded) {
             isSubmitting = state.isSubmitting;
@@ -111,7 +110,6 @@ class _HospitalFormWidgetState extends State<HospitalFormWidget> {
             isSubmitting = true;
           } else if (state is HospitalFormSubmissionFailure) {
             isSubmitting = false;
-            errorText = state.error;
           } else if (state is HospitalFormSubmissionSuccess) {
             isSubmitting = false;
           }
