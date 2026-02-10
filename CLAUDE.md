@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Flutter monorepo for a medical records application, managed by Melos. Uses clean architecture with BLoC pattern, Drift ORM for SQLite persistence, and modular package structure.
+Flutter monorepo for a medical records application, managed by Melos. Uses clean architecture with BLoC pattern, Drift ORM for SQLite persistence, and modular package structure. Melos configuration is embedded in the root `pubspec.yaml`.
 
 ## Development Commands
 
@@ -27,6 +27,7 @@ melos run test:dart            # Dart-only tests
 melos run test:flutter         # Flutter-only tests
 melos run build-runner         # Generate code (Drift, etc.)
 melos run gen-l10n             # Generate localization files
+melos run brick-test           # Run Mason brick tests
 ```
 
 ### Running the App
@@ -48,13 +49,11 @@ dart run build_runner build --delete-conflicting-outputs
 ### Monorepo Structure
 ```
 lib/                    # Main app entry, screens, router
-app_api/                # Generated API clients (OpenAPI)
 app_bloc/               # BLoC packages per domain entity
   ├── hospital/         # HospitalBloc, events, states
   ├── treatment/        # TreatmentBloc
-  ├── visit/            # VisitBloc
-  ├── *_form_bloc/      # Form-specific BLoCs with validation
-  └── error_handler/    # Global error handling
+  ├── visit/            # VisitBloc, VisitLocationBloc, VisitResourceBloc
+  └── *_form_bloc/      # Form-specific BLoCs with validation
 app_lib/                # Shared libraries
   ├── database/         # Drift ORM (SQLite)
   ├── theme/            # Theme management
@@ -68,7 +67,7 @@ app_widget/             # Reusable UI packages
   ├── adaptive/         # Responsive layout widgets
   ├── feedback/         # Dialogs, toasts, bottom sheets
   └── resources/        # Resource management widgets
-third_party/            # Customized packages (form_bloc, settings_ui)
+third_party/            # Customized packages (form_bloc, settings_ui, flutter_adaptive_scaffold)
 bricks/                 # Mason templates
 ```
 
@@ -105,10 +104,21 @@ dependencies:
     path: ../../app_lib/database
 ```
 
-### Database Testing
+### Testing Patterns
 ```dart
 // Use in-memory database for tests
 final db = AppDatabase.forTesting();
+
+// Use mocktail for mocking (preferred over mockito in this codebase)
+class MockDatabase extends Mock implements AppDatabase {}
+
+// Use bloc_test for BLoC testing
+blocTest<HospitalBloc, HospitalState>(
+  'emits [loading, loaded] when LoadHospitals succeeds',
+  build: () => HospitalBloc(db: mockDb),
+  act: (bloc) => bloc.add(LoadHospitals()),
+  expect: () => [isA<HospitalLoading>(), isA<HospitalLoaded>()],
+);
 ```
 
 ### Form Field Dependencies
@@ -144,7 +154,16 @@ melos run gen-l10n
 
 See DATA.md for complete field definitions and backup/restore functionality.
 
+## Third-Party Customizations
+
+The `third_party/` folder contains forked packages with local modifications:
+- **form_bloc** / **flutter_form_bloc**: Form state management with custom fixes
+- **flutter_adaptive_scaffold**: Responsive layouts with project-specific changes
+- **settings_ui**: Settings screen components
+
+When updating these, check if upstream changes conflict with local modifications.
+
 ## Additional Documentation
 
-- **BRICKS.md**: Mason template guide
-- **DATA.md**: Database schema and backup format
+- **BRICKS.md**: Mason template guide with examples
+- **DATA.md**: Database schema and backup/restore format
