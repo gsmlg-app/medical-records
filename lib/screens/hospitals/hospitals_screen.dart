@@ -56,6 +56,7 @@ class _HospitalsScreenState extends State<HospitalsScreen> {
                   ? Padding(
                       padding: const EdgeInsets.only(bottom: 80),
                       child: FloatingActionButton(
+                        heroTag: 'hospitals_fab',
                         onPressed: _addHospital,
                         child: const Icon(Icons.add),
                       ),

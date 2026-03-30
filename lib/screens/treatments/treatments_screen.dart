@@ -53,6 +53,7 @@ class _TreatmentsScreenState extends State<TreatmentsScreen> {
               ? Padding(
                   padding: const EdgeInsets.only(bottom: 80),
                   child: FloatingActionButton(
+                    heroTag: 'treatments_fab',
                     onPressed: () {
                       context.pushNamed(AddTreatmentScreen.name);
                     },

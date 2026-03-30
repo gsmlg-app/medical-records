@@ -474,6 +474,7 @@ class _DepartmentAndDoctorScreenState extends State<DepartmentAndDoctorScreen>
 
   Widget _buildFloatingActionButton() {
     return FloatingActionButton(
+      heroTag: 'department_doctor_fab',
       onPressed: () {
         if (_tabController.index == 0) {
           _showAddDepartmentDialog();
