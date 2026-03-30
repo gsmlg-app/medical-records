@@ -438,97 +438,98 @@ class _ResourcePickerState extends State<ResourcePicker> {
   }
 
   void _showError(String message) {
-    if (mounted) {
-      // Close the dialog first, then show the error message in the parent context
-      Navigator.of(context).pop();
+    if (!mounted) return;
 
-      // Use a post-frame callback to ensure the dialog is fully closed
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Row(
-                children: [
-                  const Icon(Icons.error_outline, color: Colors.white, size: 20),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                      message,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
+    // Capture references before popping (which unmounts this widget)
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
+    final errorColor = Theme.of(context).colorScheme.error;
+    Navigator.of(context).pop();
+
+    // Use a post-frame callback to ensure the dialog is fully closed
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      scaffoldMessenger.showSnackBar(
+        SnackBar(
+          content: Row(
+            children: [
+              const Icon(Icons.error_outline, color: Colors.white, size: 20),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  message,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w500,
                   ),
-                ],
+                ),
               ),
-              backgroundColor: Theme.of(context).colorScheme.error,
-              behavior: SnackBarBehavior.floating,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-              margin: const EdgeInsets.all(16),
-              duration: const Duration(seconds: 4),
-              action: SnackBarAction(
-                label: 'Dismiss',
-                textColor: Colors.white,
-                onPressed: () {
-                  ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                },
-              ),
-            ),
-          );
-        }
-      });
-    }
+            ],
+          ),
+          backgroundColor: errorColor,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          margin: const EdgeInsets.all(16),
+          duration: const Duration(seconds: 4),
+          action: SnackBarAction(
+            label: 'Dismiss',
+            textColor: Colors.white,
+            onPressed: () {
+              scaffoldMessenger.hideCurrentSnackBar();
+            },
+          ),
+        ),
+      );
+    });
   }
 
   void _showSuccess(String message) {
-    if (mounted) {
-      // Close the dialog first, then show the success message in the parent context
-      Navigator.of(context).pop();
+    if (!mounted) return;
 
-      // Use a post-frame callback to ensure the dialog is fully closed
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Row(
-                children: [
-                  const Icon(Icons.check_circle_outline, color: Colors.white, size: 20),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                      message,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
+    // Capture references before popping (which unmounts this widget)
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
+    final primaryColor = Theme.of(context).colorScheme.primary;
+    Navigator.of(context).pop();
+
+    // Use a post-frame callback to ensure the dialog is fully closed
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      scaffoldMessenger.showSnackBar(
+        SnackBar(
+          content: Row(
+            children: [
+              const Icon(Icons.check_circle_outline, color: Colors.white, size: 20),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  message,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w500,
                   ),
-                ],
+                ),
               ),
-              backgroundColor: Theme.of(context).colorScheme.primary,
-              behavior: SnackBarBehavior.floating,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-              margin: const EdgeInsets.all(16),
-              duration: const Duration(seconds: 3),
-            ),
-          );
-        }
-      });
-    }
+            ],
+          ),
+          backgroundColor: primaryColor,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          margin: const EdgeInsets.all(16),
+          duration: const Duration(seconds: 3),
+        ),
+      );
+    });
   }
 
   void _showPermissionDeniedDialog(String title, String message) {
-    if (mounted) {
-      // Close the picker dialog first
-      Navigator.of(context).pop();
+    if (!mounted) return;
 
-      // Use a post-frame callback to ensure the picker dialog is fully closed
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) {
-          showDialog(
-            context: context,
-            builder: (context) => AlertDialog(
+    // Capture navigator context before popping (which unmounts this widget)
+    final navigatorContext = Navigator.of(context).context;
+    Navigator.of(context).pop();
+
+    // Use a post-frame callback to ensure the picker dialog is fully closed
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      showDialog(
+        context: navigatorContext,
+        builder: (context) => AlertDialog(
               title: Row(
                 children: [
                   Icon(
@@ -575,9 +576,7 @@ class _ResourcePickerState extends State<ResourcePicker> {
               ],
             ),
           );
-        }
       });
-    }
   }
 }
 
