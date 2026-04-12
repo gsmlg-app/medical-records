@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:medical_records/destination.dart';
 import 'package:medical_records/screens/settings/settings_screen.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:settings_ui/settings_ui.dart';
-import 'package:theme_bloc/theme_bloc.dart';
+import 'package:duskmoon_settings/duskmoon_settings.dart';
+import 'package:duskmoon_theme_bloc/duskmoon_theme_bloc.dart';
 
 class AppearanceSettingsScreen extends StatelessWidget {
   static const name = 'Appearance Settings';
@@ -23,14 +23,14 @@ class AppearanceSettingsScreen extends StatelessWidget {
       onSelectedIndexChange: (idx) => Destinations.changeHandler(idx, context),
       destinations: Destinations.navs(context),
       body: (context) {
-        final themeBloc = context.read<ThemeBloc>();
+        final themeBloc = context.read<DmThemeBloc>();
 
         return SafeArea(
           child: CustomScrollView(
             slivers: <Widget>[
               SliverAppBar(title: Text(context.l10n.appearance)),
               SliverFillRemaining(
-                child: BlocBuilder<ThemeBloc, ThemeState>(
+                child: BlocBuilder<DmThemeBloc, DmThemeState>(
                   bloc: themeBloc,
                   builder: (context, state) {
                     return SettingsList(
@@ -46,7 +46,7 @@ class AppearanceSettingsScreen extends StatelessWidget {
                                   : null,
                               onPressed: (context) {
                                 themeBloc.add(
-                                  const ChangeThemeMode(ThemeMode.light),
+                                  const DmSetThemeMode(ThemeMode.light),
                                 );
                               },
                             ),
@@ -58,7 +58,7 @@ class AppearanceSettingsScreen extends StatelessWidget {
                                   : null,
                               onPressed: (context) {
                                 themeBloc.add(
-                                  const ChangeThemeMode(ThemeMode.dark),
+                                  const DmSetThemeMode(ThemeMode.dark),
                                 );
                               },
                             ),
@@ -70,7 +70,7 @@ class AppearanceSettingsScreen extends StatelessWidget {
                                   : null,
                               onPressed: (context) {
                                 themeBloc.add(
-                                  const ChangeThemeMode(ThemeMode.system),
+                                  const DmSetThemeMode(ThemeMode.system),
                                 );
                               },
                             ),

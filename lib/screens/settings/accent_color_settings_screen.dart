@@ -1,12 +1,12 @@
 import 'package:app_adaptive_widgets/app_adaptive_widgets.dart';
 import 'package:app_locale/app_locale.dart';
-import 'package:app_theme/app_theme.dart';
+import 'package:duskmoon_theme/duskmoon_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:medical_records/destination.dart';
 import 'package:medical_records/screens/settings/settings_screen.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:settings_ui/settings_ui.dart';
-import 'package:theme_bloc/theme_bloc.dart';
+import 'package:duskmoon_settings/duskmoon_settings.dart';
+import 'package:duskmoon_theme_bloc/duskmoon_theme_bloc.dart';
 
 class AccentColorSettingsScreen extends StatelessWidget {
   static const name = 'Accent Color Settings';
@@ -24,7 +24,7 @@ class AccentColorSettingsScreen extends StatelessWidget {
       onSelectedIndexChange: (idx) => Destinations.changeHandler(idx, context),
       destinations: Destinations.navs(context),
       body: (context) {
-        final themeBloc = context.read<ThemeBloc>();
+        final themeBloc = context.read<DmThemeBloc>();
         final isLight = Theme.of(context).brightness == Brightness.light;
 
         return SafeArea(
@@ -32,21 +32,19 @@ class AccentColorSettingsScreen extends StatelessWidget {
             slivers: <Widget>[
               SliverAppBar(title: Text(context.l10n.accentColor)),
               SliverFillRemaining(
-                child: BlocBuilder<ThemeBloc, ThemeState>(
+                child: BlocBuilder<DmThemeBloc, DmThemeState>(
                   bloc: themeBloc,
                   builder: (context, state) {
-                    final currentTheme = state.theme;
-
                     return SettingsList(
                       sections: [
                         SettingsSection(
                           title: Text(context.l10n.accentColor),
-                          tiles: themeList.map<SettingsTile>((appTheme) {
+                          tiles: DmThemeData.themes.map<SettingsTile>((themeEntry) {
                             final isSelected =
-                                currentTheme.name == appTheme.name;
+                                state.themeName == themeEntry.name;
                             final colorScheme = isLight
-                                ? appTheme.lightTheme.colorScheme
-                                : appTheme.darkTheme.colorScheme;
+                                ? themeEntry.light.colorScheme
+                                : themeEntry.dark.colorScheme;
 
                             return SettingsTile(
                               leading: Container(
@@ -57,7 +55,7 @@ class AccentColorSettingsScreen extends StatelessWidget {
                                   shape: BoxShape.circle,
                                 ),
                               ),
-                              title: Text(appTheme.name),
+                              title: Text(themeEntry.name),
                               trailing:
                                   isSelected ? const Icon(Icons.check) : null,
                               value: Row(
@@ -93,7 +91,7 @@ class AccentColorSettingsScreen extends StatelessWidget {
                                 ],
                               ),
                               onPressed: (context) {
-                                themeBloc.add(ChangeTheme(appTheme));
+                                themeBloc.add(DmSetTheme(themeEntry.name));
                               },
                             );
                           }).toList(),

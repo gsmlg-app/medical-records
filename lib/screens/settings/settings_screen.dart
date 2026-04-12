@@ -1,6 +1,5 @@
 import 'package:app_adaptive_widgets/app_adaptive_widgets.dart';
 import 'package:app_locale/app_locale.dart';
-import 'package:app_theme/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:medical_records/destination.dart';
 import 'package:medical_records/screens/settings/accent_color_settings_screen.dart';
@@ -9,8 +8,8 @@ import 'package:medical_records/screens/settings/data_export_screen.dart';
 import 'package:medical_records/screens/settings/data_import_screen.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:settings_ui/settings_ui.dart';
-import 'package:theme_bloc/theme_bloc.dart';
+import 'package:duskmoon_settings/duskmoon_settings.dart';
+import 'package:duskmoon_theme_bloc/duskmoon_theme_bloc.dart';
 
 class SettingsScreen extends StatelessWidget {
   static const name = 'Settings';
@@ -28,7 +27,7 @@ class SettingsScreen extends StatelessWidget {
       ),
       destinations: Destinations.navs(context),
       body: (context) {
-        final themeBloc = context.read<ThemeBloc>();
+        final themeBloc = context.read<DmThemeBloc>();
 
         return SafeArea(
           child: CustomScrollView(
@@ -37,7 +36,7 @@ class SettingsScreen extends StatelessWidget {
                 title: Text(context.l10n.settingsTitle),
               ),
               SliverFillRemaining(
-                child: BlocBuilder<ThemeBloc, ThemeState>(
+                child: BlocBuilder<DmThemeBloc, DmThemeState>(
                   bloc: themeBloc,
                   builder: (context, state) {
                     return SettingsList(
@@ -77,7 +76,7 @@ class SettingsScreen extends StatelessWidget {
                             SettingsTile.navigation(
                               leading: const Icon(Icons.palette),
                               title: Text(context.l10n.accentColor),
-                              value: Text(state.theme.name),
+                              value: Text(state.themeName),
                               onPressed: (context) {
                                 context.goNamed(AccentColorSettingsScreen.name);
                               },
