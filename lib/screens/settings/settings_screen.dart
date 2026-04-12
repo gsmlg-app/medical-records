@@ -9,6 +9,7 @@ import 'package:medical_records/screens/settings/data_import_screen.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:duskmoon_settings/duskmoon_settings.dart';
+import 'package:duskmoon_theme/duskmoon_theme.dart';
 import 'package:duskmoon_theme_bloc/duskmoon_theme_bloc.dart';
 
 class SettingsScreen extends StatelessWidget {
