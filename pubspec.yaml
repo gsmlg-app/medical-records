@@ -9,14 +9,12 @@ environment:
 
 workspace:
   - app_lib/database
-  - app_lib/theme
   - app_lib/locale
   - app_lib/provider
   - app_lib/logging
   - app_lib/storage
   - app_lib/backup
   - app_lib/utils
-  - app_bloc/theme
   - app_bloc/hospital
   - app_bloc/hospital_form_bloc
   - app_bloc/treatment
@@ -35,10 +33,6 @@ workspace:
   - app_widget/visit_form
   - app_widget/resources
   - app_widget/web_view
-  - third_party/form_bloc
-  - third_party/flutter_form_bloc
-  - third_party/flutter_adaptive_scaffold
-  - third_party/settings_ui
 
 dependencies:
   flutter:
@@ -68,17 +62,24 @@ dependencies:
   cupertino_icons: ^1.0.8
   flutter_svg: ^2.0.16
   lottie: ^3.3.1
-  google_fonts: ^6.2.1
   intl: ^0.20.2
+
+  # DuskMoon UI packages
+  duskmoon_ui: ^1.4.0
+  duskmoon_theme: ^1.4.0
+  duskmoon_theme_bloc: ^1.4.0
+  duskmoon_settings: ^1.4.0
+  duskmoon_feedback: ^1.4.0
+  duskmoon_form: ^1.4.0
+  duskmoon_adaptive_scaffold: ^1.4.0
+  duskmoon_widgets: ^1.4.0
 
   # workspace packages
   app_database: any
-  app_theme: any
   app_locale: any
   app_provider: any
   app_storage: any
   app_backup: any
-  theme_bloc: any
   hospital_bloc: any
   hospital_form_bloc: any
   treatment_bloc: any
@@ -93,7 +94,6 @@ dependencies:
   app_artwork: any
   app_feedback: any
   app_adaptive_widgets: any
-  settings_ui: any
   app_logging: any
   app_web_view: any
   saver_gallery: ^4.1.0
@@ -113,7 +113,6 @@ dev_dependencies:
   bloc_test: ^10.0.0
   mocktail: ^1.0.4
   drift: ^2.19.0
-  # form_bloc: ^1.11.0 # Using workspace version instead
   flutter_localizations:
     sdk: flutter
 
