@@ -7,7 +7,9 @@ import 'package:flutter_test/flutter_test.dart';
 class TestHelpers {
   /// Creates a temporary directory for testing
   static Future<Directory> createTempDirectory() async {
-    final tempDir = await Directory.systemTemp.createTemp('medical_records_test_');
+    final tempDir = await Directory.systemTemp.createTemp(
+      'medical_records_test_',
+    );
     return tempDir;
   }
 
@@ -30,7 +32,10 @@ class TestHelpers {
   }
 
   /// Creates a fake image file for testing
-  static Future<File> createFakeImageFile(Directory dir, String filename) async {
+  static Future<File> createFakeImageFile(
+    Directory dir,
+    String filename,
+  ) async {
     // Create a minimal valid JPEG header
     final jpegHeader = [
       0xFF, 0xD8, 0xFF, 0xE0, // JPEG SOI and APP0 marker
@@ -84,8 +89,9 @@ startxref
       }
 
       if (requireResourcesDir) {
-        final hasResources =
-            archive.files.any((f) => f.name.startsWith('resources/'));
+        final hasResources = archive.files.any(
+          (f) => f.name.startsWith('resources/'),
+        );
         if (!hasResources) return false;
       }
 

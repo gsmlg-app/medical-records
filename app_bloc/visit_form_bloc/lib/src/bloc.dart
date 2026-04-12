@@ -1013,7 +1013,9 @@ class VisitFormBloc extends FormBloc<String, String> {
       // Add or update resources
       for (final resource in resources) {
         // Update visitId if it was temporary (-1)
-        final actualVisitId = resource.visitId == -1 ? visitId : resource.visitId;
+        final actualVisitId = resource.visitId == -1
+            ? visitId
+            : resource.visitId;
 
         if (existingResourceIds.contains(resource.id)) {
           // Update existing resource
@@ -1031,7 +1033,9 @@ class VisitFormBloc extends FormBloc<String, String> {
           // If the resource was created with temporary visit ID, move the file
           if (resource.visitId == -1 && visitId != -1) {
             // Move file from temporary directory to actual visit directory
-            final oldFile = await _storageService.getResourceFile(resource.filePath);
+            final oldFile = await _storageService.getResourceFile(
+              resource.filePath,
+            );
             if (await oldFile.exists()) {
               // Store with correct visit ID
               // Determine resource type from the stored type string

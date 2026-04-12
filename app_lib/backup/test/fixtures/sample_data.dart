@@ -5,28 +5,28 @@ import 'package:drift/drift.dart';
 class SampleData {
   // Sample Hospitals
   static HospitalsCompanion sampleHospital1() => HospitalsCompanion.insert(
-        name: 'Central City Hospital',
-        address: const Value('123 Medical Drive, City, State 12345'),
-        type: const Value('General Hospital'),
-        level: const Value('Class A Grade 3'),
-        departmentIds: '[1,2]',
-      );
+    name: 'Central City Hospital',
+    address: const Value('123 Medical Drive, City, State 12345'),
+    type: const Value('General Hospital'),
+    level: const Value('Class A Grade 3'),
+    departmentIds: '[1,2]',
+  );
 
   static HospitalsCompanion sampleHospital2() => HospitalsCompanion.insert(
-        name: 'Specialty Care Clinic',
-        address: const Value('456 Care Street, City, State 12345'),
-        type: const Value('Specialty Hospital'),
-        level: const Value('Class B Grade 2'),
-        departmentIds: '[3]',
-      );
+    name: 'Specialty Care Clinic',
+    address: const Value('456 Care Street, City, State 12345'),
+    type: const Value('Specialty Hospital'),
+    level: const Value('Class B Grade 2'),
+    departmentIds: '[3]',
+  );
 
   static HospitalsCompanion hospitalWithNulls() => HospitalsCompanion.insert(
-        name: 'Minimal Hospital',
-        address: const Value(null),
-        type: const Value(null),
-        level: const Value(null),
-        departmentIds: '[]',
-      );
+    name: 'Minimal Hospital',
+    address: const Value(null),
+    type: const Value(null),
+    level: const Value(null),
+    departmentIds: '[]',
+  );
 
   // Sample Departments
   static DepartmentsCompanion sampleDepartment1() =>
@@ -66,18 +66,18 @@ class SampleData {
 
   // Sample Treatments
   static TreatmentsCompanion sampleTreatment1() => TreatmentsCompanion.insert(
-        title: 'Heart Disease Treatment',
-        diagnosis: 'Diagnosed with coronary artery disease',
-        startDate: DateTime(2024, 1, 15),
-        endDate: Value(DateTime(2024, 6, 15)),
-      );
+    title: 'Heart Disease Treatment',
+    diagnosis: 'Diagnosed with coronary artery disease',
+    startDate: DateTime(2024, 1, 15),
+    endDate: Value(DateTime(2024, 6, 15)),
+  );
 
   static TreatmentsCompanion sampleTreatment2() => TreatmentsCompanion.insert(
-        title: 'Physical Therapy',
-        diagnosis: 'Post-surgical rehabilitation for knee replacement',
-        startDate: DateTime(2024, 3, 1),
-        endDate: const Value(null), // Ongoing treatment
-      );
+    title: 'Physical Therapy',
+    diagnosis: 'Post-surgical rehabilitation for knee replacement',
+    startDate: DateTime(2024, 3, 1),
+    endDate: const Value(null), // Ongoing treatment
+  );
 
   static TreatmentsCompanion treatmentWithMinimalInfo() =>
       TreatmentsCompanion.insert(
@@ -90,13 +90,12 @@ class SampleData {
   static TreatmentsCompanion treatmentInDateRange(
     DateTime start,
     DateTime? end,
-  ) =>
-      TreatmentsCompanion.insert(
-        title: 'Treatment in Range',
-        diagnosis: 'Testing date range',
-        startDate: start,
-        endDate: Value(end),
-      );
+  ) => TreatmentsCompanion.insert(
+    title: 'Treatment in Range',
+    diagnosis: 'Testing date range',
+    startDate: start,
+    endDate: Value(end),
+  );
 
   // Sample Visits
   static VisitsCompanion sampleVisit1({
@@ -104,34 +103,34 @@ class SampleData {
     int? hospitalId,
     int? departmentId,
     int? doctorId,
-  }) =>
-      VisitsCompanion.insert(
-        treatmentId: treatmentId,
-        category: 'outpatient',
-        date: DateTime(2024, 1, 20),
-        details: 'Initial consultation and examination',
-        hospitalId: Value(hospitalId),
-        departmentId: Value(departmentId),
-        doctorId: Value(doctorId),
-        informations: const Value('{"bloodPressure": "120/80", "notes": "Patient doing well"}'),
-      );
+  }) => VisitsCompanion.insert(
+    treatmentId: treatmentId,
+    category: 'outpatient',
+    date: DateTime(2024, 1, 20),
+    details: 'Initial consultation and examination',
+    hospitalId: Value(hospitalId),
+    departmentId: Value(departmentId),
+    doctorId: Value(doctorId),
+    informations: const Value(
+      '{"bloodPressure": "120/80", "notes": "Patient doing well"}',
+    ),
+  );
 
   static VisitsCompanion sampleVisit2({
     required int treatmentId,
     int? hospitalId,
     int? departmentId,
     int? doctorId,
-  }) =>
-      VisitsCompanion.insert(
-        treatmentId: treatmentId,
-        category: 'inpatient',
-        date: DateTime(2024, 2, 15),
-        details: 'Follow-up examination and medication adjustment',
-        hospitalId: Value(hospitalId),
-        departmentId: Value(departmentId),
-        doctorId: Value(doctorId),
-        informations: const Value(null),
-      );
+  }) => VisitsCompanion.insert(
+    treatmentId: treatmentId,
+    category: 'inpatient',
+    date: DateTime(2024, 2, 15),
+    details: 'Follow-up examination and medication adjustment',
+    hospitalId: Value(hospitalId),
+    departmentId: Value(departmentId),
+    doctorId: Value(doctorId),
+    informations: const Value(null),
+  );
 
   static VisitsCompanion visitWithNulls({required int treatmentId}) =>
       VisitsCompanion.insert(

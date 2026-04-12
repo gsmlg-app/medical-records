@@ -14,18 +14,11 @@ class ImportConflict {
   final Treatment treatment;
   final Treatment? existingTreatment;
 
-  ImportConflict({
-    required this.treatment,
-    this.existingTreatment,
-  });
+  ImportConflict({required this.treatment, this.existingTreatment});
 }
 
 /// User choice for handling conflicts
-enum ConflictResolution {
-  skip,
-  override,
-  createNew,
-}
+enum ConflictResolution { skip, override, createNew }
 
 /// Service for importing treatment data from zip files
 class DataImportService {
@@ -43,7 +36,9 @@ class DataImportService {
 
       // Create temp directory for extraction
       final tempDir = await getTemporaryDirectory();
-      final extractDir = Directory('${tempDir.path}/import_${DateTime.now().millisecondsSinceEpoch}');
+      final extractDir = Directory(
+        '${tempDir.path}/import_${DateTime.now().millisecondsSinceEpoch}',
+      );
       await extractDir.create(recursive: true);
 
       // Extract zip file
@@ -77,12 +72,11 @@ class DataImportService {
         throw Exception('Manifest validation failed: $e');
       }
 
-      AppLogger().i('Zip file parsed and validated successfully, version: ${manifest['version']}');
+      AppLogger().i(
+        'Zip file parsed and validated successfully, version: ${manifest['version']}',
+      );
 
-      return {
-        'manifest': manifest,
-        'extractDir': extractDir.path,
-      };
+      return {'manifest': manifest, 'extractDir': extractDir.path};
     } catch (e, stackTrace) {
       AppLogger().e('Failed to parse zip file: $e', e, stackTrace);
       rethrow;
@@ -92,7 +86,9 @@ class DataImportService {
   /// Check for conflicts in the data to be imported
   ///
   /// A conflict occurs when a treatment with the same title and date range exists
-  Future<List<ImportConflict>> checkConflicts(Map<String, dynamic> manifest) async {
+  Future<List<ImportConflict>> checkConflicts(
+    Map<String, dynamic> manifest,
+  ) async {
     final conflicts = <ImportConflict>[];
 
     final treatmentsData = manifest['treatments'] as List<dynamic>;
@@ -117,10 +113,12 @@ class DataImportService {
       final existingTreatment = await _findConflictingTreatment(treatment);
 
       if (existingTreatment != null) {
-        conflicts.add(ImportConflict(
-          treatment: treatment,
-          existingTreatment: existingTreatment,
-        ));
+        conflicts.add(
+          ImportConflict(
+            treatment: treatment,
+            existingTreatment: existingTreatment,
+          ),
+        );
       }
     }
 
@@ -185,9 +183,15 @@ class DataImportService {
         }
       });
 
-      AppLogger().i('Import completed successfully (${manifest['treatments'].length} treatments)');
+      AppLogger().i(
+        'Import completed successfully (${manifest['treatments'].length} treatments)',
+      );
     } catch (e, stackTrace) {
-      AppLogger().e('Import failed, all changes rolled back: $e', e, stackTrace);
+      AppLogger().e(
+        'Import failed, all changes rolled back: $e',
+        e,
+        stackTrace,
+      );
       rethrow;
     } finally {
       // Clean up temp directory in finally block to ensure cleanup even on error
@@ -228,7 +232,8 @@ class DataImportService {
 
     // Check for conflict
     final existingTreatment = await _findConflictingTreatment(treatment);
-    final resolution = conflictResolutions[treatment.title] ?? ConflictResolution.skip;
+    final resolution =
+        conflictResolutions[treatment.title] ?? ConflictResolution.skip;
 
     int treatmentId;
 
@@ -242,7 +247,9 @@ class DataImportService {
         case ConflictResolution.override:
           // Delete existing treatment and its related data
           // Must delete visits and resources first (no cascade delete in schema)
-          final existingVisits = await _database.getVisitsByTreatment(existingTreatment.id);
+          final existingVisits = await _database.getVisitsByTreatment(
+            existingTreatment.id,
+          );
           for (final visit in existingVisits) {
             // Delete resources for this visit
             final resources = await _database.getResourcesByVisit(visit.id);
@@ -264,7 +271,9 @@ class DataImportService {
               endDate: drift.Value(treatment.endDate),
             ),
           );
-          AppLogger().d('Overrode treatment: ${treatment.title} (new ID: $treatmentId)');
+          AppLogger().d(
+            'Overrode treatment: ${treatment.title} (new ID: $treatmentId)',
+          );
           break;
 
         case ConflictResolution.createNew:
@@ -277,7 +286,9 @@ class DataImportService {
               endDate: drift.Value(treatment.endDate),
             ),
           );
-          AppLogger().d('Created new treatment: ${treatment.title} (ID: $treatmentId)');
+          AppLogger().d(
+            'Created new treatment: ${treatment.title} (ID: $treatmentId)',
+          );
           break;
       }
     } else {
@@ -299,7 +310,9 @@ class DataImportService {
     int? doctorId;
 
     if (treatmentData['hospital'] != null) {
-      hospitalId = await _importHospital(treatmentData['hospital'] as Map<String, dynamic>);
+      hospitalId = await _importHospital(
+        treatmentData['hospital'] as Map<String, dynamic>,
+      );
     }
 
     if (treatmentData['department'] != null && hospitalId != null) {
@@ -335,10 +348,7 @@ class DataImportService {
     final resourcesData = treatmentData['resources'] as List<dynamic>?;
     if (resourcesData != null) {
       for (final resourceJson in resourcesData) {
-        await _importResource(
-          resourceJson as Map<String, dynamic>,
-          extractDir,
-        );
+        await _importResource(resourceJson as Map<String, dynamic>, extractDir);
       }
     }
   }
@@ -372,7 +382,10 @@ class DataImportService {
     );
   }
 
-  Future<int?> _importDepartment(Map<String, dynamic> departmentJson, int hospitalId) async {
+  Future<int?> _importDepartment(
+    Map<String, dynamic> departmentJson,
+    int hospitalId,
+  ) async {
     // Validate department data
     DataValidator.validateDepartment(departmentJson);
 

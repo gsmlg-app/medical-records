@@ -292,7 +292,9 @@ class _HospitalDropdown extends StatelessWidget {
                   AppLogger().d(
                     'Current hospital field items: ${capturedVisitFormBloc.hospitalFieldBloc.state.items.length}',
                   );
-                  await capturedVisitFormBloc.refreshHospitals(selectNewest: true);
+                  await capturedVisitFormBloc.refreshHospitals(
+                    selectNewest: true,
+                  );
                   AppLogger().d('Hospital refresh completed');
                   AppLogger().d(
                     'New hospital count: ${capturedVisitFormBloc.availableHospitals.length}',
@@ -397,7 +399,10 @@ class _DepartmentDropdown extends StatelessWidget {
         ),
         const SizedBox(width: 8),
         // Add department button - listen to hospital field changes
-        BlocBuilder<SelectFieldBloc<int?, dynamic>, SelectFieldBlocState<int?, dynamic>>(
+        BlocBuilder<
+          SelectFieldBloc<int?, dynamic>,
+          SelectFieldBlocState<int?, dynamic>
+        >(
           bloc: visitFormBloc.hospitalFieldBloc,
           builder: (context, hospitalState) {
             final hospitalId = hospitalState.value;
@@ -582,10 +587,16 @@ class _DoctorDropdown extends StatelessWidget {
         ),
         const SizedBox(width: 8),
         // Add doctor button - listen to both hospital and department field changes
-        BlocBuilder<SelectFieldBloc<int?, dynamic>, SelectFieldBlocState<int?, dynamic>>(
+        BlocBuilder<
+          SelectFieldBloc<int?, dynamic>,
+          SelectFieldBlocState<int?, dynamic>
+        >(
           bloc: visitFormBloc.hospitalFieldBloc,
           builder: (context, hospitalState) {
-            return BlocBuilder<SelectFieldBloc<int?, dynamic>, SelectFieldBlocState<int?, dynamic>>(
+            return BlocBuilder<
+              SelectFieldBloc<int?, dynamic>,
+              SelectFieldBlocState<int?, dynamic>
+            >(
               bloc: visitFormBloc.departmentFieldBloc,
               builder: (context, departmentState) {
                 final hospitalId = hospitalState.value;

@@ -9,7 +9,8 @@ class ValidationError implements Exception {
   ValidationError(this.message, this.field, [this.value]);
 
   @override
-  String toString() => 'ValidationError: $message (field: $field, value: $value)';
+  String toString() =>
+      'ValidationError: $message (field: $field, value: $value)';
 }
 
 /// Service for validating imported data before database insertion
@@ -108,11 +109,7 @@ class DataValidator {
     // Validate file path format
     final filePath = json['filePath'] as String;
     if (filePath.isEmpty) {
-      throw ValidationError(
-        'File path cannot be empty',
-        'filePath',
-        filePath,
-      );
+      throw ValidationError('File path cannot be empty', 'filePath', filePath);
     }
 
     // Validate datetime fields
@@ -265,21 +262,13 @@ class DataValidator {
     if (value == null) return;
 
     if (value is! String) {
-      throw ValidationError(
-        'DateTime field must be a string',
-        field,
-        value,
-      );
+      throw ValidationError('DateTime field must be a string', field, value);
     }
 
     try {
       DateTime.parse(value);
     } catch (e) {
-      throw ValidationError(
-        'Invalid ISO8601 datetime format',
-        field,
-        value,
-      );
+      throw ValidationError('Invalid ISO8601 datetime format', field, value);
     }
   }
 

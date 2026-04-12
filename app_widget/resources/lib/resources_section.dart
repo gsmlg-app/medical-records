@@ -135,7 +135,9 @@ class _ResourcesSectionState extends State<ResourcesSection> {
     setState(() => _isLoading = true);
 
     try {
-      AppLogger().d('Starting resource addition - File: ${sourceFile.path}, Type: ${type.value}');
+      AppLogger().d(
+        'Starting resource addition - File: ${sourceFile.path}, Type: ${type.value}',
+      );
 
       // For new visits (visitId == null), we use a temporary visit ID of -1
       // The actual file will be moved/renamed when the visit is saved
@@ -146,7 +148,9 @@ class _ResourcesSectionState extends State<ResourcesSection> {
       if (!await sourceFile.exists()) {
         throw Exception('Source file does not exist: ${sourceFile.path}');
       }
-      AppLogger().d('Source file exists, size: ${await sourceFile.length()} bytes');
+      AppLogger().d(
+        'Source file exists, size: ${await sourceFile.length()} bytes',
+      );
 
       // Store the file
       AppLogger().d('Calling storeResourceFile...');
@@ -208,7 +212,10 @@ class _ResourcesSectionState extends State<ResourcesSection> {
     }
   }
 
-  Future<String?> _showEditNameDialog(BuildContext dialogContext, String? currentName) async {
+  Future<String?> _showEditNameDialog(
+    BuildContext dialogContext,
+    String? currentName,
+  ) async {
     final nameController = TextEditingController(text: currentName ?? '');
 
     return showDialog<String>(
@@ -360,7 +367,9 @@ class _ResourcesSectionState extends State<ResourcesSection> {
                         Text(
                           'Preview not available for ${originalResource.type} files.',
                           style: TextStyle(
-                            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.onSurface.withValues(alpha: 0.7),
                           ),
                         ),
                     ],
@@ -398,7 +407,8 @@ class _ResourcesSectionState extends State<ResourcesSection> {
   String _formatFileSize(int bytes) {
     if (bytes < 1024) return '$bytes B';
     if (bytes < 1024 * 1024) return '${(bytes / 1024).toStringAsFixed(1)} KB';
-    if (bytes < 1024 * 1024 * 1024) return '${(bytes / (1024 * 1024)).toStringAsFixed(1)} MB';
+    if (bytes < 1024 * 1024 * 1024)
+      return '${(bytes / (1024 * 1024)).toStringAsFixed(1)} MB';
     return '${(bytes / (1024 * 1024 * 1024)).toStringAsFixed(1)} GB';
   }
 

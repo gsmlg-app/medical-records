@@ -24,7 +24,9 @@ class DataExportService {
 
       // Create temp directory for export
       final tempDir = await getTemporaryDirectory();
-      final exportDir = Directory('${tempDir.path}/export_${DateTime.now().millisecondsSinceEpoch}');
+      final exportDir = Directory(
+        '${tempDir.path}/export_${DateTime.now().millisecondsSinceEpoch}',
+      );
       await exportDir.create(recursive: true);
 
       final resourcesDir = Directory('${exportDir.path}/resources');
@@ -56,7 +58,8 @@ class DataExportService {
         for (final visit in visits) {
           // Collect IDs for related data
           if (visit.hospitalId != null) hospitalIds.add(visit.hospitalId!);
-          if (visit.departmentId != null) departmentIds.add(visit.departmentId!);
+          if (visit.departmentId != null)
+            departmentIds.add(visit.departmentId!);
           if (visit.doctorId != null) doctorIds.add(visit.doctorId!);
 
           // Fetch resources for this visit
@@ -65,7 +68,9 @@ class DataExportService {
           for (final resource in resources) {
             // Copy resource file to temp directory
             try {
-              final sourceFile = await _storageService.getResourceFile(resource.filePath);
+              final sourceFile = await _storageService.getResourceFile(
+                resource.filePath,
+              );
               if (await sourceFile.exists()) {
                 final fileName = p.basename(resource.filePath);
                 final destFile = File('${resourcesDir.path}/$fileName');
@@ -105,7 +110,9 @@ class DataExportService {
           'visits': visitDataList.map((v) => _visitToJson(v)).toList(),
           'resources': resourceDataList.map((r) => _resourceToJson(r)).toList(),
           'hospital': hospital != null ? _hospitalToJson(hospital) : null,
-          'department': department != null ? _departmentToJson(department) : null,
+          'department': department != null
+              ? _departmentToJson(department)
+              : null,
           'doctor': doctor != null ? _doctorToJson(doctor) : null,
         });
       }
@@ -125,7 +132,8 @@ class DataExportService {
       AppLogger().d('Manifest created with ${exportData.length} treatments');
 
       // Create zip file
-      final zipFilePath = '${tempDir.path}/medical_records_export_${DateTime.now().millisecondsSinceEpoch}.zip';
+      final zipFilePath =
+          '${tempDir.path}/medical_records_export_${DateTime.now().millisecondsSinceEpoch}.zip';
 
       final encoder = ZipFileEncoder();
       encoder.create(zipFilePath);
@@ -146,7 +154,9 @@ class DataExportService {
 
       encoder.close();
 
-      AppLogger().i('Export completed: $zipFilePath (${exportData.length} treatments)');
+      AppLogger().i(
+        'Export completed: $zipFilePath (${exportData.length} treatments)',
+      );
 
       // Clean up temp export directory
       await exportDir.delete(recursive: true);
@@ -162,12 +172,17 @@ class DataExportService {
   ///
   /// [startDate] - Start of date range (inclusive)
   /// [endDate] - End of date range (inclusive)
-  Future<File> exportTreatmentsByDateRange(DateTime startDate, DateTime endDate) async {
+  Future<File> exportTreatmentsByDateRange(
+    DateTime startDate,
+    DateTime endDate,
+  ) async {
     final allTreatments = await _database.getAllTreatments();
 
     final treatmentsInRange = allTreatments.where((treatment) {
-      return treatment.startDate.isAfter(startDate.subtract(const Duration(days: 1))) &&
-             treatment.startDate.isBefore(endDate.add(const Duration(days: 1)));
+      return treatment.startDate.isAfter(
+            startDate.subtract(const Duration(days: 1)),
+          ) &&
+          treatment.startDate.isBefore(endDate.add(const Duration(days: 1)));
     }).toList();
 
     final treatmentIds = treatmentsInRange.map((t) => t.id).toList();
@@ -201,7 +216,9 @@ class DataExportService {
       'id': visitJson['id'],
       'category': visitJson['category'],
       'date': visitJson['date'] is int
-          ? DateTime.fromMillisecondsSinceEpoch(visitJson['date'] as int).toIso8601String()
+          ? DateTime.fromMillisecondsSinceEpoch(
+              visitJson['date'] as int,
+            ).toIso8601String()
           : visitJson['date'],
       'details': visitJson['details'],
       'hospitalId': visitJson['hospitalId'],
@@ -209,10 +226,14 @@ class DataExportService {
       'doctorId': visitJson['doctorId'],
       'informations': visitJson['informations'],
       'createdAt': visitJson['createdAt'] is int
-          ? DateTime.fromMillisecondsSinceEpoch(visitJson['createdAt'] as int).toIso8601String()
+          ? DateTime.fromMillisecondsSinceEpoch(
+              visitJson['createdAt'] as int,
+            ).toIso8601String()
           : visitJson['createdAt'],
       'updatedAt': visitJson['updatedAt'] is int
-          ? DateTime.fromMillisecondsSinceEpoch(visitJson['updatedAt'] as int).toIso8601String()
+          ? DateTime.fromMillisecondsSinceEpoch(
+              visitJson['updatedAt'] as int,
+            ).toIso8601String()
           : visitJson['updatedAt'],
     };
   }
@@ -224,10 +245,14 @@ class DataExportService {
       'filePath': resourceJson['filePath'],
       'notes': resourceJson['notes'],
       'createdAt': resourceJson['createdAt'] is int
-          ? DateTime.fromMillisecondsSinceEpoch(resourceJson['createdAt'] as int).toIso8601String()
+          ? DateTime.fromMillisecondsSinceEpoch(
+              resourceJson['createdAt'] as int,
+            ).toIso8601String()
           : resourceJson['createdAt'],
       'updatedAt': resourceJson['updatedAt'] is int
-          ? DateTime.fromMillisecondsSinceEpoch(resourceJson['updatedAt'] as int).toIso8601String()
+          ? DateTime.fromMillisecondsSinceEpoch(
+              resourceJson['updatedAt'] as int,
+            ).toIso8601String()
           : resourceJson['updatedAt'],
     };
   }

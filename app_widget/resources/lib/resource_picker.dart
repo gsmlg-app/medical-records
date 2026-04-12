@@ -418,7 +418,17 @@ class _ResourcePickerState extends State<ResourcePicker> {
           final extension = result.files.single.extension?.toLowerCase();
           ResourceType resourceType;
 
-          if (extension != null && ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'heic', 'heif'].contains(extension)) {
+          if (extension != null &&
+              [
+                'jpg',
+                'jpeg',
+                'png',
+                'gif',
+                'bmp',
+                'webp',
+                'heic',
+                'heif',
+              ].contains(extension)) {
             resourceType = ResourceType.image;
           } else {
             resourceType = ResourceType.document;
@@ -495,7 +505,11 @@ class _ResourcePickerState extends State<ResourcePicker> {
         SnackBar(
           content: Row(
             children: [
-              const Icon(Icons.check_circle_outline, color: Colors.white, size: 20),
+              const Icon(
+                Icons.check_circle_outline,
+                color: Colors.white,
+                size: 20,
+              ),
               const SizedBox(width: 12),
               Expanded(
                 child: Text(
@@ -530,53 +544,53 @@ class _ResourcePickerState extends State<ResourcePicker> {
       showDialog(
         context: navigatorContext,
         builder: (context) => AlertDialog(
-              title: Row(
-                children: [
-                  Icon(
-                    Icons.warning_amber_rounded,
-                    color: Theme.of(context).colorScheme.error,
-                    size: 28,
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                      title,
-                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ],
+          title: Row(
+            children: [
+              Icon(
+                Icons.warning_amber_rounded,
+                color: Theme.of(context).colorScheme.error,
+                size: 28,
               ),
-              content: Text(message),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.of(context).pop(),
-                  child: const Text('Cancel'),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  title,
+                  style: Theme.of(
+                    context,
+                  ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
                 ),
-                ElevatedButton.icon(
-                  onPressed: () async {
-                    // Capture ScaffoldMessenger before popping the dialog
-                    final scaffoldMessenger = ScaffoldMessenger.of(context);
-                    Navigator.of(context).pop();
-                    // Open app settings
-                    final opened = await openAppSettings();
-                    if (!opened) {
-                      scaffoldMessenger.showSnackBar(
-                        const SnackBar(
-                          content: Text('Could not open app settings'),
-                          backgroundColor: Colors.red,
-                        ),
-                      );
-                    }
-                  },
-                  icon: const Icon(Icons.settings),
-                  label: const Text('Open Settings'),
-                ),
-              ],
+              ),
+            ],
+          ),
+          content: Text(message),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Cancel'),
             ),
-          );
-      });
+            ElevatedButton.icon(
+              onPressed: () async {
+                // Capture ScaffoldMessenger before popping the dialog
+                final scaffoldMessenger = ScaffoldMessenger.of(context);
+                Navigator.of(context).pop();
+                // Open app settings
+                final opened = await openAppSettings();
+                if (!opened) {
+                  scaffoldMessenger.showSnackBar(
+                    const SnackBar(
+                      content: Text('Could not open app settings'),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                }
+              },
+              icon: const Icon(Icons.settings),
+              label: const Text('Open Settings'),
+            ),
+          ],
+        ),
+      );
+    });
   }
 }
 
