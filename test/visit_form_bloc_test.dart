@@ -6,7 +6,7 @@ import 'package:app_locale/gen_l10n/app_localizations.dart';
 import 'package:app_database/app_database.dart';
 import 'package:visit_form_bloc/visit_form_bloc.dart';
 import 'package:visit_form_widget/visit_form.dart';
-import 'package:form_bloc/form_bloc.dart';
+import 'package:duskmoon_form/duskmoon_form.dart';
 import 'package:drift/drift.dart';
 
 void main() {

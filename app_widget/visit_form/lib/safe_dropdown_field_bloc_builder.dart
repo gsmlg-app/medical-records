@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_form_bloc/flutter_form_bloc.dart';
+import 'package:duskmoon_form/duskmoon_form.dart';
 
 /// A safe dropdown field bloc builder that avoids assertion errors
 /// by ensuring valid state during widget initialization

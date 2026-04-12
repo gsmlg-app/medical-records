@@ -13,19 +13,13 @@ dependencies:
     sdk: flutter
   bloc: ^9.0.0
   equatable: ^2.0.5
-  form_bloc:
-    path: ../../third_party/form_bloc
-  app_logging:
-    path: ../../app_lib/logging
-  app_database:
-    path: ../../app_lib/database
-  app_storage:
-    path: ../../app_lib/storage
-  app_utils:
-    path: ../../app_lib/utils
+  duskmoon_form: ^1.4.0
+  app_logging: any
+  app_database: any
+  app_storage: any
+  app_utils: any
   drift: ^2.19.0
-  visit_bloc:
-    path: ../../app_bloc/visit
+  visit_bloc: any
 
 dev_dependencies:
   flutter_test:

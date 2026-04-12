@@ -12,26 +12,15 @@ dependencies:
   flutter:
     sdk: flutter
   flutter_bloc: ^9.0.0
-  flutter_form_bloc:
-    path: ../../third_party/flutter_form_bloc
-  form_bloc:
-    path: ../../third_party/form_bloc
-  app_locale:
-    path: ../../app_lib/locale
-  app_logging:
-    path: ../../app_lib/logging
-  app_database:
-    path: ../../app_lib/database
-  app_resources:
-    path: ../../app_widget/resources
-  visit_form_bloc:
-    path: ../../app_bloc/visit_form_bloc
-  hospital_bloc:
-    path: ../../app_bloc/hospital
-  hospital_form_bloc:
-    path: ../../app_bloc/hospital_form_bloc
-  hospital_form:
-    path: ../../app_widget/hospital_form
+  duskmoon_form: ^1.4.0
+  app_locale: any
+  app_logging: any
+  app_database: any
+  app_resources: any
+  visit_form_bloc: any
+  hospital_bloc: any
+  hospital_form_bloc: any
+  hospital_form: any
 
 dev_dependencies:
   flutter_test:

@@ -4,7 +4,7 @@ import 'dart:async';
 import 'package:app_locale/app_locale.dart';
 import 'package:app_logging/app_logging.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_form_bloc/flutter_form_bloc.dart';
+import 'package:duskmoon_form/duskmoon_form.dart';
 import 'package:visit_form_bloc/visit_form_bloc.dart';
 import 'package:hospital_bloc/hospital_bloc.dart';
 import 'package:hospital_form_bloc/hospital_form_bloc.dart';
@@ -81,13 +81,15 @@ class _VisitFormState extends State<VisitForm> {
 
           final visitFormBloc = context.read<VisitFormBloc>();
 
-          return FormThemeProvider(
-            theme: FormTheme(
-              decorationTheme: const InputDecorationTheme(
-                border: OutlineInputBorder(),
-                contentPadding: EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 12,
+          return DmFormThemeProvider(
+            theme: DmFormTheme(
+              textTheme: TextFieldTheme(
+                decorationTheme: const InputDecorationTheme(
+                  border: OutlineInputBorder(),
+                  contentPadding: EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 12,
+                  ),
                 ),
               ),
             ),
@@ -98,7 +100,7 @@ class _VisitFormState extends State<VisitForm> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     // Visit Category
-                    DropdownFieldBlocBuilder<VisitCategory>(
+                    DmDropdownFieldBlocBuilder<VisitCategory>(
                       selectFieldBloc: visitFormBloc.categoryFieldBloc,
                       decoration: InputDecoration(
                         labelText: context.l10n.visitCategory,
@@ -109,7 +111,7 @@ class _VisitFormState extends State<VisitForm> {
                     const SizedBox(height: 16),
 
                     // Visit Date
-                    DateTimeFieldBlocBuilder(
+                    DmDateTimeFieldBlocBuilder(
                       dateTimeFieldBloc: visitFormBloc.dateFieldBloc,
                       format: DateFormat('yyyy-MM-dd'),
                       initialDate: DateTime.now(),
@@ -134,7 +136,7 @@ class _VisitFormState extends State<VisitForm> {
                     const SizedBox(height: 16),
 
                     // Visit Details (optional)
-                    TextFieldBlocBuilder(
+                    DmTextFieldBlocBuilder(
                       textFieldBloc: visitFormBloc.detailsFieldBloc,
                       decoration: InputDecoration(
                         labelText: context.l10n.visitDetails,

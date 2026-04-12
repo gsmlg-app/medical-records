@@ -4,7 +4,7 @@ import 'package:app_locale/app_locale.dart';
 import 'package:app_logging/app_logging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:form_bloc/form_bloc.dart';
+import 'package:duskmoon_form/duskmoon_form.dart';
 import 'package:go_router/go_router.dart';
 import 'package:medical_records/destination.dart';
 import 'package:visit_form_bloc/visit_form_bloc.dart';

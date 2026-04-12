@@ -8,7 +8,7 @@ import 'package:app_storage/app_storage.dart';
 import 'package:app_utils/field_dependency_helper.dart';
 import 'package:drift/drift.dart' show Value;
 import 'package:equatable/equatable.dart';
-import 'package:form_bloc/form_bloc.dart';
+import 'package:duskmoon_form/duskmoon_form.dart';
 import 'package:visit_bloc/visit_bloc.dart';
 
 part 'event.dart';

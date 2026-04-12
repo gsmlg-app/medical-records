@@ -4,7 +4,7 @@ import 'package:mocktail/mocktail.dart';
 
 import 'package:visit_form_bloc/src/bloc.dart';
 import 'package:app_database/app_database.dart';
-import 'package:form_bloc/form_bloc.dart';
+import 'package:duskmoon_form/duskmoon_form.dart';
 
 void main() {
   group('VisitFormBloc', () {
