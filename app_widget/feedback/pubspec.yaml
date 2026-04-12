@@ -10,8 +10,8 @@ resolution: workspace
 dependencies:
   flutter:
     sdk: flutter
-
   app_locale: any
+  duskmoon_feedback: ^1.4.0
 
 dev_dependencies:
   flutter_test:

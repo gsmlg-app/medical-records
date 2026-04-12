@@ -3,14 +3,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('showSuccessToast test', (WidgetTester tester) async {
+  testWidgets('showDmSuccessToast test', (WidgetTester tester) async {
     const Key tapSuccessTarget = Key('tap-success');
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
         body: Builder(builder: (BuildContext context) {
           return GestureDetector(
             onTap: () {
-              showSuccessToast(
+              showDmSuccessToast(
                   context: context, title: 'success', message: 'message');
             },
             behavior: HitTestBehavior.opaque,
@@ -33,14 +33,14 @@ void main() {
     expect(find.text('success'), findsOneWidget);
   });
 
-  testWidgets('showErrorToast test', (WidgetTester tester) async {
+  testWidgets('showDmErrorToast test', (WidgetTester tester) async {
     const Key tapErrorTarget = Key('tap-error');
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
         body: Builder(builder: (BuildContext context) {
           return GestureDetector(
             onTap: () {
-              showErrorToast(
+              showDmErrorToast(
                   context: context, title: 'error', message: 'message');
             },
             behavior: HitTestBehavior.opaque,
