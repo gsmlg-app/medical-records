@@ -84,7 +84,7 @@ class _VisitFormState extends State<VisitForm> {
           return DmFormThemeProvider(
             theme: DmFormTheme(
               textTheme: TextFieldTheme(
-                decorationTheme: const InputDecorationTheme(
+                decorationTheme: const InputDecorationThemeData(
                   border: OutlineInputBorder(),
                   contentPadding: EdgeInsets.symmetric(
                     horizontal: 16,

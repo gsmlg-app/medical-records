@@ -65,14 +65,14 @@ dependencies:
   intl: ^0.20.2
 
   # DuskMoon UI packages
-  duskmoon_ui: ^1.4.0
-  duskmoon_theme: ^1.4.0
-  duskmoon_theme_bloc: ^1.4.0
-  duskmoon_settings: ^1.4.0
-  duskmoon_feedback: ^1.4.0
-  duskmoon_form: ^1.4.0
-  duskmoon_adaptive_scaffold: ^1.4.0
-  duskmoon_widgets: ^1.4.0
+  duskmoon_ui: ^1.4.2
+  duskmoon_theme: ^1.4.2
+  duskmoon_theme_bloc: ^1.4.2
+  duskmoon_settings: ^1.4.2
+  duskmoon_feedback: ^1.4.2
+  duskmoon_form: ^1.4.2
+  duskmoon_adaptive_scaffold: ^1.4.2
+  duskmoon_widgets: ^1.4.2
 
   # workspace packages
   app_database: any
