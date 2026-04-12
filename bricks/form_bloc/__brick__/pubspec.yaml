@@ -13,8 +13,7 @@ dependencies:
     sdk: flutter
 
   # Form management
-  form_bloc: any
-  flutter_form_bloc: any
+  duskmoon_form: ^1.4.0
 
   # State management
   bloc: any

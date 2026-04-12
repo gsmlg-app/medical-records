@@ -1,5 +1,5 @@
 name: form_hooks
-description: Hooks for the form_bloc brick
+description: Hooks for the form bloc brick
 version: 0.1.0
 
 environment:

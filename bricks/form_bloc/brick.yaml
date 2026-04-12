@@ -1,5 +1,5 @@
 name: form_bloc
-description: Create a form bloc package with validation and submission logic using form_bloc packages.
+description: Create a form bloc package with validation and submission logic using duskmoon_form.
 
 # The following defines the brick repository url.
 # Uncomment and update the following line before publishing the brick.

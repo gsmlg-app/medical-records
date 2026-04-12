@@ -1,4 +1,4 @@
-import 'package:form_bloc/form_bloc.dart';
+import 'package:duskmoon_form/duskmoon_form.dart';
 import 'package:equatable/equatable.dart';
 
 import 'event.dart';

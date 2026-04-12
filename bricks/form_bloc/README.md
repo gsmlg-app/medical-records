@@ -1,6 +1,6 @@
 # {{name.pascalCase()}} Form BLoC
 
-A Form BLoC for handling {{name.sentenceCase()}} form validation and submission using the `form_bloc` package.
+A Form BLoC for handling {{name.sentenceCase()}} form validation and submission using the `duskmoon_form` package.
 
 ## Features
 
@@ -45,10 +45,10 @@ context.read<{{name.pascalCase()}}FormBloc>().add(
 
 ## Form Field Builders
 
-Use the `TextFieldBlocBuilder` from `flutter_form_bloc` to build form fields:
+Use the `DmTextFieldBlocBuilder` from `duskmoon_form` to build form fields:
 
 ```dart
-TextFieldBlocBuilder(
+DmTextFieldBlocBuilder(
   textFieldBloc: context.read<{{name.pascalCase()}}FormBloc>().{{field_names.first.camelCase()}}FieldBloc,
   decoration: const InputDecoration(
     labelText: '{{field_names.first.pascalCase()}}',
@@ -73,7 +73,6 @@ flutter test
 
 ## Dependencies
 
-- `form_bloc`: Core form functionality
-- `flutter_form_bloc`: Flutter widgets for form fields
+- `duskmoon_form`: Form state management and adaptive form widgets
 - `bloc`: State management
 - `equatable`: Value equality
