@@ -2,7 +2,7 @@ import 'package:app_database/app_database.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:theme_bloc/theme_bloc.dart';
+import 'package:duskmoon_theme_bloc/duskmoon_theme_bloc.dart';
 import 'package:treatment_bloc/treatment_bloc.dart';
 import 'package:visit_bloc/visit_bloc.dart';
 
@@ -31,9 +31,9 @@ class MainProvider extends StatelessWidget {
       ],
       child: MultiBlocProvider(
         providers: [
-          BlocProvider<ThemeBloc>(
-            create: (BuildContext context) => ThemeBloc(
-              context.read<SharedPreferences>(),
+          BlocProvider<DmThemeBloc>(
+            create: (BuildContext context) => DmThemeBloc(
+              prefs: context.read<SharedPreferences>(),
             ),
           ),
           BlocProvider<TreatmentBloc>(

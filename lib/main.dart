@@ -9,7 +9,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hospital_bloc/hospital_bloc.dart';
 import 'package:treatment_bloc/treatment_bloc.dart';
 import 'package:visit_bloc/visit_bloc.dart';
-import 'package:theme_bloc/theme_bloc.dart';
+import 'package:duskmoon_theme_bloc/duskmoon_theme_bloc.dart';
 import 'package:department_bloc/department_bloc.dart';
 import 'package:doctor_bloc/doctor_bloc.dart';
 import 'package:visit_form_bloc/visit_form_bloc.dart';
@@ -63,7 +63,7 @@ void main(List<String> args) async {
       database: database,
       child: MultiBlocProvider(
         providers: [
-          BlocProvider(create: (context) => ThemeBloc(sharedPrefs)),
+          BlocProvider(create: (context) => DmThemeBloc(prefs: sharedPrefs)),
           BlocProvider(create: (context) => HospitalBloc(database)),
           BlocProvider(create: (context) => TreatmentBloc(database)),
           BlocProvider(create: (context) => VisitBloc(database)),

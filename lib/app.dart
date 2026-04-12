@@ -1,7 +1,7 @@
 import 'package:app_locale/app_locale.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:theme_bloc/theme_bloc.dart';
+import 'package:duskmoon_theme_bloc/duskmoon_theme_bloc.dart';
 
 import 'router.dart';
 
@@ -22,9 +22,9 @@ class _AppState extends State<App> {
 
   @override
   Widget build(BuildContext context) {
-    final themeBloc = context.read<ThemeBloc>();
+    final themeBloc = context.read<DmThemeBloc>();
 
-    return BlocBuilder<ThemeBloc, ThemeState>(
+    return BlocBuilder<DmThemeBloc, DmThemeState>(
         bloc: themeBloc,
         builder: (context, state) {
           final router = AppRouter.router;
@@ -33,8 +33,8 @@ class _AppState extends State<App> {
             debugShowCheckedModeBanner: false,
             routerConfig: router,
             onGenerateTitle: (context) => context.l10n.appName,
-            theme: state.theme.lightTheme,
-            darkTheme: state.theme.darkTheme,
+            theme: state.entry.light,
+            darkTheme: state.entry.dark,
             themeMode: state.themeMode,
             localizationsDelegates: AppLocale.localizationsDelegates,
             supportedLocales: AppLocale.supportedLocales,
