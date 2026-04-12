@@ -15,7 +15,7 @@ dependencies:
     sdk: flutter
   intl: any
 
-  flutter_adaptive_scaffold: any
+  duskmoon_adaptive_scaffold: ^1.4.0
   flutter_bloc: ^9.0.0
 
 dev_dependencies:

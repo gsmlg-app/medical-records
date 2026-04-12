@@ -114,7 +114,7 @@ class _TreatmentsScreenState extends State<TreatmentsScreen> {
                 ],
               ),
             ),
-            smallSecondaryBody: AdaptiveScaffold.emptyBuilder,
+            smallSecondaryBody: DmAdaptiveScaffold.emptyBuilder,
           ),
         );
       },

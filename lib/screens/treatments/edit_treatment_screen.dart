@@ -150,7 +150,7 @@ class _EditTreatmentViewState extends State<_EditTreatmentView> {
           ],
         ),
       ),
-      smallSecondaryBody: AdaptiveScaffold.emptyBuilder,
+      smallSecondaryBody: DmAdaptiveScaffold.emptyBuilder,
     );
   }
 }

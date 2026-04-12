@@ -139,7 +139,7 @@ class _TreatmentDetailScreenState extends State<TreatmentDetailScreen> {
             ],
           ),
         ),
-        smallSecondaryBody: AdaptiveScaffold.emptyBuilder,
+        smallSecondaryBody: DmAdaptiveScaffold.emptyBuilder,
       ),
     );
   }

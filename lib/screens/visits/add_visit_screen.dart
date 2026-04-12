@@ -228,7 +228,7 @@ class _AddVisitViewState extends State<_AddVisitView> {
           ],
         ),
       ),
-      smallSecondaryBody: AdaptiveScaffold.emptyBuilder,
+      smallSecondaryBody: DmAdaptiveScaffold.emptyBuilder,
     );
   }
 }

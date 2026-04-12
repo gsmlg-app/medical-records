@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_adaptive_scaffold/flutter_adaptive_scaffold.dart';
+import 'package:duskmoon_adaptive_scaffold/duskmoon_adaptive_scaffold.dart';
 
-export 'package:flutter_adaptive_scaffold/flutter_adaptive_scaffold.dart';
+export 'package:duskmoon_adaptive_scaffold/duskmoon_adaptive_scaffold.dart';
 
 class AppAdaptiveScaffold extends StatelessWidget {
   static const appSmallBreakpoint = Breakpoints.small;
@@ -241,7 +241,7 @@ class AppAdaptiveScaffold extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AdaptiveScaffold(
+    return DmAdaptiveScaffold(
       destinations: destinations,
       selectedIndex: selectedIndex,
       leadingUnextendedNavRail: leadingUnextendedNavRail,

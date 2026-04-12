@@ -107,7 +107,7 @@ class AccentColorSettingsScreen extends StatelessWidget {
           ),
         );
       },
-      smallSecondaryBody: AdaptiveScaffold.emptyBuilder,
+      smallSecondaryBody: DmAdaptiveScaffold.emptyBuilder,
     );
   }
 }

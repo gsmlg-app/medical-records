@@ -218,7 +218,7 @@ class _VisitDetailScreenState extends State<VisitDetailScreen> {
             ],
           ),
         ),
-        smallSecondaryBody: AdaptiveScaffold.emptyBuilder,
+        smallSecondaryBody: DmAdaptiveScaffold.emptyBuilder,
       ),
     );
   }

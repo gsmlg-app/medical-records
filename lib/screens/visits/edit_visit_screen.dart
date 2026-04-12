@@ -212,7 +212,7 @@ class _EditVisitViewState extends State<_EditVisitView> {
           ],
         ),
       ),
-      smallSecondaryBody: AdaptiveScaffold.emptyBuilder,
+      smallSecondaryBody: DmAdaptiveScaffold.emptyBuilder,
     );
   }
 }

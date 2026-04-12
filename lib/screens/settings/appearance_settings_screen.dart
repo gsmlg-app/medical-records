@@ -85,7 +85,7 @@ class AppearanceSettingsScreen extends StatelessWidget {
           ),
         );
       },
-      smallSecondaryBody: AdaptiveScaffold.emptyBuilder,
+      smallSecondaryBody: DmAdaptiveScaffold.emptyBuilder,
     );
   }
 }

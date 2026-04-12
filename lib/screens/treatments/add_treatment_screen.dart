@@ -105,7 +105,7 @@ class _AddTreatmentViewState extends State<_AddTreatmentView> {
           ],
         ),
       ),
-      smallSecondaryBody: AdaptiveScaffold.emptyBuilder,
+      smallSecondaryBody: DmAdaptiveScaffold.emptyBuilder,
     );
   }
 }

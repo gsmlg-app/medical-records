@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-export 'package:flutter_adaptive_scaffold/flutter_adaptive_scaffold.dart';
+export 'package:duskmoon_adaptive_scaffold/duskmoon_adaptive_scaffold.dart';
 
 enum AppAdaptiveActionSize {
   small,

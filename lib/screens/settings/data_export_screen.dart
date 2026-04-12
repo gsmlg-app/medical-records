@@ -248,7 +248,7 @@ class _DataExportScreenState extends State<DataExportScreen> {
           ],
         ),
       ),
-      smallSecondaryBody: AdaptiveScaffold.emptyBuilder,
+      smallSecondaryBody: DmAdaptiveScaffold.emptyBuilder,
     );
   }
 

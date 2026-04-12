@@ -188,7 +188,7 @@ class _DataImportScreenState extends State<DataImportScreen> {
           ],
         ),
       ),
-      smallSecondaryBody: AdaptiveScaffold.emptyBuilder,
+      smallSecondaryBody: DmAdaptiveScaffold.emptyBuilder,
     );
   }
 
