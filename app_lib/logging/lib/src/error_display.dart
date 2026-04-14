@@ -1,3 +1,5 @@
+import 'package:app_feedback/app_feedback.dart';
+import 'package:duskmoon_widgets/duskmoon_widgets.dart';
 import 'package:flutter/material.dart';
 
 class ErrorDisplay {
@@ -61,24 +63,23 @@ class ErrorDisplay {
     ThemeData theme, {
     VoidCallback? onRetry,
   }) {
-    showDialog(
+    showDmDialog(
       context: context,
-      barrierDismissible: false,
-      builder: (context) => AlertDialog(
-        title: const Text('Error'),
-        content: Text(message),
-        actions: [
-          if (onRetry != null)
-            TextButton(
-              onPressed: onRetry,
-              child: const Text('RETRY'),
-            ),
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('OK'),
+      title: const Text('Error'),
+      content: Text(message),
+      actions: [
+        if (onRetry != null)
+          DmButton(
+            variant: DmButtonVariant.text,
+            onPressed: onRetry,
+            child: const Text('RETRY'),
           ),
-        ],
-      ),
+        DmButton(
+          variant: DmButtonVariant.text,
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Text('OK'),
+        ),
+      ],
     );
   }
 
@@ -88,44 +89,42 @@ class ErrorDisplay {
     ThemeData theme, {
     VoidCallback? onRetry,
   }) {
-    showDialog(
+    showDmDialog(
       context: context,
-      barrierDismissible: false,
-      builder: (context) => AlertDialog(
-        title: Row(
-          children: [
-            Icon(
-              Icons.error,
-              color: theme.colorScheme.error,
-            ),
-            const SizedBox(width: 8),
-            const Text('Critical Error'),
-          ],
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(message),
-            const SizedBox(height: 16),
-            const Text(
-              'The app needs to restart to recover.',
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
-          ],
-        ),
-        actions: [
-          if (onRetry != null)
-            ElevatedButton(
-              onPressed: onRetry,
-              child: const Text('RESTART APP'),
-            ),
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('OK'),
+      title: Row(
+        children: [
+          Icon(
+            Icons.error,
+            color: theme.colorScheme.error,
+          ),
+          const SizedBox(width: 8),
+          const Text('Critical Error'),
+        ],
+      ),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(message),
+          const SizedBox(height: 16),
+          const Text(
+            'The app needs to restart to recover.',
+            style: TextStyle(fontWeight: FontWeight.bold),
           ),
         ],
       ),
+      actions: [
+        if (onRetry != null)
+          DmButton(
+            onPressed: onRetry,
+            child: const Text('RESTART APP'),
+          ),
+        DmButton(
+          variant: DmButtonVariant.text,
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Text('OK'),
+        ),
+      ],
     );
   }
 }

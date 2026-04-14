@@ -16,6 +16,10 @@ dependencies:
   app_storage: any
   app_locale: any
   app_logging: any
+  app_feedback: any
+
+  # DuskMoon UI
+  duskmoon_widgets: any
 
   # External dependencies
   flutter_bloc: ^9.0.0

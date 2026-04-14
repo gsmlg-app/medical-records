@@ -8,6 +8,8 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:app_locale/app_locale.dart';
 import 'package:app_logging/app_logging.dart';
 import 'package:app_database/app_database.dart';
+import 'package:app_feedback/app_feedback.dart';
+import 'package:duskmoon_widgets/duskmoon_widgets.dart';
 
 /// Resource picker modal bottom sheet
 class ResourcePicker extends StatefulWidget {
@@ -170,17 +172,9 @@ class _ResourcePickerState extends State<ResourcePicker> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                TextButton(
+                DmButton(
                   onPressed: () => Navigator.of(context).pop(),
-                  style: TextButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 24,
-                      vertical: 12,
-                    ),
-                    foregroundColor: Theme.of(
-                      context,
-                    ).colorScheme.onSurface.withValues(alpha: 0.7),
-                  ),
+                  variant: DmButtonVariant.text,
                   child: Text(context.l10n.cancel.toUpperCase()),
                 ),
                 const SizedBox(width: 8),
@@ -392,7 +386,6 @@ class _ResourcePickerState extends State<ResourcePicker> {
         // Handle web files differently (no file path)
         if (kIsWeb) {
           final bytes = result.files.single.bytes;
-          // final name = result.files.single.name; // Unused variable
 
           if (bytes != null && bytes.length > 10 * 1024 * 1024) {
             if (mounted) _showError(context.l10n.fileTooLarge);
@@ -453,6 +446,7 @@ class _ResourcePickerState extends State<ResourcePicker> {
     // Capture references before popping (which unmounts this widget)
     final scaffoldMessenger = ScaffoldMessenger.of(context);
     final errorColor = Theme.of(context).colorScheme.error;
+    final onErrorColor = Theme.of(context).colorScheme.onError;
     Navigator.of(context).pop();
 
     // Use a post-frame callback to ensure the dialog is fully closed
@@ -461,13 +455,13 @@ class _ResourcePickerState extends State<ResourcePicker> {
         SnackBar(
           content: Row(
             children: [
-              const Icon(Icons.error_outline, color: Colors.white, size: 20),
+              Icon(Icons.error_outline, color: onErrorColor, size: 20),
               const SizedBox(width: 12),
               Expanded(
                 child: Text(
                   message,
-                  style: const TextStyle(
-                    color: Colors.white,
+                  style: TextStyle(
+                    color: onErrorColor,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
@@ -481,7 +475,7 @@ class _ResourcePickerState extends State<ResourcePicker> {
           duration: const Duration(seconds: 4),
           action: SnackBarAction(
             label: 'Dismiss',
-            textColor: Colors.white,
+            textColor: onErrorColor,
             onPressed: () {
               scaffoldMessenger.hideCurrentSnackBar();
             },
@@ -497,6 +491,7 @@ class _ResourcePickerState extends State<ResourcePicker> {
     // Capture references before popping (which unmounts this widget)
     final scaffoldMessenger = ScaffoldMessenger.of(context);
     final primaryColor = Theme.of(context).colorScheme.primary;
+    final onPrimaryColor = Theme.of(context).colorScheme.onPrimary;
     Navigator.of(context).pop();
 
     // Use a post-frame callback to ensure the dialog is fully closed
@@ -505,17 +500,17 @@ class _ResourcePickerState extends State<ResourcePicker> {
         SnackBar(
           content: Row(
             children: [
-              const Icon(
+              Icon(
                 Icons.check_circle_outline,
-                color: Colors.white,
+                color: onPrimaryColor,
                 size: 20,
               ),
               const SizedBox(width: 12),
               Expanded(
                 child: Text(
                   message,
-                  style: const TextStyle(
-                    color: Colors.white,
+                  style: TextStyle(
+                    color: onPrimaryColor,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
@@ -541,54 +536,63 @@ class _ResourcePickerState extends State<ResourcePicker> {
 
     // Use a post-frame callback to ensure the picker dialog is fully closed
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      showDialog(
+      showDmDialog(
         context: navigatorContext,
-        builder: (context) => AlertDialog(
-          title: Row(
-            children: [
-              Icon(
-                Icons.warning_amber_rounded,
-                color: Theme.of(context).colorScheme.error,
-                size: 28,
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  title,
-                  style: Theme.of(
-                    context,
-                  ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
-                ),
-              ),
-            ],
-          ),
-          content: Text(message),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Cancel'),
+        title: Row(
+          children: [
+            Icon(
+              Icons.warning_amber_rounded,
+              color: Theme.of(navigatorContext).colorScheme.error,
+              size: 28,
             ),
-            ElevatedButton.icon(
-              onPressed: () async {
-                // Capture ScaffoldMessenger before popping the dialog
-                final scaffoldMessenger = ScaffoldMessenger.of(context);
-                Navigator.of(context).pop();
-                // Open app settings
-                final opened = await openAppSettings();
-                if (!opened) {
-                  scaffoldMessenger.showSnackBar(
-                    const SnackBar(
-                      content: Text('Could not open app settings'),
-                      backgroundColor: Colors.red,
-                    ),
-                  );
-                }
-              },
-              icon: const Icon(Icons.settings),
-              label: const Text('Open Settings'),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                title,
+                style: Theme.of(
+                  navigatorContext,
+                ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+              ),
             ),
           ],
         ),
+        content: Text(message),
+        actions: [
+          DmButton(
+            onPressed: () => Navigator.of(navigatorContext).pop(),
+            variant: DmButtonVariant.text,
+            child: const Text('Cancel'),
+          ),
+          DmButton(
+            onPressed: () async {
+              // Capture references before popping the dialog
+              final scaffoldMessenger = ScaffoldMessenger.of(
+                navigatorContext,
+              );
+              final errorColor =
+                  Theme.of(navigatorContext).colorScheme.error;
+              Navigator.of(navigatorContext).pop();
+              // Open app settings
+              final opened = await openAppSettings();
+              if (!opened) {
+                scaffoldMessenger.showSnackBar(
+                  SnackBar(
+                    content: const Text('Could not open app settings'),
+                    backgroundColor: errorColor,
+                  ),
+                );
+              }
+            },
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.settings),
+                const SizedBox(width: 8),
+                const Text('Open Settings'),
+              ],
+            ),
+          ),
+        ],
       );
     });
   }

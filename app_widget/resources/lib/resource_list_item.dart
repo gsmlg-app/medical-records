@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:app_locale/app_locale.dart';
 import 'package:app_database/app_database.dart';
 import 'package:app_storage/app_storage.dart';
+import 'package:app_feedback/app_feedback.dart';
+import 'package:duskmoon_widgets/duskmoon_widgets.dart';
 
 /// Widget to display a single resource item
 class ResourceListItem extends StatefulWidget {
@@ -62,7 +64,7 @@ class _ResourceListItemState extends State<ResourceListItem> {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
+    return DmCard(
       margin: const EdgeInsets.symmetric(vertical: 4),
       child: ListTile(
         leading: _buildLeadingWidget(),
@@ -83,15 +85,21 @@ class _ResourceListItemState extends State<ResourceListItem> {
       );
     }
 
+    final colorScheme = Theme.of(context).colorScheme;
+
     if (!_fileExists) {
       return Container(
         width: 40,
         height: 40,
         decoration: BoxDecoration(
-          color: Colors.grey.withValues(alpha: 0.3),
+          color: colorScheme.outlineVariant,
           borderRadius: BorderRadius.circular(8),
         ),
-        child: const Icon(Icons.error_outline, color: Colors.grey, size: 20),
+        child: Icon(
+          Icons.error_outline,
+          color: colorScheme.onSurfaceVariant,
+          size: 20,
+        ),
       );
     }
 
@@ -102,8 +110,12 @@ class _ResourceListItemState extends State<ResourceListItem> {
           child: Container(
             width: 40,
             height: 40,
-            color: Colors.grey[300],
-            child: const Icon(Icons.image, color: Colors.grey, size: 20),
+            color: colorScheme.outlineVariant,
+            child: Icon(
+              Icons.image,
+              color: colorScheme.onSurfaceVariant,
+              size: 20,
+            ),
           ),
         );
       case ResourceType.document:
@@ -111,42 +123,42 @@ class _ResourceListItemState extends State<ResourceListItem> {
           width: 40,
           height: 40,
           decoration: BoxDecoration(
-            color: Colors.red.withValues(alpha: 0.1),
+            color: colorScheme.errorContainer,
             borderRadius: BorderRadius.circular(8),
           ),
-          child: const Icon(Icons.picture_as_pdf, color: Colors.red, size: 20),
+          child: Icon(Icons.picture_as_pdf, color: colorScheme.error, size: 20),
         );
       case ResourceType.video:
         return Container(
           width: 40,
           height: 40,
           decoration: BoxDecoration(
-            color: Colors.blue.withValues(alpha: 0.1),
+            color: colorScheme.primaryContainer,
             borderRadius: BorderRadius.circular(8),
           ),
-          child: const Icon(Icons.videocam, color: Colors.blue, size: 20),
+          child: Icon(Icons.videocam, color: colorScheme.primary, size: 20),
         );
       case ResourceType.audio:
         return Container(
           width: 40,
           height: 40,
           decoration: BoxDecoration(
-            color: Colors.green.withValues(alpha: 0.1),
+            color: colorScheme.primaryContainer,
             borderRadius: BorderRadius.circular(8),
           ),
-          child: const Icon(Icons.audiotrack, color: Colors.green, size: 20),
+          child: Icon(Icons.audiotrack, color: colorScheme.primary, size: 20),
         );
       default:
         return Container(
           width: 40,
           height: 40,
           decoration: BoxDecoration(
-            color: Colors.grey.withValues(alpha: 0.1),
+            color: colorScheme.surfaceContainerHigh,
             borderRadius: BorderRadius.circular(8),
           ),
-          child: const Icon(
+          child: Icon(
             Icons.insert_drive_file,
-            color: Colors.grey,
+            color: colorScheme.onSurfaceVariant,
             size: 20,
           ),
         );
@@ -196,8 +208,13 @@ class _ResourceListItemState extends State<ResourceListItem> {
     }
 
     return Text(
-      parts.join(' • '),
-      style: TextStyle(color: _fileExists ? null : Colors.red, fontSize: 12),
+      parts.join(' \u2022 '),
+      style: TextStyle(
+        color: _fileExists
+            ? null
+            : Theme.of(context).colorScheme.error,
+        fontSize: 12,
+      ),
     );
   }
 
@@ -206,38 +223,22 @@ class _ResourceListItemState extends State<ResourceListItem> {
       return const SizedBox.shrink();
     }
 
-    return IconButton(
-      icon: const Icon(Icons.delete, color: Colors.red),
+    return DmIconButton(
+      icon: Icon(Icons.delete, color: Theme.of(context).colorScheme.error),
       onPressed: _showDeleteConfirmation,
       tooltip: context.l10n.delete,
     );
   }
 
-  void _showDeleteConfirmation() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(context.l10n.deleteResource),
-        content: Text(context.l10n.deleteResourceConfirmation),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: Text(context.l10n.cancel),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              widget.onDelete();
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red,
-              foregroundColor: Colors.white,
-            ),
-            child: Text(context.l10n.delete),
-          ),
-        ],
-      ),
+  void _showDeleteConfirmation() async {
+    final confirmed = await showAppDeleteDialog(
+      context,
+      title: context.l10n.deleteResource,
+      content: context.l10n.deleteResourceConfirmation,
     );
+    if (confirmed) {
+      widget.onDelete();
+    }
   }
 
   String _formatFileSize(int bytes) {

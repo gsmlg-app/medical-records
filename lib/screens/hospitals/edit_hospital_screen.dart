@@ -1,5 +1,6 @@
 import 'package:app_adaptive_widgets/app_adaptive_widgets.dart';
 import 'package:app_database/app_database.dart';
+import 'package:app_feedback/app_feedback.dart';
 import 'package:app_locale/app_locale.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -49,12 +50,7 @@ class _EditHospitalScreenState extends State<EditHospitalScreen> {
         _isLoading = false;
       });
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error loading hospital: $e'),
-            backgroundColor: Colors.red,
-          ),
-        );
+        showAppErrorSnackbar(context, 'Error loading hospital: $e');
       }
     }
   }
@@ -110,17 +106,10 @@ class _EditHospitalScreenState extends State<EditHospitalScreen> {
         child: BlocListener<HospitalBloc, HospitalState>(
           listener: (context, state) {
             if (state is HospitalOperationSuccess) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text(state.message)),
-              );
+              showAppSuccessSnackbar(context, state.message);
               context.pop();
             } else if (state is HospitalError) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(state.message),
-                  backgroundColor: Colors.red,
-                ),
-              );
+              showAppErrorSnackbar(context, state.message);
               // Reset form to allow user to try again
               context.read<HospitalFormBloc>().add(
                 InitializeForm(

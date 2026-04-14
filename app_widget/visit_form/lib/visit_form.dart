@@ -1,8 +1,10 @@
 import 'package:app_database/app_database.dart';
 import 'dart:async';
 
+import 'package:app_feedback/app_feedback.dart';
 import 'package:app_locale/app_locale.dart';
 import 'package:app_logging/app_logging.dart';
+import 'package:duskmoon_widgets/duskmoon_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:duskmoon_form/duskmoon_form.dart';
 import 'package:visit_form_bloc/visit_form_bloc.dart';
@@ -63,13 +65,9 @@ class _VisitFormState extends State<VisitForm> {
       listener: (context, state) {
         // Handle submission success/failure
         if (state is FormBlocSuccess) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text('Visit saved successfully!')));
+          showAppSuccessSnackbar(context, 'Visit saved successfully!');
         } else if (state is FormBlocFailure) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text('An error occurred')));
+          showAppErrorSnackbar(context, 'An error occurred');
         }
       },
       child: BlocBuilder<VisitFormBloc, FormBlocState<String, String>>(
@@ -202,8 +200,12 @@ class _HospitalDropdown extends StatelessWidget {
                 ),
                 itemBuilder: (context, value) {
                   if (value == null) {
-                    return const FieldItem(
-                      child: Text('None', style: TextStyle(color: Colors.grey)),
+                    return FieldItem(
+                      child: Text('None',
+                          style: TextStyle(
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onSurfaceVariant)),
                     );
                   }
                   final hospital = visitFormBloc.availableHospitals
@@ -219,15 +221,10 @@ class _HospitalDropdown extends StatelessWidget {
         ),
         const SizedBox(width: 8),
         // Add hospital button
-        IconButton(
+        DmIconButton(
           icon: const Icon(Icons.add),
           onPressed: () => _showAddHospitalDialog(context),
           tooltip: 'Add Hospital',
-          style: IconButton.styleFrom(
-            backgroundColor: Theme.of(
-              context,
-            ).primaryColor.withValues(alpha: 0.1),
-          ),
         ),
       ],
     );
@@ -238,103 +235,94 @@ class _HospitalDropdown extends StatelessWidget {
     // This is critical because the dialog creates a new context that doesn't include VisitFormBloc
     final capturedVisitFormBloc = visitFormBloc;
 
-    showDialog(
+    showDmDialog(
       context: context,
-      builder: (dialogContext) => MultiBlocProvider(
-        providers: [
-          BlocProvider(create: (context) => HospitalFormBloc()),
-          BlocProvider.value(value: context.read<HospitalBloc>()),
-        ],
-        child: MultiBlocListener(
-          listeners: [
-            BlocListener<HospitalFormBloc, HospitalFormState>(
-              listener: (context, formState) {
-                if (formState is HospitalFormSubmissionInProgress) {
-                  // Extract form data and trigger hospital save
-                  final formData = context.read<HospitalFormBloc>().formData;
-                  context.read<HospitalBloc>().add(
-                    AddHospital(
-                      name: formData['name']!,
-                      address: formData['address'],
-                      type: formData['type'],
-                      level: formData['level'],
-                    ),
-                  );
-                }
-              },
-            ),
-            BlocListener<HospitalBloc, HospitalState>(
-              listener: (context, state) async {
-                if (state is HospitalOperationSuccess) {
-                  // Notify form bloc of success
-                  context.read<HospitalFormBloc>().handleSubmissionSuccess();
-
-                  // Close the dialog
-                  Navigator.of(dialogContext).pop();
-
-                  // Show success message
-                  ScaffoldMessenger.of(
-                    dialogContext,
-                  ).showSnackBar(SnackBar(content: Text(state.message)));
-
-                  // Use a microtask to ensure database write is completed
-                  final completer = Completer<void>();
-                  Timer.run(() => completer.complete());
-                  await completer.future;
-
-                  // Refresh the hospital list to include the newly added hospital
-                  // and automatically select the newly created hospital
-                  // Use the captured VisitFormBloc reference instead of trying to read from dialog context
-                  AppLogger().d('About to refresh hospitals...');
-                  AppLogger().d(
-                    'Current hospital count: ${capturedVisitFormBloc.availableHospitals.length}',
-                  );
-                  AppLogger().d(
-                    'Current hospital field items: ${capturedVisitFormBloc.hospitalFieldBloc.state.items.length}',
-                  );
-                  await capturedVisitFormBloc.refreshHospitals(
-                    selectNewest: true,
-                  );
-                  AppLogger().d('Hospital refresh completed');
-                  AppLogger().d(
-                    'New hospital count: ${capturedVisitFormBloc.availableHospitals.length}',
-                  );
-                  AppLogger().d(
-                    'New hospital field items: ${capturedVisitFormBloc.hospitalFieldBloc.state.items.length}',
-                  );
-                  AppLogger().d(
-                    'Selected hospital value: ${capturedVisitFormBloc.hospitalFieldBloc.value}',
-                  );
-                } else if (state is HospitalError) {
-                  // Notify form bloc of failure
-                  context.read<HospitalFormBloc>().handleSubmissionFailure(
-                    state.message,
-                  );
-
-                  ScaffoldMessenger.of(dialogContext).showSnackBar(
-                    SnackBar(
-                      content: Text(state.message),
-                      backgroundColor: Colors.red,
-                    ),
-                  );
-                }
-              },
-            ),
+      title: const Text('Add Hospital'),
+      content: SizedBox(
+        width: double.maxFinite,
+        child: MultiBlocProvider(
+          providers: [
+            BlocProvider(create: (context) => HospitalFormBloc()),
+            BlocProvider.value(value: context.read<HospitalBloc>()),
           ],
-          child: AlertDialog(
-            title: const Text('Add Hospital'),
-            content: SizedBox(
-              width: double.maxFinite,
-              child: SingleChildScrollView(
-                child: HospitalFormWidget(
-                  isEditMode: false,
-                  onSave: () {
-                    // Save is triggered by the BlocListener above
-                  },
-                  onCancel: () {
-                    Navigator.of(dialogContext).pop();
-                  },
-                ),
+          child: MultiBlocListener(
+            listeners: [
+              BlocListener<HospitalFormBloc, HospitalFormState>(
+                listener: (context, formState) {
+                  if (formState is HospitalFormSubmissionInProgress) {
+                    // Extract form data and trigger hospital save
+                    final formData = context.read<HospitalFormBloc>().formData;
+                    context.read<HospitalBloc>().add(
+                      AddHospital(
+                        name: formData['name']!,
+                        address: formData['address'],
+                        type: formData['type'],
+                        level: formData['level'],
+                      ),
+                    );
+                  }
+                },
+              ),
+              BlocListener<HospitalBloc, HospitalState>(
+                listener: (context, state) async {
+                  if (state is HospitalOperationSuccess) {
+                    // Notify form bloc of success
+                    context.read<HospitalFormBloc>().handleSubmissionSuccess();
+
+                    // Close the dialog
+                    Navigator.of(context).pop();
+
+                    // Show success message
+                    showAppSuccessSnackbar(context, state.message);
+
+                    // Use a microtask to ensure database write is completed
+                    final completer = Completer<void>();
+                    Timer.run(() => completer.complete());
+                    await completer.future;
+
+                    // Refresh the hospital list to include the newly added hospital
+                    // and automatically select the newly created hospital
+                    // Use the captured VisitFormBloc reference instead of trying to read from dialog context
+                    AppLogger().d('About to refresh hospitals...');
+                    AppLogger().d(
+                      'Current hospital count: ${capturedVisitFormBloc.availableHospitals.length}',
+                    );
+                    AppLogger().d(
+                      'Current hospital field items: ${capturedVisitFormBloc.hospitalFieldBloc.state.items.length}',
+                    );
+                    await capturedVisitFormBloc.refreshHospitals(
+                      selectNewest: true,
+                    );
+                    AppLogger().d('Hospital refresh completed');
+                    AppLogger().d(
+                      'New hospital count: ${capturedVisitFormBloc.availableHospitals.length}',
+                    );
+                    AppLogger().d(
+                      'New hospital field items: ${capturedVisitFormBloc.hospitalFieldBloc.state.items.length}',
+                    );
+                    AppLogger().d(
+                      'Selected hospital value: ${capturedVisitFormBloc.hospitalFieldBloc.value}',
+                    );
+                  } else if (state is HospitalError) {
+                    // Notify form bloc of failure
+                    context.read<HospitalFormBloc>().handleSubmissionFailure(
+                      state.message,
+                    );
+
+                    showAppErrorSnackbar(context, state.message);
+                  }
+                },
+              ),
+            ],
+            child: SingleChildScrollView(
+              child: HospitalFormWidget(
+                isEditMode: false,
+                onSave: () {
+                  // Save is triggered by the BlocListener above
+                },
+                onCancel: () {
+                  Navigator.of(context).pop();
+                },
               ),
             ),
           ),
@@ -379,8 +367,12 @@ class _DepartmentDropdown extends StatelessWidget {
                 ),
                 itemBuilder: (context, value) {
                   if (value == null) {
-                    return const FieldItem(
-                      child: Text('None', style: TextStyle(color: Colors.grey)),
+                    return FieldItem(
+                      child: Text('None',
+                          style: TextStyle(
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onSurfaceVariant)),
                     );
                   }
 
@@ -408,17 +400,12 @@ class _DepartmentDropdown extends StatelessWidget {
             final hospitalId = hospitalState.value;
             final canAddDepartment = hospitalId != null;
 
-            return IconButton(
+            return DmIconButton(
               icon: const Icon(Icons.add),
               onPressed: canAddDepartment
                   ? () => _showAddDepartmentDialog(context)
                   : null,
               tooltip: 'Add Department',
-              style: IconButton.styleFrom(
-                backgroundColor: canAddDepartment
-                    ? Theme.of(context).primaryColor.withValues(alpha: 0.1)
-                    : Colors.transparent,
-              ),
             );
           },
         ),
@@ -430,103 +417,96 @@ class _DepartmentDropdown extends StatelessWidget {
     final nameController = TextEditingController();
     final categoryController = TextEditingController();
 
-    showDialog(
+    showDmDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Add Department'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: nameController,
-              decoration: const InputDecoration(
-                labelText: 'Department Name',
-                border: OutlineInputBorder(),
-              ),
-              autofocus: true,
+      title: const Text('Add Department'),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          TextField(
+            controller: nameController,
+            decoration: const InputDecoration(
+              labelText: 'Department Name',
+              border: OutlineInputBorder(),
             ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: categoryController,
-              decoration: const InputDecoration(
-                labelText: 'Category (Optional)',
-                border: OutlineInputBorder(),
-                hintText: 'e.g., Cardiology, Neurology',
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancel'),
+            autofocus: true,
           ),
-          ElevatedButton(
-            onPressed: () async {
-              final name = nameController.text.trim();
-              if (name.isEmpty) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Please enter a department name'),
-                  ),
-                );
-                return;
-              }
-
-              final category = categoryController.text.trim().isEmpty
-                  ? null
-                  : categoryController.text.trim();
-
-              // Capture navigator and scaffold messenger before async gap
-              final navigator = Navigator.of(context);
-              final scaffoldMessenger = ScaffoldMessenger.of(context);
-
-              navigator.pop();
-
-              // Show loading indicator
-              showDialog(
-                context: context,
-                barrierDismissible: false,
-                builder: (context) => const AlertDialog(
-                  content: Row(
-                    children: [
-                      CircularProgressIndicator(),
-                      SizedBox(width: 16),
-                      Text('Adding department...'),
-                    ],
-                  ),
-                ),
-              );
-
-              try {
-                final success = await visitFormBloc.quickAddDepartment(
-                  name,
-                  category: category,
-                );
-                navigator.pop(); // Remove loading dialog
-
-                if (success) {
-                  scaffoldMessenger.showSnackBar(
-                    SnackBar(
-                      content: Text('Department "$name" added successfully'),
-                    ),
-                  );
-                } else {
-                  scaffoldMessenger.showSnackBar(
-                    const SnackBar(content: Text('Failed to add department')),
-                  );
-                }
-              } catch (e) {
-                navigator.pop(); // Remove loading dialog
-                scaffoldMessenger.showSnackBar(
-                  SnackBar(content: Text('Error: $e')),
-                );
-              }
-            },
-            child: const Text('Add'),
+          const SizedBox(height: 16),
+          TextField(
+            controller: categoryController,
+            decoration: const InputDecoration(
+              labelText: 'Category (Optional)',
+              border: OutlineInputBorder(),
+              hintText: 'e.g., Cardiology, Neurology',
+            ),
           ),
         ],
       ),
+      actions: [
+        DmButton(
+          variant: DmButtonVariant.text,
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Text('Cancel'),
+        ),
+        DmButton(
+          onPressed: () async {
+            final name = nameController.text.trim();
+            if (name.isEmpty) {
+              showAppErrorSnackbar(context, 'Please enter a department name');
+              return;
+            }
+
+            final category = categoryController.text.trim().isEmpty
+                ? null
+                : categoryController.text.trim();
+
+            // Capture navigator and scaffold messenger before async gap
+            final navigator = Navigator.of(context);
+
+            navigator.pop();
+
+            // Show loading indicator
+            showDmDialog(
+              context: context,
+              title: const Text('Please Wait'),
+              content: const Row(
+                children: [
+                  CircularProgressIndicator(),
+                  SizedBox(width: 16),
+                  Text('Adding department...'),
+                ],
+              ),
+            );
+
+            try {
+              final success = await visitFormBloc.quickAddDepartment(
+                name,
+                category: category,
+              );
+              navigator.pop(); // Remove loading dialog
+
+              if (success) {
+                if (context.mounted) {
+                  showAppSuccessSnackbar(
+                    context,
+                    'Department "$name" added successfully',
+                  );
+                }
+              } else {
+                if (context.mounted) {
+                  showAppErrorSnackbar(context, 'Failed to add department');
+                }
+              }
+            } catch (e) {
+              navigator.pop(); // Remove loading dialog
+              if (context.mounted) {
+                showAppErrorSnackbar(context, 'Error: $e');
+              }
+            }
+          },
+          child: const Text('Add'),
+        ),
+      ],
     );
   }
 }
@@ -567,8 +547,12 @@ class _DoctorDropdown extends StatelessWidget {
                 ),
                 itemBuilder: (context, value) {
                   if (value == null) {
-                    return const FieldItem(
-                      child: Text('None', style: TextStyle(color: Colors.grey)),
+                    return FieldItem(
+                      child: Text('None',
+                          style: TextStyle(
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onSurfaceVariant)),
                     );
                   }
 
@@ -603,17 +587,12 @@ class _DoctorDropdown extends StatelessWidget {
                 final departmentId = departmentState.value;
                 final canAddDoctor = hospitalId != null && departmentId != null;
 
-                return IconButton(
+                return DmIconButton(
                   icon: const Icon(Icons.add),
                   onPressed: canAddDoctor
                       ? () => _showAddDoctorDialog(context)
                       : null,
                   tooltip: 'Add Doctor',
-                  style: IconButton.styleFrom(
-                    backgroundColor: canAddDoctor
-                        ? Theme.of(context).primaryColor.withValues(alpha: 0.1)
-                        : Colors.transparent,
-                  ),
                 );
               },
             );
@@ -628,114 +607,109 @@ class _DoctorDropdown extends StatelessWidget {
     final titleController = TextEditingController();
     final specialtyController = TextEditingController();
 
-    showDialog(
+    showDmDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Add Doctor'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: nameController,
-              decoration: const InputDecoration(
-                labelText: 'Doctor Name',
-                border: OutlineInputBorder(),
-              ),
-              autofocus: true,
+      title: const Text('Add Doctor'),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          TextField(
+            controller: nameController,
+            decoration: const InputDecoration(
+              labelText: 'Doctor Name',
+              border: OutlineInputBorder(),
             ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: titleController,
-              decoration: const InputDecoration(
-                labelText: 'Title (Optional)',
-                border: OutlineInputBorder(),
-                hintText: 'e.g., Dr., Prof., MD',
-              ),
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: specialtyController,
-              decoration: const InputDecoration(
-                labelText: 'Specialty (Optional)',
-                border: OutlineInputBorder(),
-                hintText: 'e.g., Cardiology, Neurology',
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancel'),
+            autofocus: true,
           ),
-          ElevatedButton(
-            onPressed: () async {
-              final name = nameController.text.trim();
-              if (name.isEmpty) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Please enter a doctor name')),
-                );
-                return;
-              }
-
-              final title = titleController.text.trim().isEmpty
-                  ? null
-                  : titleController.text.trim();
-              final specialty = specialtyController.text.trim().isEmpty
-                  ? null
-                  : specialtyController.text.trim();
-
-              // Capture navigator and scaffold messenger before async gap
-              final navigator = Navigator.of(context);
-              final scaffoldMessenger = ScaffoldMessenger.of(context);
-
-              navigator.pop();
-
-              // Show loading indicator
-              showDialog(
-                context: context,
-                barrierDismissible: false,
-                builder: (context) => const AlertDialog(
-                  content: Row(
-                    children: [
-                      CircularProgressIndicator(),
-                      SizedBox(width: 16),
-                      Text('Adding doctor...'),
-                    ],
-                  ),
-                ),
-              );
-
-              try {
-                final success = await visitFormBloc.quickAddDoctor(
-                  name,
-                  title: title,
-                  specialty: specialty,
-                );
-                navigator.pop(); // Remove loading dialog
-
-                if (success) {
-                  scaffoldMessenger.showSnackBar(
-                    SnackBar(
-                      content: Text('Doctor "$name" added successfully'),
-                    ),
-                  );
-                } else {
-                  scaffoldMessenger.showSnackBar(
-                    const SnackBar(content: Text('Failed to add doctor')),
-                  );
-                }
-              } catch (e) {
-                navigator.pop(); // Remove loading dialog
-                scaffoldMessenger.showSnackBar(
-                  SnackBar(content: Text('Error: $e')),
-                );
-              }
-            },
-            child: const Text('Add'),
+          const SizedBox(height: 16),
+          TextField(
+            controller: titleController,
+            decoration: const InputDecoration(
+              labelText: 'Title (Optional)',
+              border: OutlineInputBorder(),
+              hintText: 'e.g., Dr., Prof., MD',
+            ),
+          ),
+          const SizedBox(height: 16),
+          TextField(
+            controller: specialtyController,
+            decoration: const InputDecoration(
+              labelText: 'Specialty (Optional)',
+              border: OutlineInputBorder(),
+              hintText: 'e.g., Cardiology, Neurology',
+            ),
           ),
         ],
       ),
+      actions: [
+        DmButton(
+          variant: DmButtonVariant.text,
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Text('Cancel'),
+        ),
+        DmButton(
+          onPressed: () async {
+            final name = nameController.text.trim();
+            if (name.isEmpty) {
+              showAppErrorSnackbar(context, 'Please enter a doctor name');
+              return;
+            }
+
+            final title = titleController.text.trim().isEmpty
+                ? null
+                : titleController.text.trim();
+            final specialty = specialtyController.text.trim().isEmpty
+                ? null
+                : specialtyController.text.trim();
+
+            // Capture navigator before async gap
+            final navigator = Navigator.of(context);
+
+            navigator.pop();
+
+            // Show loading indicator
+            showDmDialog(
+              context: context,
+              title: const Text('Please Wait'),
+              content: const Row(
+                children: [
+                  CircularProgressIndicator(),
+                  SizedBox(width: 16),
+                  Text('Adding doctor...'),
+                ],
+              ),
+            );
+
+            try {
+              final success = await visitFormBloc.quickAddDoctor(
+                name,
+                title: title,
+                specialty: specialty,
+              );
+              navigator.pop(); // Remove loading dialog
+
+              if (success) {
+                if (context.mounted) {
+                  showAppSuccessSnackbar(
+                    context,
+                    'Doctor "$name" added successfully',
+                  );
+                }
+              } else {
+                if (context.mounted) {
+                  showAppErrorSnackbar(context, 'Failed to add doctor');
+                }
+              }
+            } catch (e) {
+              navigator.pop(); // Remove loading dialog
+              if (context.mounted) {
+                showAppErrorSnackbar(context, 'Error: $e');
+              }
+            }
+          },
+          child: const Text('Add'),
+        ),
+      ],
     );
   }
 }

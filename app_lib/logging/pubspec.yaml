@@ -12,6 +12,8 @@ dependencies:
   flutter:
     sdk: flutter
 
+  duskmoon_widgets: ^1.4.0
+  app_feedback: any
   logging: ^1.2.0
   stack_trace: ^1.11.1
   shared_preferences: ^2.0.17

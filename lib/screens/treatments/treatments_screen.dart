@@ -1,6 +1,8 @@
 import 'package:app_adaptive_widgets/app_adaptive_widgets.dart';
 import 'package:app_database/app_database.dart';
+import 'package:app_feedback/app_feedback.dart';
 import 'package:app_locale/app_locale.dart';
+import 'package:duskmoon_widgets/duskmoon_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -35,16 +37,9 @@ class _TreatmentsScreenState extends State<TreatmentsScreen> {
     return BlocConsumer<TreatmentBloc, TreatmentState>(
       listener: (context, state) {
         if (state is TreatmentOperationSuccess) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(state.message)),
-          );
+          showAppSuccessSnackbar(context, state.message);
         } else if (state is TreatmentError) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(state.message),
-              backgroundColor: Theme.of(context).colorScheme.error,
-            ),
-          );
+          showAppErrorSnackbar(context, state.message);
         }
       },
       builder: (context, state) {
@@ -52,8 +47,7 @@ class _TreatmentsScreenState extends State<TreatmentsScreen> {
           floatingActionButton: state is TreatmentLoaded && state.treatments.isNotEmpty
               ? Padding(
                   padding: const EdgeInsets.only(bottom: 80),
-                  child: FloatingActionButton(
-                    heroTag: 'treatments_fab',
+                  child: DmFab(
                     onPressed: () {
                       context.pushNamed(AddTreatmentScreen.name);
                     },
@@ -99,7 +93,7 @@ class _TreatmentsScreenState extends State<TreatmentsScreen> {
                               textAlign: TextAlign.center,
                             ),
                             const SizedBox(height: 16),
-                            ElevatedButton(
+                            DmButton(
                               onPressed: () {
                                 context.read<TreatmentBloc>().add(LoadTreatments());
                               },
@@ -138,13 +132,19 @@ class _TreatmentsScreenState extends State<TreatmentsScreen> {
               style: Theme.of(context).textTheme.titleLarge,
             ),
             const SizedBox(height: 8),
-            ElevatedButton.icon(
+            DmButton(
               onPressed: () {
                 context.read<TreatmentBloc>().add(LoadTreatments());
                 context.pushNamed(AddTreatmentScreen.name);
               },
-              icon: const Icon(Icons.add),
-              label: Text(context.l10n.addTreatment),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.add),
+                  const SizedBox(width: 8),
+                  Text(context.l10n.addTreatment),
+                ],
+              ),
             ),
           ],
         ),
@@ -182,7 +182,7 @@ class TreatmentCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
+    return DmCard(
       margin: const EdgeInsets.symmetric(vertical: 4.0),
       child: ListTile(
         leading: CircleAvatar(
@@ -245,13 +245,13 @@ context.pushNamed(
                 ],
               ),
             ),
-            const PopupMenuItem(
+            PopupMenuItem(
               value: 'delete',
               child: Row(
                 children: [
-                  Icon(Icons.delete, color: Colors.red),
-                  SizedBox(width: 8),
-                  Text('Delete', style: TextStyle(color: Colors.red)),
+                  Icon(Icons.delete, color: Theme.of(context).colorScheme.error),
+                  const SizedBox(width: 8),
+                  Text('Delete', style: TextStyle(color: Theme.of(context).colorScheme.error)),
                 ],
               ),
             ),
@@ -267,28 +267,15 @@ context.pushNamed(
     );
   }
 
-  void _showDeleteDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(context.l10n.deleteTreatment),
-        content: Text(context.l10n.deleteTreatmentConfirmation),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: Text(context.l10n.cancel),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              context.read<TreatmentBloc>().add(DeleteTreatment(treatment.id));
-            },
-            style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: Text(context.l10n.delete),
-          ),
-        ],
-      ),
+  void _showDeleteDialog(BuildContext context) async {
+    final confirmed = await showAppDeleteDialog(
+      context,
+      title: context.l10n.deleteTreatment,
+      content: context.l10n.deleteTreatmentConfirmation,
     );
+    if (confirmed && context.mounted) {
+      context.read<TreatmentBloc>().add(DeleteTreatment(treatment.id));
+    }
   }
 
   String _formatDate(DateTime date) {

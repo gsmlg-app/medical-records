@@ -13,6 +13,8 @@ dependencies:
     sdk: flutter
   flutter_bloc: ^9.0.0
   duskmoon_form: ^1.4.0
+  duskmoon_widgets: ^1.4.0
+  app_feedback: any
   app_locale: any
   app_logging: any
   app_database: any

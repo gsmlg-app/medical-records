@@ -1,3 +1,5 @@
+import 'package:app_feedback/app_feedback.dart';
+import 'package:duskmoon_widgets/duskmoon_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:app_locale/app_locale.dart';
@@ -88,16 +90,9 @@ class _HospitalFormWidgetState extends State<HospitalFormWidget> {
     return BlocListener<HospitalFormBloc, HospitalFormState>(
       listener: (context, state) {
         if (state is HospitalFormSubmissionFailure) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(state.error), backgroundColor: Colors.red),
-          );
+          showAppErrorSnackbar(context, state.error);
         } else if (state is HospitalFormSubmissionSuccess) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(state.message),
-              backgroundColor: Colors.green,
-            ),
-          );
+          showAppSuccessSnackbar(context, state.message);
         }
       },
       child: BlocBuilder<HospitalFormBloc, HospitalFormState>(
@@ -191,14 +186,15 @@ class _HospitalFormWidgetState extends State<HospitalFormWidget> {
                 Row(
                   children: [
                     Expanded(
-                      child: OutlinedButton(
+                      child: DmButton(
+                        variant: DmButtonVariant.outlined,
                         onPressed: isSubmitting ? null : _onCancel,
                         child: Text(context.l10n.cancel),
                       ),
                     ),
                     const SizedBox(width: 16),
                     Expanded(
-                      child: ElevatedButton(
+                      child: DmButton(
                         onPressed:
                             (isSubmitting ||
                                 !(state is HospitalFormLoaded &&

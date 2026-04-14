@@ -1,7 +1,9 @@
 import 'package:app_adaptive_widgets/app_adaptive_widgets.dart';
 import 'package:app_database/app_database.dart';
+import 'package:app_feedback/app_feedback.dart';
 import 'package:app_locale/app_locale.dart';
 import 'package:app_logging/app_logging.dart';
+import 'package:duskmoon_widgets/duskmoon_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:duskmoon_form/duskmoon_form.dart';
@@ -63,7 +65,7 @@ class _EditVisitViewState extends State<_EditVisitView> {
 
   void _loadVisit() {
     if (_visitId == null) return;
-    
+
     final state = context.read<VisitBloc>().state;
     if (state is VisitLoaded) {
       try {
@@ -143,9 +145,7 @@ class _EditVisitViewState extends State<_EditVisitView> {
             if (state is FormBlocSuccess) {
               context.pop();
             } else if (state is FormBlocFailure) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('An error occurred')),
-              );
+              showAppErrorSnackbar(context, 'An error occurred');
             }
           },
         ),
@@ -164,15 +164,17 @@ class _EditVisitViewState extends State<_EditVisitView> {
           slivers: [
             SliverAppBar(
               title: Text(context.l10n.editVisit),
-              leading: IconButton(
+              leading: DmIconButton(
                 icon: const Icon(Icons.close),
                 onPressed: () => context.pop(),
+                tooltip: 'Close',
               ),
               actions: [
                 BlocBuilder<VisitFormBloc, FormBlocState<String, String>>(
                   bloc: _visitFormBloc,
                   builder: (context, state) {
-                    return TextButton(
+                    return DmButton(
+                      variant: DmButtonVariant.text,
                       onPressed: state.isValid() && !_isSaving ? _saveVisit : null,
                       child: _isSaving
                         ? const SizedBox(

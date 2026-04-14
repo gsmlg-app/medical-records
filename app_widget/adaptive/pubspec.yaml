@@ -16,6 +16,7 @@ dependencies:
   intl: any
 
   duskmoon_adaptive_scaffold: ^1.4.0
+  duskmoon_widgets: ^1.4.0
   flutter_bloc: ^9.0.0
 
 dev_dependencies:

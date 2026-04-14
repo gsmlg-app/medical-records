@@ -2,7 +2,9 @@ import 'dart:convert';
 
 
 import 'package:app_database/app_database.dart';
+import 'package:app_feedback/app_feedback.dart';
 import 'package:app_locale/app_locale.dart';
+import 'package:duskmoon_widgets/duskmoon_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -96,12 +98,7 @@ class _DepartmentAndDoctorScreenState extends State<DepartmentAndDoctorScreen>
         _isLoading = false;
       });
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error loading data: $e'),
-            backgroundColor: Colors.red,
-          ),
-        );
+        showAppErrorSnackbar(context, 'Error loading data: $e');
       }
     }
   }
@@ -131,7 +128,7 @@ class _DepartmentAndDoctorScreenState extends State<DepartmentAndDoctorScreen>
 
     if (_hospital == null) {
       return Scaffold(
-        appBar: AppBar(
+        appBar: DmAppBar(
           title: Text(context.l10n.departmentAndDoctorTitle),
         ),
         body: Center(
@@ -141,11 +138,12 @@ class _DepartmentAndDoctorScreenState extends State<DepartmentAndDoctorScreen>
     }
 
     return Scaffold(
-      appBar: AppBar(
+      appBar: DmAppBar(
         title: Text(context.l10n.departmentAndDoctorTitle),
-        leading: IconButton(
+        leading: DmIconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => context.goNamed(HospitalsScreen.name),
+          tooltip: 'Back',
         ),
       ),
       body: Column(
@@ -260,7 +258,7 @@ class _DepartmentAndDoctorScreenState extends State<DepartmentAndDoctorScreen>
       itemCount: _departments.length,
       itemBuilder: (context, index) {
         final department = _departments[index];
-        return Card(
+        return DmCard(
           margin: const EdgeInsets.only(bottom: 8),
           child: ListTile(
             leading: CircleAvatar(
@@ -277,18 +275,19 @@ class _DepartmentAndDoctorScreenState extends State<DepartmentAndDoctorScreen>
             trailing: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                IconButton(
+                DmIconButton(
                   icon: const Icon(Icons.edit_outlined),
                   onPressed: () {
                     _showEditDepartmentDialog(department);
                   },
+                  tooltip: 'Edit department',
                 ),
-                IconButton(
-                  icon: const Icon(Icons.delete_outline, color: Colors.red),
+                DmIconButton(
+                  icon: Icon(Icons.delete_outline, color: Theme.of(context).colorScheme.error),
                   onPressed: () {
-                    // TODO: Implement department removal
                     _showRemoveDepartmentDialog(department);
                   },
+                  tooltip: 'Delete department',
                 ),
               ],
             ),
@@ -326,7 +325,7 @@ class _DepartmentAndDoctorScreenState extends State<DepartmentAndDoctorScreen>
       itemCount: _doctors.length,
       itemBuilder: (context, index) {
         final doctor = _doctors[index];
-        return Card(
+        return DmCard(
           margin: const EdgeInsets.only(bottom: 8),
           child: ListTile(
             leading: CircleAvatar(
@@ -379,7 +378,7 @@ class _DepartmentAndDoctorScreenState extends State<DepartmentAndDoctorScreen>
                   future: _getDepartmentById(doctor.departmentId),
                   builder: (context, snapshot) {
                     final departmentExists = snapshot.hasData && snapshot.data != null;
-                    return IconButton(
+                    return DmIconButton(
                       icon: Icon(
                         Icons.edit_outlined,
                         color: departmentExists ? null : Theme.of(context).colorScheme.outline,
@@ -387,15 +386,16 @@ class _DepartmentAndDoctorScreenState extends State<DepartmentAndDoctorScreen>
                       onPressed: departmentExists ? () {
                         _showEditDoctorDialog(doctor);
                       } : null,
+                      tooltip: 'Edit doctor',
                     );
                   },
                 ),
-                IconButton(
-                  icon: const Icon(Icons.delete_outline, color: Colors.red),
+                DmIconButton(
+                  icon: Icon(Icons.delete_outline, color: Theme.of(context).colorScheme.error),
                   onPressed: () {
-                    // TODO: Implement doctor removal
                     _showRemoveDoctorDialog(doctor);
                   },
+                  tooltip: 'Delete doctor',
                 ),
               ],
             ),
@@ -425,56 +425,59 @@ class _DepartmentAndDoctorScreenState extends State<DepartmentAndDoctorScreen>
         ? 'Warning: $doctorsInDepartment doctor${doctorsInDepartment == 1 ? '' : 's'} assigned to this department will also be removed. Are you sure?'
         : 'Are you sure you want to remove ${department.name} from this hospital?';
 
-    showDialog(
+    showDmDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text('Remove Department'),
-        content: Text(warningMessage),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: Text(context.l10n.cancel),
+      title: Text('Remove Department'),
+      content: Text(warningMessage),
+      actions: [
+        DmButton(
+          onPressed: () => Navigator.of(context).pop(),
+          variant: DmButtonVariant.text,
+          child: Text(context.l10n.cancel),
+        ),
+        DmButton(
+          onPressed: () async {
+            Navigator.of(context).pop();
+            await _removeDepartment(department);
+          },
+          variant: DmButtonVariant.text,
+          child: Text(
+            'Remove',
+            style: TextStyle(color: Theme.of(context).colorScheme.error),
           ),
-          TextButton(
-            onPressed: () async {
-              Navigator.of(context).pop();
-              await _removeDepartment(department);
-            },
-            style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: Text('Remove'),
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
   void _showRemoveDoctorDialog(Doctor doctor) {
-    showDialog(
+    showDmDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text('Remove Doctor'),
-        content: Text('Are you sure you want to remove ${doctor.name} from this hospital?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: Text(context.l10n.cancel),
+      title: Text('Remove Doctor'),
+      content: Text('Are you sure you want to remove ${doctor.name} from this hospital?'),
+      actions: [
+        DmButton(
+          onPressed: () => Navigator.of(context).pop(),
+          variant: DmButtonVariant.text,
+          child: Text(context.l10n.cancel),
+        ),
+        DmButton(
+          onPressed: () async {
+            Navigator.of(context).pop();
+            await _removeDoctor(doctor);
+          },
+          variant: DmButtonVariant.text,
+          child: Text(
+            'Remove',
+            style: TextStyle(color: Theme.of(context).colorScheme.error),
           ),
-          TextButton(
-            onPressed: () async {
-              Navigator.of(context).pop();
-              await _removeDoctor(doctor);
-            },
-            style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: Text('Remove'),
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
   Widget _buildFloatingActionButton() {
-    return FloatingActionButton(
-      heroTag: 'department_doctor_fab',
+    return DmFab(
       onPressed: () {
         if (_tabController.index == 0) {
           _showAddDepartmentDialog();
@@ -487,84 +490,63 @@ class _DepartmentAndDoctorScreenState extends State<DepartmentAndDoctorScreen>
   }
 
   void _showAddDepartmentDialog() {
-    showDialog(
+    showDmDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text(context.l10n.addDepartment),
-        content: SizedBox(
-          width: double.maxFinite,
-          child: DepartmentFormWidget(
-            isEditMode: false,
-            onSave: (name, category) async {
-              await _addDepartment(name, category);
-              if (mounted) {
-                Navigator.of(context).pop();
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(context.l10n.departmentAddedSuccess),
-                    backgroundColor: Colors.green,
-                  ),
-                );
-              }
-            },
-          ),
+      title: Text(context.l10n.addDepartment),
+      content: SizedBox(
+        width: double.maxFinite,
+        child: DepartmentFormWidget(
+          isEditMode: false,
+          onSave: (name, category) async {
+            await _addDepartment(name, category);
+            if (mounted) {
+              Navigator.of(context).pop();
+              showAppSuccessSnackbar(context, context.l10n.departmentAddedSuccess);
+            }
+          },
         ),
       ),
     );
   }
 
   void _showEditDepartmentDialog(Department department) {
-    showDialog(
+    showDmDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text(context.l10n.edit),
-        content: SizedBox(
-          width: double.maxFinite,
-          child: DepartmentFormWidget(
-            initialName: department.name,
-            initialCategory: department.category,
-            isEditMode: true,
-            onSave: (name, category) async {
-              await _updateDepartment(department.id, name, category);
-              if (mounted) {
-                Navigator.of(context).pop();
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(context.l10n.departmentUpdatedSuccess),
-                    backgroundColor: Colors.green,
-                  ),
-                );
-              }
-            },
-          ),
+      title: Text(context.l10n.edit),
+      content: SizedBox(
+        width: double.maxFinite,
+        child: DepartmentFormWidget(
+          initialName: department.name,
+          initialCategory: department.category,
+          isEditMode: true,
+          onSave: (name, category) async {
+            await _updateDepartment(department.id, name, category);
+            if (mounted) {
+              Navigator.of(context).pop();
+              showAppSuccessSnackbar(context, context.l10n.departmentUpdatedSuccess);
+            }
+          },
         ),
       ),
     );
   }
 
   void _showAddDoctorDialog() {
-    showDialog(
+    showDmDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text(context.l10n.addDoctor),
-        content: SizedBox(
-          width: double.maxFinite,
-          child: DoctorFormWidget(
-            availableDepartments: _departments,
-            isEditMode: false,
-            onSave: (name, departmentId, level) async {
-              await _addDoctor(name, departmentId, level);
-              if (mounted) {
-                Navigator.of(context).pop();
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(context.l10n.doctorAddedSuccess),
-                    backgroundColor: Colors.green,
-                  ),
-                );
-              }
-            },
-          ),
+      title: Text(context.l10n.addDoctor),
+      content: SizedBox(
+        width: double.maxFinite,
+        child: DoctorFormWidget(
+          availableDepartments: _departments,
+          isEditMode: false,
+          onSave: (name, departmentId, level) async {
+            await _addDoctor(name, departmentId, level);
+            if (mounted) {
+              Navigator.of(context).pop();
+              showAppSuccessSnackbar(context, context.l10n.doctorAddedSuccess);
+            }
+          },
         ),
       ),
     );
@@ -575,47 +557,39 @@ class _DepartmentAndDoctorScreenState extends State<DepartmentAndDoctorScreen>
     final departmentExists = _departments.any((dept) => dept.id == doctor.departmentId);
 
     if (!departmentExists) {
-      showDialog(
+      showDmDialog(
         context: context,
-        builder: (context) => AlertDialog(
-          title: Text('Cannot Edit Doctor'),
-          content: Text('${doctor.name} is assigned to a department that no longer exists. Please remove this doctor and create a new one with a valid department assignment.'),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: Text(context.l10n.ok),
-            ),
-          ],
-        ),
+        title: Text('Cannot Edit Doctor'),
+        content: Text('${doctor.name} is assigned to a department that no longer exists. Please remove this doctor and create a new one with a valid department assignment.'),
+        actions: [
+          DmButton(
+            onPressed: () => Navigator.of(context).pop(),
+            variant: DmButtonVariant.text,
+            child: Text(context.l10n.ok),
+          ),
+        ],
       );
       return;
     }
 
-    showDialog(
+    showDmDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text(context.l10n.edit),
-        content: SizedBox(
-          width: double.maxFinite,
-          child: DoctorFormWidget(
-            initialName: doctor.name,
-            initialLevel: doctor.level,
-            initialDepartmentId: doctor.departmentId,
-            availableDepartments: _departments,
-            isEditMode: true,
-            onSave: (name, departmentId, level) async {
-              await _updateDoctor(doctor.id, name, departmentId, level);
-              if (mounted) {
-                Navigator.of(context).pop();
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(context.l10n.doctorUpdatedSuccess),
-                    backgroundColor: Colors.green,
-                  ),
-                );
-              }
-            },
-          ),
+      title: Text(context.l10n.edit),
+      content: SizedBox(
+        width: double.maxFinite,
+        child: DoctorFormWidget(
+          initialName: doctor.name,
+          initialLevel: doctor.level,
+          initialDepartmentId: doctor.departmentId,
+          availableDepartments: _departments,
+          isEditMode: true,
+          onSave: (name, departmentId, level) async {
+            await _updateDoctor(doctor.id, name, departmentId, level);
+            if (mounted) {
+              Navigator.of(context).pop();
+              showAppSuccessSnackbar(context, context.l10n.doctorUpdatedSuccess);
+            }
+          },
         ),
       ),
     );
@@ -660,12 +634,7 @@ class _DepartmentAndDoctorScreenState extends State<DepartmentAndDoctorScreen>
       await _fetchData();
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error adding department: $e'),
-            backgroundColor: Colors.red,
-          ),
-        );
+        showAppErrorSnackbar(context, 'Error adding department: $e');
       }
     }
   }
@@ -686,12 +655,7 @@ class _DepartmentAndDoctorScreenState extends State<DepartmentAndDoctorScreen>
       await _fetchData();
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error updating department: $e'),
-            backgroundColor: Colors.red,
-          ),
-        );
+        showAppErrorSnackbar(context, 'Error updating department: $e');
       }
     }
   }
@@ -736,21 +700,11 @@ class _DepartmentAndDoctorScreenState extends State<DepartmentAndDoctorScreen>
       await _fetchData();
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(context.l10n.departmentRemovedSuccess),
-            backgroundColor: Colors.green,
-          ),
-        );
+        showAppSuccessSnackbar(context, context.l10n.departmentRemovedSuccess);
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error removing department: $e'),
-            backgroundColor: Colors.red,
-          ),
-        );
+        showAppErrorSnackbar(context, 'Error removing department: $e');
       }
     }
   }
@@ -772,12 +726,7 @@ class _DepartmentAndDoctorScreenState extends State<DepartmentAndDoctorScreen>
       await _fetchData();
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error adding doctor: $e'),
-            backgroundColor: Colors.red,
-          ),
-        );
+        showAppErrorSnackbar(context, 'Error adding doctor: $e');
       }
     }
   }
@@ -802,12 +751,7 @@ class _DepartmentAndDoctorScreenState extends State<DepartmentAndDoctorScreen>
       await _fetchData();
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error updating doctor: $e'),
-            backgroundColor: Colors.red,
-          ),
-        );
+        showAppErrorSnackbar(context, 'Error updating doctor: $e');
       }
     }
   }
@@ -822,21 +766,11 @@ class _DepartmentAndDoctorScreenState extends State<DepartmentAndDoctorScreen>
       await _fetchData();
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(context.l10n.doctorRemovedSuccess),
-            backgroundColor: Colors.green,
-          ),
-        );
+        showAppSuccessSnackbar(context, context.l10n.doctorRemovedSuccess);
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error removing doctor: $e'),
-            backgroundColor: Colors.red,
-          ),
-        );
+        showAppErrorSnackbar(context, 'Error removing doctor: $e');
       }
     }
   }

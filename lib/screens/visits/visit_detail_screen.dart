@@ -3,9 +3,11 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:app_database/app_database.dart';
+import 'package:app_feedback/app_feedback.dart';
 import 'package:app_locale/app_locale.dart';
 import 'package:app_resources/app_resources.dart';
 import 'package:app_storage/app_storage.dart';
+import 'package:duskmoon_widgets/duskmoon_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -171,13 +173,15 @@ class _VisitDetailScreenState extends State<VisitDetailScreen> {
             slivers: [
               SliverAppBar(
                 title: Text(context.l10n.visitDetails),
-                leading: IconButton(
+                leading: DmIconButton(
                   icon: const Icon(Icons.arrow_back),
                   onPressed: () => context.pop(),
+                  tooltip: 'Go back',
                 ),
                 actions: [
-                  IconButton(
+                  DmIconButton(
                     icon: const Icon(Icons.edit),
+                    tooltip: 'Edit visit',
                     onPressed: () async {
                       if (_visit != null) {
                         await context.pushNamed(
@@ -192,8 +196,9 @@ class _VisitDetailScreenState extends State<VisitDetailScreen> {
                       }
                     },
                   ),
-                  IconButton(
+                  DmIconButton(
                     icon: const Icon(Icons.delete),
+                    tooltip: 'Delete visit',
                     onPressed: _visit != null
                         ? () => _showDeleteDialog(context)
                         : null,
@@ -228,7 +233,7 @@ class _VisitDetailScreenState extends State<VisitDetailScreen> {
       (r) => r.type == 'image' || r.type == 'document',
     );
 
-    return Card(
+    return DmCard(
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -242,10 +247,17 @@ class _VisitDetailScreenState extends State<VisitDetailScreen> {
                   style: Theme.of(context).textTheme.titleLarge,
                 ),
                 if (hasExportableResources && !_isLoading)
-                  TextButton.icon(
+                  DmButton(
+                    variant: DmButtonVariant.text,
                     onPressed: _exportResourcesToGallery,
-                    icon: const Icon(Icons.save_alt),
-                    label: Text(context.l10n.exportToGallery),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.save_alt),
+                        const SizedBox(width: 4),
+                        Text(context.l10n.exportToGallery),
+                      ],
+                    ),
                   ),
               ],
             ),
@@ -285,7 +297,7 @@ class _VisitDetailScreenState extends State<VisitDetailScreen> {
         .toList();
 
     if (exportableResources.isEmpty) {
-      _showSnackBar(context.l10n.noImagesToExport, isError: true);
+      showAppErrorSnackbar(context, context.l10n.noImagesToExport);
       return;
     }
 
@@ -336,18 +348,19 @@ class _VisitDetailScreenState extends State<VisitDetailScreen> {
 
       if (mounted) {
         if (failCount == 0) {
-          _showSnackBar(context.l10n.exportSuccess(successCount));
+          showAppSuccessSnackbar(context, context.l10n.exportSuccess(successCount));
         } else if (successCount > 0) {
-          _showSnackBar(
+          showAppSuccessSnackbar(
+            context,
             context.l10n.exportPartialSuccess(successCount, failCount),
           );
         } else {
-          _showSnackBar(context.l10n.exportFailed, isError: true);
+          showAppErrorSnackbar(context, context.l10n.exportFailed);
         }
       }
     } catch (e) {
       if (mounted) {
-        _showSnackBar(context.l10n.exportFailed, isError: true);
+        showAppErrorSnackbar(context, context.l10n.exportFailed);
       }
     } finally {
       if (mounted) {
@@ -425,17 +438,8 @@ class _VisitDetailScreenState extends State<VisitDetailScreen> {
     return {'success': successCount, 'failed': failCount};
   }
 
-  void _showSnackBar(String message, {bool isError = false}) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: isError ? Colors.red : Colors.green,
-      ),
-    );
-  }
-
   Widget _buildInfoCard() {
-    return Card(
+    return DmCard(
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -568,29 +572,16 @@ class _VisitDetailScreenState extends State<VisitDetailScreen> {
     );
   }
 
-  void _showDeleteDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(context.l10n.deleteVisit),
-        content: Text(context.l10n.deleteVisitConfirmation),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: Text(context.l10n.cancel),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              context.read<VisitBloc>().add(DeleteVisit(_visit!.id));
-              context.pop(); // Go back to previous screen
-            },
-            style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: Text(context.l10n.delete),
-          ),
-        ],
-      ),
+  void _showDeleteDialog(BuildContext context) async {
+    final confirmed = await showAppDeleteDialog(
+      context,
+      title: context.l10n.deleteVisit,
+      content: context.l10n.deleteVisitConfirmation,
     );
+    if (confirmed && context.mounted) {
+      context.read<VisitBloc>().add(DeleteVisit(_visit!.id));
+      context.pop(); // Go back to previous screen
+    }
   }
 
   String _formatDate(DateTime date) {

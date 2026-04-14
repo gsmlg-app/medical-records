@@ -1,5 +1,7 @@
 import 'package:app_database/app_database.dart';
+import 'package:app_feedback/app_feedback.dart';
 import 'package:app_locale/app_locale.dart';
+import 'package:duskmoon_widgets/duskmoon_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -24,43 +26,48 @@ class HospitalListItem extends StatelessWidget {
   }
 
   void _deleteHospital(BuildContext context) {
-    showDialog(
+    showDmDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text(context.l10n.deleteHospital),
-        content: Text(context.l10n.deleteHospitalConfirmation),
-        actions: [
-          TextButton(
-            onPressed: () => context.pop(),
-            child: Text(context.l10n.cancel),
+      title: Text(context.l10n.deleteHospital),
+      content: Text(context.l10n.deleteHospitalConfirmation),
+      actions: [
+        DmButton(
+          onPressed: () => context.pop(),
+          variant: DmButtonVariant.text,
+          child: Text(context.l10n.cancel),
+        ),
+        DmButton(
+          onPressed: () {
+            context.pop();
+            context.read<HospitalBloc>().add(DeleteHospital(hospital.id));
+          },
+          variant: DmButtonVariant.text,
+          child: Text(
+            context.l10n.delete,
+            style: TextStyle(color: Theme.of(context).colorScheme.error),
           ),
-          TextButton(
-            onPressed: () {
-              context.pop();
-              context.read<HospitalBloc>().add(DeleteHospital(hospital.id));
-            },
-            style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: Text(context.l10n.delete),
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    return Card(
+    final errorColor = Theme.of(context).colorScheme.error;
+    final onErrorColor = Theme.of(context).colorScheme.onError;
+
+    return DmCard(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Dismissible(
         key: Key(hospital.id.toString()),
         direction: DismissDirection.endToStart,
         background: Container(
-          color: Colors.red,
+          color: errorColor,
           alignment: Alignment.centerRight,
           padding: const EdgeInsets.only(right: 16),
-          child: const Icon(
+          child: Icon(
             Icons.delete,
-            color: Colors.white,
+            color: onErrorColor,
             size: 24,
           ),
         ),
@@ -171,38 +178,41 @@ class HospitalListItem extends StatelessWidget {
                   break;
               }
             },
-            itemBuilder: (context) => [
-              PopupMenuItem(
-                value: 'edit',
-                child: Row(
-                  children: [
-                    const Icon(Icons.edit_outlined),
-                    const SizedBox(width: 8),
-                    Text(context.l10n.edit),
-                  ],
+            itemBuilder: (context) {
+              final menuErrorColor = Theme.of(context).colorScheme.error;
+              return [
+                PopupMenuItem(
+                  value: 'edit',
+                  child: Row(
+                    children: [
+                      const Icon(Icons.edit_outlined),
+                      const SizedBox(width: 8),
+                      Text(context.l10n.edit),
+                    ],
+                  ),
                 ),
-              ),
-              PopupMenuItem(
-                value: 'departments_doctors',
-                child: Row(
-                  children: [
-                    const Icon(Icons.medical_services_outlined),
-                    const SizedBox(width: 8),
-                    Text(context.l10n.departmentAndDoctor),
-                  ],
+                PopupMenuItem(
+                  value: 'departments_doctors',
+                  child: Row(
+                    children: [
+                      const Icon(Icons.medical_services_outlined),
+                      const SizedBox(width: 8),
+                      Text(context.l10n.departmentAndDoctor),
+                    ],
+                  ),
                 ),
-              ),
-              PopupMenuItem(
-                value: 'delete',
-                child: Row(
-                  children: [
-                    const Icon(Icons.delete_outline, color: Colors.red),
-                    const SizedBox(width: 8),
-                    Text(context.l10n.delete, style: const TextStyle(color: Colors.red)),
-                  ],
+                PopupMenuItem(
+                  value: 'delete',
+                  child: Row(
+                    children: [
+                      Icon(Icons.delete_outline, color: menuErrorColor),
+                      const SizedBox(width: 8),
+                      Text(context.l10n.delete, style: TextStyle(color: menuErrorColor)),
+                    ],
+                  ),
                 ),
-              ),
-            ],
+              ];
+            },
           ),
           onTap: () => _editHospital(context),
         ),

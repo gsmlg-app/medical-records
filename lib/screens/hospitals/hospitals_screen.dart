@@ -1,5 +1,7 @@
 import 'package:app_adaptive_widgets/app_adaptive_widgets.dart';
+import 'package:app_feedback/app_feedback.dart';
 import 'package:app_locale/app_locale.dart';
+import 'package:duskmoon_widgets/duskmoon_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -37,16 +39,9 @@ class _HospitalsScreenState extends State<HospitalsScreen> {
     return BlocConsumer<HospitalBloc, HospitalState>(
       listener: (context, state) {
         if (state is HospitalOperationSuccess) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(state.message)),
-          );
+          showAppSuccessSnackbar(context, state.message);
         } else if (state is HospitalError) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(state.message),
-              backgroundColor: Colors.red,
-            ),
-          );
+          showAppErrorSnackbar(context, state.message);
         }
       },
       builder: (context, state) {
@@ -55,8 +50,7 @@ class _HospitalsScreenState extends State<HospitalsScreen> {
               state is HospitalLoaded && state.hospitals.isNotEmpty
                   ? Padding(
                       padding: const EdgeInsets.only(bottom: 80),
-                      child: FloatingActionButton(
-                        heroTag: 'hospitals_fab',
+                      child: DmFab(
                         onPressed: _addHospital,
                         child: const Icon(Icons.add),
                       ),
@@ -118,10 +112,16 @@ class _HospitalsScreenState extends State<HospitalsScreen> {
                   style: Theme.of(context).textTheme.titleLarge,
                 ),
                 const SizedBox(height: 8),
-                ElevatedButton.icon(
+                DmButton(
                   onPressed: _addHospital,
-                  icon: const Icon(Icons.add),
-                  label: Text(context.l10n.addHospital),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.add),
+                      const SizedBox(width: 8),
+                      Text(context.l10n.addHospital),
+                    ],
+                  ),
                 ),
               ],
             ),
@@ -158,7 +158,7 @@ class _HospitalsScreenState extends State<HospitalsScreen> {
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 16),
-              ElevatedButton(
+              DmButton(
                 onPressed: () {
                   context.read<HospitalBloc>().add(LoadHospitals());
                 },

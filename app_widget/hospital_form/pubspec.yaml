@@ -12,6 +12,8 @@ dependencies:
   flutter:
     sdk: flutter
 
+  duskmoon_widgets: ^1.4.0
+  app_feedback: any
   app_locale: any
   app_database: any
   hospital_form_bloc: any

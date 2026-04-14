@@ -1,3 +1,4 @@
+import 'package:duskmoon_widgets/duskmoon_widgets.dart';
 import 'package:flutter/material.dart';
 
 export 'package:duskmoon_adaptive_scaffold/duskmoon_adaptive_scaffold.dart';
@@ -72,8 +73,9 @@ class AppAdaptiveActionList extends StatelessWidget {
           direction: direction,
           children: actions
               .map<Widget>(
-                (action) => IconButton(
+                (action) => DmIconButton(
                   icon: Icon(action.icon),
+                  tooltip: action.title,
                   onPressed: action.disabled ? null : action.onPressed,
                 ),
               )
@@ -85,10 +87,17 @@ class AppAdaptiveActionList extends StatelessWidget {
           direction: direction,
           children: actions
               .map<Widget>(
-                (action) => TextButton.icon(
-                  icon: Icon(action.icon),
-                  label: Text(action.title),
+                (action) => DmButton(
+                  variant: DmButtonVariant.text,
                   onPressed: action.disabled ? null : action.onPressed,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(action.icon),
+                      const SizedBox(width: 8),
+                      Text(action.title),
+                    ],
+                  ),
                 ),
               )
               .toList(),

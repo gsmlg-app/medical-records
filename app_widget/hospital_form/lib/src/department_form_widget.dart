@@ -1,3 +1,5 @@
+import 'package:app_feedback/app_feedback.dart';
+import 'package:duskmoon_widgets/duskmoon_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:app_locale/app_locale.dart';
 
@@ -96,9 +98,7 @@ class _DepartmentFormWidgetState extends State<DepartmentFormWidget> {
         await widget.onSave(_nameController.text.trim(), _selectedCategory);
       } catch (e) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
-          );
+          showAppErrorSnackbar(context, 'Error: $e');
         }
       } finally {
         if (mounted) {
@@ -171,14 +171,15 @@ class _DepartmentFormWidgetState extends State<DepartmentFormWidget> {
           Row(
             children: [
               Expanded(
-                child: OutlinedButton(
+                child: DmButton(
+                  variant: DmButtonVariant.outlined,
                   onPressed: _isSubmitting ? null : _onCancel,
                   child: Text(context.l10n.cancel),
                 ),
               ),
               const SizedBox(width: 16),
               Expanded(
-                child: ElevatedButton(
+                child: DmButton(
                   onPressed: _isSubmitting ? null : _onSave,
                   child: _isSubmitting
                       ? const SizedBox(

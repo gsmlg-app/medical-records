@@ -4,6 +4,8 @@ import 'package:app_locale/app_locale.dart';
 import 'package:app_database/app_database.dart';
 import 'package:app_storage/app_storage.dart';
 import 'package:app_logging/app_logging.dart';
+import 'package:app_feedback/app_feedback.dart';
+import 'package:duskmoon_widgets/duskmoon_widgets.dart';
 import 'resource_picker.dart';
 import 'resource_list_item.dart';
 
@@ -49,6 +51,8 @@ class _ResourcesSectionState extends State<ResourcesSection> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -62,15 +66,15 @@ class _ResourcesSectionState extends State<ResourcesSection> {
               ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
             ),
             if (!widget.isReadOnly)
-              ElevatedButton.icon(
+              DmButton(
                 onPressed: _isLoading ? null : _showResourcePicker,
-                icon: const Icon(Icons.add),
-                label: Text(context.l10n.addResource),
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 8,
-                  ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.add),
+                    const SizedBox(width: 8),
+                    Text(context.l10n.addResource),
+                  ],
                 ),
               ),
           ],
@@ -82,18 +86,22 @@ class _ResourcesSectionState extends State<ResourcesSection> {
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: Colors.grey[100],
+              color: colorScheme.surfaceContainerHighest,
               borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: Colors.grey[300]!),
+              border: Border.all(color: colorScheme.outlineVariant),
             ),
             child: Row(
               children: [
-                Icon(Icons.folder_open, color: Colors.grey[600], size: 20),
+                Icon(
+                  Icons.folder_open,
+                  color: colorScheme.onSurfaceVariant,
+                  size: 20,
+                ),
                 const SizedBox(width: 8),
                 Text(
                   context.l10n.noResources,
                   style: TextStyle(
-                    color: Colors.grey[600],
+                    color: colorScheme.onSurfaceVariant,
                     fontStyle: FontStyle.italic,
                   ),
                 ),
@@ -184,10 +192,10 @@ class _ResourcesSectionState extends State<ResourcesSection> {
       widget.onResourcesChanged?.call(_resources);
       AppLogger().d('Parent notified of resource change');
 
-      if (mounted) _showSuccess(context.l10n.resourceAdded);
+      if (mounted) showAppSuccessSnackbar(context, context.l10n.resourceAdded);
     } catch (e, stackTrace) {
       AppLogger().e('Failed to add resource: $e', e, stackTrace);
-      _showError('Failed to add resource: $e');
+      if (mounted) showAppErrorSnackbar(context, 'Failed to add resource: $e');
     } finally {
       setState(() => _isLoading = false);
     }
@@ -206,9 +214,9 @@ class _ResourcesSectionState extends State<ResourcesSection> {
       // Notify parent
       widget.onResourcesChanged?.call(_resources);
 
-      if (mounted) _showSuccess(context.l10n.resourceRemoved);
+      if (mounted) showAppSuccessSnackbar(context, context.l10n.resourceRemoved);
     } catch (e) {
-      _showError('Failed to delete resource: $e');
+      if (mounted) showAppErrorSnackbar(context, 'Failed to delete resource: $e');
     }
   }
 
@@ -218,29 +226,28 @@ class _ResourcesSectionState extends State<ResourcesSection> {
   ) async {
     final nameController = TextEditingController(text: currentName ?? '');
 
-    return showDialog<String>(
+    return showDmDialog<String>(
       context: dialogContext,
-      builder: (context) => AlertDialog(
-        title: Text(context.l10n.editResourceName),
-        content: TextField(
-          controller: nameController,
-          decoration: InputDecoration(
-            labelText: context.l10n.resourceName,
-            hintText: context.l10n.resourceNameHint,
-          ),
-          autofocus: true,
+      title: Text(context.l10n.editResourceName),
+      content: TextField(
+        controller: nameController,
+        decoration: InputDecoration(
+          labelText: context.l10n.resourceName,
+          hintText: context.l10n.resourceNameHint,
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: Text(context.l10n.cancel),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.of(context).pop(nameController.text),
-            child: Text(context.l10n.ok),
-          ),
-        ],
+        autofocus: true,
       ),
+      actions: [
+        DmButton(
+          onPressed: () => Navigator.of(dialogContext).pop(),
+          variant: DmButtonVariant.text,
+          child: Text(context.l10n.cancel),
+        ),
+        DmButton(
+          onPressed: () => Navigator.of(dialogContext).pop(nameController.text),
+          child: Text(context.l10n.ok),
+        ),
+      ],
     );
   }
 
@@ -265,7 +272,7 @@ class _ResourcesSectionState extends State<ResourcesSection> {
     });
 
     widget.onResourcesChanged?.call(_resources);
-    _showSuccess(context.l10n.resourceNameUpdated);
+    showAppSuccessSnackbar(context, context.l10n.resourceNameUpdated);
   }
 
   Future<void> _openResource(Resource resource) async {
@@ -274,7 +281,9 @@ class _ResourcesSectionState extends State<ResourcesSection> {
       final file = await _storageService.getResourceFile(resource.filePath);
 
       if (!await file.exists()) {
-        _showError('File not found: ${resource.filePath}');
+        if (mounted) {
+          showAppErrorSnackbar(context, 'File not found: ${resource.filePath}');
+        }
         AppLogger().e('File not found: ${file.path}');
         return;
       }
@@ -310,7 +319,7 @@ class _ResourcesSectionState extends State<ResourcesSection> {
                       ),
                     ),
                     if (!widget.isReadOnly) ...[
-                      IconButton(
+                      DmIconButton(
                         icon: const Icon(Icons.edit, size: 20),
                         tooltip: 'Edit Name',
                         onPressed: () async {
@@ -327,7 +336,7 @@ class _ResourcesSectionState extends State<ResourcesSection> {
                         },
                       ),
                       if (originalResource.type == 'image')
-                        IconButton(
+                        DmIconButton(
                           icon: const Icon(Icons.rotate_right, size: 20),
                           tooltip: 'Rotate',
                           onPressed: () {
@@ -376,12 +385,13 @@ class _ResourcesSectionState extends State<ResourcesSection> {
                   ),
                 ),
                 actions: [
-                  TextButton(
+                  DmButton(
                     onPressed: () => Navigator.of(dialogContext).pop(false),
+                    variant: DmButtonVariant.text,
                     child: Text(context.l10n.cancel),
                   ),
                   if (!widget.isReadOnly)
-                    ElevatedButton(
+                    DmButton(
                       onPressed: hasChanges
                           ? () => Navigator.of(dialogContext).pop(true)
                           : null,
@@ -400,27 +410,18 @@ class _ResourcesSectionState extends State<ResourcesSection> {
       }
     } catch (e, stackTrace) {
       AppLogger().e('Failed to open resource: $e', e, stackTrace);
-      _showError('Failed to open resource: $e');
+      if (mounted) {
+        showAppErrorSnackbar(context, 'Failed to open resource: $e');
+      }
     }
   }
 
   String _formatFileSize(int bytes) {
     if (bytes < 1024) return '$bytes B';
     if (bytes < 1024 * 1024) return '${(bytes / 1024).toStringAsFixed(1)} KB';
-    if (bytes < 1024 * 1024 * 1024)
+    if (bytes < 1024 * 1024 * 1024) {
       return '${(bytes / (1024 * 1024)).toStringAsFixed(1)} MB';
+    }
     return '${(bytes / (1024 * 1024 * 1024)).toStringAsFixed(1)} GB';
-  }
-
-  void _showError(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message), backgroundColor: Colors.red),
-    );
-  }
-
-  void _showSuccess(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message), backgroundColor: Colors.green),
-    );
   }
 }

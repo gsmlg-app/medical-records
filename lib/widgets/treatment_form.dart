@@ -1,4 +1,5 @@
 import 'package:app_database/app_database.dart';
+import 'package:app_feedback/app_feedback.dart';
 import 'package:app_locale/app_locale.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -56,8 +57,9 @@ class _TreatmentFormState extends State<TreatmentForm> {
       listener: (context, state) {
         // Handle any state changes that require UI actions
         if (state.status == TreatmentFormStatus.error) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(state.error ?? 'An error occurred')),
+          showAppErrorSnackbar(
+            context,
+            state.error ?? 'An error occurred',
           );
         }
       },
@@ -151,7 +153,7 @@ class _TreatmentFormState extends State<TreatmentForm> {
       lastDate: DateTime(2101),
     );
 
-    if (picked != null) {
+    if (picked != null && mounted) {
       if (isStartDate) {
         context.read<TreatmentFormBloc>().add(
               TreatmentFormStartDateChanged(picked),
@@ -176,9 +178,7 @@ class _TreatmentFormState extends State<TreatmentForm> {
 
       if (!blocState.isFormValid) {
         if (!blocState.isStartDateValid) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(context.l10n.fieldRequired)),
-          );
+          showAppErrorSnackbar(context, context.l10n.fieldRequired);
           return false;
         }
         return false;
@@ -193,9 +193,9 @@ class _TreatmentFormState extends State<TreatmentForm> {
         );
         return true;
       } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: ${e.toString()}')),
-        );
+        if (mounted) {
+          showAppErrorSnackbar(context, 'Error: ${e.toString()}');
+        }
         return false;
       }
     }

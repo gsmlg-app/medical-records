@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:ui';
 
+import 'package:app_feedback/app_feedback.dart';
+import 'package:duskmoon_widgets/duskmoon_widgets.dart';
 import 'package:flutter/material.dart';
 
 import 'error_reporting_service.dart';
@@ -84,8 +86,10 @@ class ErrorScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Scaffold(
-      backgroundColor: Colors.red[50],
+      backgroundColor: colorScheme.errorContainer,
       body: Center(
         child: Padding(
           padding: const EdgeInsets.all(24.0),
@@ -95,13 +99,13 @@ class ErrorScreen extends StatelessWidget {
               Icon(
                 Icons.error_outline,
                 size: 64,
-                color: Colors.red[700],
+                color: colorScheme.error,
               ),
               const SizedBox(height: 24),
               Text(
                 'Oops! Something went wrong',
                 style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      color: Colors.red[700],
+                      color: colorScheme.error,
                     ),
               ),
               const SizedBox(height: 16),
@@ -114,7 +118,7 @@ class ErrorScreen extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  ElevatedButton(
+                  DmButton(
                     onPressed: onRetry ??
                         () {
                           // Restart app or navigate to home
@@ -122,7 +126,8 @@ class ErrorScreen extends StatelessWidget {
                     child: const Text('Retry'),
                   ),
                   const SizedBox(width: 16),
-                  OutlinedButton(
+                  DmButton(
+                    variant: DmButtonVariant.outlined,
                     onPressed: onReport ??
                         () {
                           // Open error reporting dialog
@@ -140,48 +145,47 @@ class ErrorScreen extends StatelessWidget {
   }
 
   void _showReportDialog(BuildContext context) {
-    showDialog(
+    final colorScheme = Theme.of(context).colorScheme;
+
+    showDmDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Report Error'),
-        content: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Text('Error details:'),
-              const SizedBox(height: 8),
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: Colors.grey[200],
-                  borderRadius: BorderRadius.circular(4),
-                ),
-                child: Text(
-                  errorDetails.exceptionAsString(),
-                  style: const TextStyle(fontSize: 12),
-                ),
+      title: const Text('Report Error'),
+      content: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text('Error details:'),
+            const SizedBox(height: 8),
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: colorScheme.outlineVariant,
+                borderRadius: BorderRadius.circular(4),
               ),
-            ],
-          ),
+              child: Text(
+                errorDetails.exceptionAsString(),
+                style: const TextStyle(fontSize: 12),
+              ),
+            ),
+          ],
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              // TODO: Implement actual error reporting
-              Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Error report submitted')),
-              );
-            },
-            child: const Text('Send Report'),
-          ),
-        ],
       ),
+      actions: [
+        DmButton(
+          variant: DmButtonVariant.text,
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Cancel'),
+        ),
+        DmButton(
+          onPressed: () {
+            // TODO: Implement actual error reporting
+            Navigator.pop(context);
+            showAppSuccessSnackbar(context, 'Error report submitted');
+          },
+          child: const Text('Send Report'),
+        ),
+      ],
     );
   }
 }

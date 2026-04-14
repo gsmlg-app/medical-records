@@ -1,6 +1,7 @@
 import 'package:app_adaptive_widgets/app_adaptive_widgets.dart';
 import 'package:app_artwork/app_artwork.dart';
 import 'package:app_locale/app_locale.dart';
+import 'package:duskmoon_widgets/duskmoon_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:medical_records/destination.dart';
@@ -27,9 +28,8 @@ class HomeScreen extends StatelessWidget {
         context,
       ),
       destinations: Destinations.navs(context),
-      appBar: AppBar(
+      appBar: DmAppBar(
         title: Text(context.l10n.appName),
-        centerTitle: true,
         foregroundColor: Theme.of(context).colorScheme.onPrimary,
         backgroundColor: Theme.of(context).colorScheme.primary,
       ),
@@ -80,7 +80,7 @@ class HomeScreen extends StatelessWidget {
                     Row(
                       children: [
                         Expanded(
-                          child: Card(
+                          child: DmCard(
                             child: InkWell(
                               onTap: () => context.goNamed('Treatments'),
                               borderRadius: BorderRadius.circular(12),
@@ -113,7 +113,7 @@ class HomeScreen extends StatelessWidget {
                         ),
                         const SizedBox(width: 16),
                         Expanded(
-                          child: Card(
+                          child: DmCard(
                             child: InkWell(
                               onTap: () => context.goNamed('Hospitals'),
                               borderRadius: BorderRadius.circular(12),

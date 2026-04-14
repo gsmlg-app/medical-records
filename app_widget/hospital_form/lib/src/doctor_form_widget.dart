@@ -1,3 +1,5 @@
+import 'package:app_feedback/app_feedback.dart';
+import 'package:duskmoon_widgets/duskmoon_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:app_locale/app_locale.dart';
 import 'package:app_database/app_database.dart';
@@ -64,9 +66,7 @@ class _DoctorFormWidgetState extends State<DoctorFormWidget> {
         );
       } catch (e) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
-          );
+          showAppErrorSnackbar(context, 'Error: $e');
         }
       } finally {
         if (mounted) {
@@ -165,14 +165,15 @@ class _DoctorFormWidgetState extends State<DoctorFormWidget> {
           Row(
             children: [
               Expanded(
-                child: OutlinedButton(
+                child: DmButton(
+                  variant: DmButtonVariant.outlined,
                   onPressed: _isSubmitting ? null : _onCancel,
                   child: Text(context.l10n.cancel),
                 ),
               ),
               const SizedBox(width: 16),
               Expanded(
-                child: ElevatedButton(
+                child: DmButton(
                   onPressed: (_isSubmitting || _selectedDepartmentId == null)
                       ? null
                       : _onSave,

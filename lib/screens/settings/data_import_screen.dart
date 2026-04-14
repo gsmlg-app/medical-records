@@ -1,8 +1,10 @@
 import 'dart:io';
 import 'package:app_adaptive_widgets/app_adaptive_widgets.dart';
 import 'package:app_database/app_database.dart';
+import 'package:app_feedback/app_feedback.dart';
 import 'package:app_logging/app_logging.dart';
 import 'package:app_backup/app_backup.dart';
+import 'package:duskmoon_widgets/duskmoon_widgets.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -51,9 +53,7 @@ class _DataImportScreenState extends State<DataImportScreen> {
       AppLogger().e('Failed to select file: $e');
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to select file: $e')),
-        );
+        showAppErrorSnackbar(context, 'Failed to select file: $e');
       }
     }
   }
@@ -84,12 +84,7 @@ class _DataImportScreenState extends State<DataImportScreen> {
       setState(() => _isLoading = false);
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Failed to parse file: $e'),
-            backgroundColor: Colors.red,
-          ),
-        );
+        showAppErrorSnackbar(context, 'Failed to parse file: $e');
       }
     }
   }
@@ -101,11 +96,9 @@ class _DataImportScreenState extends State<DataImportScreen> {
     if (_conflicts != null && _conflicts!.isNotEmpty) {
       for (final conflict in _conflicts!) {
         if (!_conflictResolutions.containsKey(conflict.treatment.title)) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Please resolve all conflicts before importing'),
-              backgroundColor: Colors.orange,
-            ),
+          showAppErrorSnackbar(
+            context,
+            'Please resolve all conflicts before importing',
           );
           return;
         }
@@ -121,12 +114,7 @@ class _DataImportScreenState extends State<DataImportScreen> {
       await importService.importTreatments(_parsedData!, _conflictResolutions);
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Import completed successfully'),
-            backgroundColor: Colors.green,
-          ),
-        );
+        showAppSuccessSnackbar(context, 'Import completed successfully');
 
         // Reset state
         setState(() {
@@ -140,12 +128,7 @@ class _DataImportScreenState extends State<DataImportScreen> {
       AppLogger().e('Import failed: $e', e, stackTrace);
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Import failed: $e'),
-            backgroundColor: Colors.red,
-          ),
-        );
+        showAppErrorSnackbar(context, 'Import failed: $e');
       }
     } finally {
       setState(() => _isImporting = false);
@@ -193,56 +176,62 @@ class _DataImportScreenState extends State<DataImportScreen> {
   }
 
   Widget _buildFileSelector() {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Select File',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+    return DmCard(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Select File',
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.bold,
             ),
-            const SizedBox(height: 16),
-            if (_selectedFile == null)
-              ElevatedButton.icon(
-                onPressed: _selectFile,
-                icon: const Icon(Icons.folder_open),
-                label: const Text('Browse...'),
-              )
-            else
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      const Icon(Icons.file_present, color: Colors.blue),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          _selectedFile!.path.split('/').last,
-                          style: Theme.of(context).textTheme.bodyLarge,
-                        ),
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.close),
-                        onPressed: () {
-                          setState(() {
-                            _selectedFile = null;
-                            _parsedData = null;
-                            _conflicts = null;
-                            _conflictResolutions.clear();
-                          });
-                        },
-                      ),
-                    ],
-                  ),
+          ),
+          const SizedBox(height: 16),
+          if (_selectedFile == null)
+            DmButton(
+              onPressed: _selectFile,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: const [
+                  Icon(Icons.folder_open),
+                  SizedBox(width: 8),
+                  Text('Browse...'),
                 ],
               ),
-          ],
-        ),
+            )
+          else
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Icon(Icons.file_present,
+                        color: Theme.of(context).colorScheme.primary),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        _selectedFile!.path.split('/').last,
+                        style: Theme.of(context).textTheme.bodyLarge,
+                      ),
+                    ),
+                    DmIconButton(
+                      icon: const Icon(Icons.close),
+                      tooltip: 'Remove selected file',
+                      onPressed: () {
+                        setState(() {
+                          _selectedFile = null;
+                          _parsedData = null;
+                          _conflicts = null;
+                          _conflictResolutions.clear();
+                        });
+                      },
+                    ),
+                  ],
+                ),
+              ],
+            ),
+        ],
       ),
     );
   }
@@ -253,55 +242,53 @@ class _DataImportScreenState extends State<DataImportScreen> {
     final manifest = _parsedData!['manifest'] as Map<String, dynamic>;
     final treatments = manifest['treatments'] as List<dynamic>;
 
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Import Preview',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+    return DmCard(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Import Preview',
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.bold,
             ),
-            const SizedBox(height: 16),
-            _buildInfoRow(Icons.calendar_today, 'Export Date',
-              DateFormat('MMM d, yyyy HH:mm').format(
-                DateTime.parse(manifest['exportDate'] as String)
-              ),
+          ),
+          const SizedBox(height: 16),
+          _buildInfoRow(Icons.calendar_today, 'Export Date',
+            DateFormat('MMM d, yyyy HH:mm').format(
+              DateTime.parse(manifest['exportDate'] as String)
             ),
-            const Divider(height: 24),
-            _buildInfoRow(Icons.medical_services, 'Treatments', '${treatments.length}'),
-            const SizedBox(height: 8),
-            ListView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: treatments.length,
-              itemBuilder: (context, index) {
-                final treatment = treatments[index]['treatment'] as Map<String, dynamic>;
-                final visits = treatments[index]['visits'] as List<dynamic>;
-                final resources = treatments[index]['resources'] as List<dynamic>;
+          ),
+          const Divider(height: 24),
+          _buildInfoRow(Icons.medical_services, 'Treatments', '${treatments.length}'),
+          const SizedBox(height: 8),
+          ListView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: treatments.length,
+            itemBuilder: (context, index) {
+              final treatment = treatments[index]['treatment'] as Map<String, dynamic>;
+              final visits = treatments[index]['visits'] as List<dynamic>;
+              final resources = treatments[index]['resources'] as List<dynamic>;
 
-                return Padding(
-                  padding: const EdgeInsets.only(left: 16, top: 8),
-                  child: Row(
-                    children: [
-                      const Icon(Icons.chevron_right, size: 16),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          '${treatment['title']} (${visits.length} visits, ${resources.length} resources)',
-                          style: Theme.of(context).textTheme.bodyMedium,
-                        ),
+              return Padding(
+                padding: const EdgeInsets.only(left: 16, top: 8),
+                child: Row(
+                  children: [
+                    const Icon(Icons.chevron_right, size: 16),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        '${treatment['title']} (${visits.length} visits, ${resources.length} resources)',
+                        style: Theme.of(context).textTheme.bodyMedium,
                       ),
-                    ],
-                  ),
-                );
-              },
-            ),
-          ],
-        ),
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+        ],
       ),
     );
   }
@@ -310,7 +297,7 @@ class _DataImportScreenState extends State<DataImportScreen> {
     if (_conflicts == null || _conflicts!.isEmpty) return const SizedBox.shrink();
 
     return Card(
-      color: Colors.orange.shade50,
+      color: Theme.of(context).colorScheme.tertiaryContainer,
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -318,13 +305,14 @@ class _DataImportScreenState extends State<DataImportScreen> {
           children: [
             Row(
               children: [
-                const Icon(Icons.warning_amber_rounded, color: Colors.orange),
+                Icon(Icons.warning_amber_rounded,
+                    color: Theme.of(context).colorScheme.tertiary),
                 const SizedBox(width: 12),
                 Text(
                   'Conflicts Found',
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
-                    color: Colors.orange.shade900,
+                    color: Theme.of(context).colorScheme.onTertiaryContainer,
                   ),
                 ),
               ],
@@ -332,7 +320,8 @@ class _DataImportScreenState extends State<DataImportScreen> {
             const SizedBox(height: 16),
             Text(
               '${_conflicts!.length} treatment(s) have the same title and date range as existing treatments.',
-              style: TextStyle(color: Colors.orange.shade900),
+              style: TextStyle(
+                  color: Theme.of(context).colorScheme.onTertiaryContainer),
             ),
             const Divider(height: 24),
             ListView.builder(
@@ -353,58 +342,56 @@ class _DataImportScreenState extends State<DataImportScreen> {
   Widget _buildConflictResolutionCard(ImportConflict conflict) {
     final resolution = _conflictResolutions[conflict.treatment.title];
 
-    return Card(
+    return DmCard(
       margin: const EdgeInsets.only(bottom: 12),
-      child: Padding(
-        padding: const EdgeInsets.all(12.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              conflict.treatment.title,
-              style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                fontWeight: FontWeight.bold,
+      padding: const EdgeInsets.all(12.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            conflict.treatment.title,
+            style: Theme.of(context).textTheme.titleSmall?.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            'Date: ${DateFormat('MMM d, yyyy').format(conflict.treatment.startDate)} - '
+            '${conflict.treatment.endDate != null ? DateFormat('MMM d, yyyy').format(conflict.treatment.endDate!) : 'Ongoing'}',
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
+          const SizedBox(height: 12),
+          Text('Choose action:', style: Theme.of(context).textTheme.bodySmall),
+          const SizedBox(height: 8),
+          SegmentedButton<ConflictResolution>(
+            segments: const [
+              ButtonSegment(
+                value: ConflictResolution.skip,
+                label: Text('Skip'),
+                icon: Icon(Icons.skip_next, size: 16),
               ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              'Date: ${DateFormat('MMM d, yyyy').format(conflict.treatment.startDate)} - '
-              '${conflict.treatment.endDate != null ? DateFormat('MMM d, yyyy').format(conflict.treatment.endDate!) : 'Ongoing'}',
-              style: Theme.of(context).textTheme.bodySmall,
-            ),
-            const SizedBox(height: 12),
-            Text('Choose action:', style: Theme.of(context).textTheme.bodySmall),
-            const SizedBox(height: 8),
-            SegmentedButton<ConflictResolution>(
-              segments: const [
-                ButtonSegment(
-                  value: ConflictResolution.skip,
-                  label: Text('Skip'),
-                  icon: Icon(Icons.skip_next, size: 16),
-                ),
-                ButtonSegment(
-                  value: ConflictResolution.override,
-                  label: Text('Override'),
-                  icon: Icon(Icons.sync, size: 16),
-                ),
-                ButtonSegment(
-                  value: ConflictResolution.createNew,
-                  label: Text('Create New'),
-                  icon: Icon(Icons.add, size: 16),
-                ),
-              ],
-              selected: resolution != null ? {resolution} : {},
-              onSelectionChanged: (Set<ConflictResolution> newSelection) {
-                setState(() {
-                  _conflictResolutions[conflict.treatment.title] = newSelection.first;
-                });
-              },
-              style: SegmentedButton.styleFrom(
-                visualDensity: VisualDensity.compact,
+              ButtonSegment(
+                value: ConflictResolution.override,
+                label: Text('Override'),
+                icon: Icon(Icons.sync, size: 16),
               ),
+              ButtonSegment(
+                value: ConflictResolution.createNew,
+                label: Text('Create New'),
+                icon: Icon(Icons.add, size: 16),
+              ),
+            ],
+            selected: resolution != null ? {resolution} : {},
+            onSelectionChanged: (Set<ConflictResolution> newSelection) {
+              setState(() {
+                _conflictResolutions[conflict.treatment.title] = newSelection.first;
+              });
+            },
+            style: SegmentedButton.styleFrom(
+              visualDensity: VisualDensity.compact,
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -417,18 +404,22 @@ class _DataImportScreenState extends State<DataImportScreen> {
 
     return SizedBox(
       width: double.infinity,
-      child: ElevatedButton.icon(
+      child: DmButton(
         onPressed: canImport && !_isImporting ? _importData : null,
-        icon: _isImporting
-            ? const SizedBox(
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (_isImporting)
+              const SizedBox(
                 width: 20,
                 height: 20,
                 child: CircularProgressIndicator(strokeWidth: 2),
               )
-            : const Icon(Icons.upload),
-        label: Text(_isImporting ? 'Importing...' : 'Import Data'),
-        style: ElevatedButton.styleFrom(
-          padding: const EdgeInsets.symmetric(vertical: 16),
+            else
+              const Icon(Icons.upload),
+            const SizedBox(width: 8),
+            Text(_isImporting ? 'Importing...' : 'Import Data'),
+          ],
         ),
       ),
     );

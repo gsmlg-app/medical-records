@@ -2,6 +2,7 @@ import 'package:app_adaptive_widgets/app_adaptive_widgets.dart';
 import 'package:app_database/app_database.dart';
 import 'package:app_locale/app_locale.dart';
 import 'package:app_logging/app_logging.dart';
+import 'package:duskmoon_widgets/duskmoon_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -105,13 +106,15 @@ class _TreatmentDetailScreenState extends State<TreatmentDetailScreen> {
             slivers: [
               SliverAppBar(
                 title: Text(context.l10n.treatmentDetails),
-                leading: IconButton(
+                leading: DmIconButton(
                   icon: const Icon(Icons.arrow_back),
                   onPressed: () => context.pop(),
+                  tooltip: 'Go back',
                 ),
                 actions: [
-                  IconButton(
+                  DmIconButton(
                     icon: const Icon(Icons.edit),
+                    tooltip: 'Edit treatment',
                     onPressed: () {
                       context.pushNamed(
                         EditTreatmentScreen.name,
@@ -145,7 +148,7 @@ class _TreatmentDetailScreenState extends State<TreatmentDetailScreen> {
   }
 
   Widget _buildInfoCard() {
-    return Card(
+    return DmCard(
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -213,15 +216,22 @@ class _TreatmentDetailScreenState extends State<TreatmentDetailScreen> {
               context.l10n.visits,
               style: Theme.of(context).textTheme.headlineSmall,
             ),
-            TextButton.icon(
+            DmButton(
+              variant: DmButtonVariant.text,
               onPressed: () {
                 context.pushNamed(
                   AddVisitScreen.name,
                   pathParameters: {'treatmentId': widget.treatmentId.toString()},
                 );
               },
-              icon: const Icon(Icons.add),
-              label: Text(context.l10n.addVisit),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.add),
+                  const SizedBox(width: 4),
+                  Text(context.l10n.addVisit),
+                ],
+              ),
             ),
           ],
         ),
@@ -229,8 +239,8 @@ class _TreatmentDetailScreenState extends State<TreatmentDetailScreen> {
         BlocBuilder<VisitBloc, VisitState>(
           builder: (context, state) {
             if (state is VisitLoading) {
-              return const Card(
-                child: Padding(
+              return DmCard(
+                child: const Padding(
                   padding: EdgeInsets.all(32.0),
                   child: Center(child: CircularProgressIndicator()),
                 ),
@@ -242,7 +252,7 @@ class _TreatmentDetailScreenState extends State<TreatmentDetailScreen> {
                 ..sort((a, b) => b.date.compareTo(a.date)); // Sort by date descending (most recent first)
 
               if (treatmentVisits.isEmpty) {
-                return Card(
+                return DmCard(
                   child: Padding(
                     padding: const EdgeInsets.all(16.0),
                     child: Center(
@@ -279,7 +289,7 @@ class _TreatmentDetailScreenState extends State<TreatmentDetailScreen> {
                   final hospitalName = _getHospitalName(visit.hospitalId);
                   final departmentName = _getDepartmentName(visit.departmentId);
 
-                  return Card(
+                  return DmCard(
                     margin: const EdgeInsets.only(bottom: 8.0),
                     child: ListTile(
                       leading: CircleAvatar(
@@ -350,7 +360,7 @@ class _TreatmentDetailScreenState extends State<TreatmentDetailScreen> {
                 },
               );
             } else if (state is VisitError) {
-              return Card(
+              return DmCard(
                 child: Padding(
                   padding: const EdgeInsets.all(16.0),
                   child: Center(

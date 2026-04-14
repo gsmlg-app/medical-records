@@ -1,4 +1,5 @@
 import 'package:app_locale/app_locale.dart';
+import 'package:duskmoon_theme/duskmoon_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:duskmoon_theme_bloc/duskmoon_theme_bloc.dart';
@@ -13,13 +14,6 @@ class App extends StatefulWidget {
 }
 
 class _AppState extends State<App> {
-  bool isOpenWindow = true;
-
-  @override
-  void initState() {
-    super.initState();
-  }
-
   @override
   Widget build(BuildContext context) {
     final themeBloc = context.read<DmThemeBloc>();
@@ -28,16 +22,18 @@ class _AppState extends State<App> {
         bloc: themeBloc,
         builder: (context, state) {
           final router = AppRouter.router;
-          return MaterialApp.router(
-            key: const Key('app'),
-            debugShowCheckedModeBanner: false,
-            routerConfig: router,
-            onGenerateTitle: (context) => context.l10n.appName,
-            theme: state.entry.light,
-            darkTheme: state.entry.dark,
-            themeMode: state.themeMode,
-            localizationsDelegates: AppLocale.localizationsDelegates,
-            supportedLocales: AppLocale.supportedLocales,
+          return DuskmoonApp(
+            child: MaterialApp.router(
+              key: const Key('app'),
+              debugShowCheckedModeBanner: false,
+              routerConfig: router,
+              onGenerateTitle: (context) => context.l10n.appName,
+              theme: state.entry.light,
+              darkTheme: state.entry.dark,
+              themeMode: state.themeMode,
+              localizationsDelegates: AppLocale.localizationsDelegates,
+              supportedLocales: AppLocale.supportedLocales,
+            ),
           );
         });
   }

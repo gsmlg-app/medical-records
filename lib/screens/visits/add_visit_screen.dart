@@ -2,8 +2,10 @@ import 'package:app_adaptive_widgets/app_adaptive_widgets.dart';
 import 'dart:async';
 
 import 'package:app_database/app_database.dart';
+import 'package:app_feedback/app_feedback.dart';
 import 'package:app_locale/app_locale.dart';
 import 'package:app_logging/app_logging.dart';
+import 'package:duskmoon_widgets/duskmoon_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:duskmoon_form/duskmoon_form.dart';
@@ -44,14 +46,14 @@ class _AddVisitViewState extends State<_AddVisitView> {
       context.read<AppDatabase>(),
       visitBloc: context.read<VisitBloc>(),
     );
-    
+
     // Set up field dependencies after the UI is completely stable to avoid dropdown assertion errors
     WidgetsBinding.instance.addPostFrameCallback((_) {
       // Use proper async pattern instead of delays
       if (mounted) {
         // First, ensure the form is fully loaded
         _visitFormBloc.emitLoaded();
-        
+
         // Then set up dependencies after the UI has processed the first update
         Timer.run(() {
           if (mounted) {
@@ -118,11 +120,9 @@ class _AddVisitViewState extends State<_AddVisitView> {
                   } catch (e) {
                     AppLogger().e('Failed to save resources: $e');
                     if (mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text('Visit saved but failed to save resources: $e'),
-                          backgroundColor: Colors.orange,
-                        ),
+                      showAppErrorSnackbar(
+                        context,
+                        'Visit saved but failed to save resources: $e',
                       );
                     }
                   }
@@ -137,11 +137,9 @@ class _AddVisitViewState extends State<_AddVisitView> {
           } else if (state is VisitError) {
             AppLogger().e('Failed to create visit: ${state.message}');
             if (mounted) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text('Failed to create visit: ${state.message}'),
-                  backgroundColor: Colors.red,
-                ),
+              showAppErrorSnackbar(
+                context,
+                'Failed to create visit: ${state.message}',
               );
             }
             break;
@@ -172,15 +170,17 @@ class _AddVisitViewState extends State<_AddVisitView> {
           slivers: [
             SliverAppBar(
               title: Text(context.l10n.addVisit),
-              leading: IconButton(
+              leading: DmIconButton(
                 icon: const Icon(Icons.close),
                 onPressed: () => context.pop(),
+                tooltip: 'Close',
               ),
               actions: [
                 BlocBuilder<VisitFormBloc, FormBlocState<String, String>>(
                   bloc: _visitFormBloc,
                   builder: (context, state) {
-                    return TextButton(
+                    return DmButton(
+                      variant: DmButtonVariant.text,
                       onPressed: state.isValid() && !_isSaving ? _saveVisit : null,
                       child: _isSaving
                         ? const SizedBox(
@@ -204,9 +204,7 @@ class _AddVisitViewState extends State<_AddVisitView> {
                       if (state is FormBlocLoading) {
                         // Show loading indicator if needed
                       } else if (state is FormBlocFailure) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('Error loading form')),
-                        );
+                        showAppErrorSnackbar(context, 'Error loading form');
                       }
                     },
                     child: VisitForm(

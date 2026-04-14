@@ -1,4 +1,5 @@
 import 'package:app_adaptive_widgets/app_adaptive_widgets.dart';
+import 'package:app_feedback/app_feedback.dart';
 import 'package:app_locale/app_locale.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -43,20 +44,13 @@ class AddHospitalScreen extends StatelessWidget {
               // Notify form bloc of success
               context.read<HospitalFormBloc>().handleSubmissionSuccess();
 
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text(state.message)),
-              );
+              showAppSuccessSnackbar(context, state.message);
               context.pop();
             } else if (state is HospitalError) {
               // Notify form bloc of failure
               context.read<HospitalFormBloc>().handleSubmissionFailure(state.message);
 
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(state.message),
-                  backgroundColor: Colors.red,
-                ),
-              );
+              showAppErrorSnackbar(context, state.message);
             }
           },
           child: AppAdaptiveScaffold(

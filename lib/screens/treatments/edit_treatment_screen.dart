@@ -1,6 +1,7 @@
 import 'package:app_adaptive_widgets/app_adaptive_widgets.dart';
 import 'package:app_database/app_database.dart';
 import 'package:app_locale/app_locale.dart';
+import 'package:duskmoon_widgets/duskmoon_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -108,14 +109,16 @@ class _EditTreatmentViewState extends State<_EditTreatmentView> {
           slivers: [
             SliverAppBar(
               title: Text(context.l10n.editTreatment),
-              leading: IconButton(
+              leading: DmIconButton(
                 icon: const Icon(Icons.close),
                 onPressed: () => context.pop(),
+                tooltip: 'Close',
               ),
               actions: [
                 BlocBuilder<TreatmentFormBloc, TreatmentFormState>(
                   builder: (context, state) {
-                    return TextButton(
+                    return DmButton(
+                      variant: DmButtonVariant.text,
                       onPressed: state.isFormValid && !_isSaving ? _saveTreatment : null,
                       child: _isSaving
                         ? const SizedBox(
